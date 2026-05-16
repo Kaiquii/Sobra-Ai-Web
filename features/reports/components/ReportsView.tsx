@@ -110,6 +110,7 @@ function MetricCard({
           <p className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
             {label}
           </p>
+
           <strong
             className={cn(
               "mt-3 block text-2xl font-semibold text-slate-950 dark:text-slate-50",
@@ -119,10 +120,12 @@ function MetricCard({
           >
             {formatMoney(value)}
           </strong>
+
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
             {description}
           </p>
         </div>
+
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300">
           {icon}
         </div>
@@ -138,6 +141,7 @@ function ReportsSkeleton() {
         <div className="h-96 animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900" />
         <div className="h-96 animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900" />
       </div>
+
       <div className="grid gap-4 md:grid-cols-2">
         <div className="h-32 animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900" />
         <div className="h-32 animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900" />
@@ -153,7 +157,10 @@ type CategoryPieCardProps = {
 
 function CategoryPieCard({ categories, totalExpense }: CategoryPieCardProps) {
   const sortedCategories = useMemo(
-    () => [...categories].sort((first, second) => second.total_amount - first.total_amount),
+    () =>
+      [...categories].sort(
+        (first, second) => second.total_amount - first.total_amount,
+      ),
     [categories],
   );
 
@@ -165,24 +172,26 @@ function CategoryPieCard({ categories, totalExpense }: CategoryPieCardProps) {
   }));
 
   return (
-    <article className="flex h-full min-h-124 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:h-128">
-      <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
-        <div>
+    <article className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5 lg:min-h-128">
+      <div className="flex min-w-0 shrink-0 items-start justify-between gap-3">
+        <div className="min-w-0">
           <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
             Gastos por Categoria
           </p>
+
           <strong className="mt-2 block text-2xl font-semibold text-red-600 dark:text-red-300">
             {formatMoney(totalExpense)}
           </strong>
         </div>
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300">
+
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300">
           <PieChart aria-hidden="true" size={23} />
         </div>
       </div>
 
       {sortedCategories.length ? (
-        <div className="mt-6 grid min-h-0 flex-1 gap-5 xl:grid-cols-[minmax(220px,250px)_1fr] xl:items-center">
-          <div className="h-60 min-h-60 xl:h-64 xl:min-h-64">
+        <div className="mt-6 flex min-w-0 flex-1 flex-col gap-4 xl:grid xl:grid-cols-[minmax(220px,250px)_1fr] xl:items-center xl:gap-5">
+          <div className="h-57.5 w-full min-w-0 shrink-0 sm:h-65 xl:h-64 xl:min-h-64">
             <ResponsivePie
               activeOuterRadiusOffset={7}
               borderColor={{ from: "color", modifiers: [["darker", 0.35]] }}
@@ -202,26 +211,30 @@ function CategoryPieCard({ categories, totalExpense }: CategoryPieCardProps) {
             />
           </div>
 
-          <div className="max-h-72 min-h-0 space-y-3 overflow-y-auto pr-2 xl:max-h-92">
+          <div className="min-w-0 space-y-3 xl:max-h-105 xl:overflow-y-auto xl:pr-2">
             {sortedCategories.map((category, index) => (
-              <div className="space-y-1.5" key={category.category_id}>
-                <div className="flex items-center justify-between gap-3 text-sm">
-                  <div className="flex min-w-0 items-center gap-2">
+              <div className="min-w-0 space-y-1.5" key={category.category_id}>
+                <div className="flex min-w-0 items-center justify-between gap-2 text-sm">
+                  <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
                     <span
                       className="h-2.5 w-2.5 shrink-0 rounded-full"
                       style={{ backgroundColor: getCategoryColor(index) }}
                     />
+
                     <span className="truncate font-semibold text-slate-800 dark:text-slate-100">
                       {category.category_name}
                     </span>
-                    <span className="text-slate-500 dark:text-slate-400">
+
+                    <span className="shrink-0 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
                       {formatPercentage(category.percentage)}
                     </span>
                   </div>
-                  <strong className="shrink-0 text-slate-950 dark:text-slate-50">
+
+                  <strong className="ml-2 shrink-0 text-xs text-slate-950 dark:text-slate-50 sm:text-sm">
                     {formatMoney(category.total_amount)}
                   </strong>
                 </div>
+
                 <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                   <div
                     className="h-full rounded-full"
@@ -267,10 +280,12 @@ function IncomeExpenseChart({
     () => getVisibleChartData(data, range, month),
     [data, month, range],
   );
+
   const selectedData =
     visibleData.find((item) => item.month === selectedMonth) ??
     visibleData.find((item) => item.month === month) ??
     null;
+
   const maxValue =
     Math.max(...visibleData.map((item) => Math.max(item.income, item.expense)), 0) ||
     1;
@@ -282,7 +297,8 @@ function IncomeExpenseChart({
     }
 
     const nextSelectedMonth =
-      visibleData.find((item) => item.month === month)?.month ?? visibleData[0].month;
+      visibleData.find((item) => item.month === month)?.month ??
+      visibleData[0].month;
 
     setSelectedMonth(nextSelectedMonth);
   }, [month, range, setSelectedMonth, visibleData]);
@@ -292,12 +308,13 @@ function IncomeExpenseChart({
     : 0;
 
   return (
-    <article className="flex h-full min-h-124 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:h-128">
-      <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
-        <div>
+    <article className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5 lg:min-h-128">
+      <div className="flex min-w-0 shrink-0 flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
           <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
             Renda vs Despesas
           </p>
+
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
             Comparativo mensal de entradas e gastos
           </p>
@@ -314,71 +331,74 @@ function IncomeExpenseChart({
       </div>
 
       {selectedData ? (
-        <div className="mt-5 shrink-0 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/70">
-          <div>
-            <div>
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-                {formatShortMonth(selectedData.month, year)}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-4 text-sm">
-                <span className="text-emerald-600 dark:text-emerald-300">
-                  Renda: <strong>{formatMoney(selectedData.income)}</strong>
-                </span>
-                <span className="text-red-600 dark:text-red-300">
-                  Despesa: <strong>{formatMoney(selectedData.expense)}</strong>
-                </span>
-                <span
-                  className={
-                    selectedBalance >= 0
-                      ? "text-emerald-600 dark:text-emerald-300"
-                      : "text-red-600 dark:text-red-300"
-                  }
-                >
-                  Saldo: <strong>{formatMoney(selectedBalance)}</strong>
-                </span>
-              </div>
-            </div>
+        <div className="mt-5 min-w-0 shrink-0 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/70">
+          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+            {formatShortMonth(selectedData.month, year)}
+          </p>
+
+          <div className="mt-2 flex min-w-0 flex-wrap gap-3 text-sm">
+            <span className="wrap-break-word text-emerald-600 dark:text-emerald-300">
+              Renda: <strong>{formatMoney(selectedData.income)}</strong>
+            </span>
+
+            <span className="wrap-break-word text-red-600 dark:text-red-300">
+              Despesa: <strong>{formatMoney(selectedData.expense)}</strong>
+            </span>
+
+            <span
+              className={
+                selectedBalance >= 0
+                  ? "wrap-break-word text-emerald-600 dark:text-emerald-300"
+                  : "wrap-break-word text-red-600 dark:text-red-300"
+              }
+            >
+              Saldo: <strong>{formatMoney(selectedBalance)}</strong>
+            </span>
           </div>
         </div>
       ) : null}
 
-      <div className="mt-5 min-h-0 flex-1">
+      <div className="mt-5 min-w-0 flex-1">
         {visibleData.length ? (
-          <div className="flex h-full items-end gap-3 overflow-x-auto pb-2">
-            {visibleData.map((item) => {
-              const incomeHeight = `${Math.max((item.income / maxValue) * 100, 3)}%`;
-              const expenseHeight = `${Math.max((item.expense / maxValue) * 100, 3)}%`;
-              const isSelected = item.month === selectedData?.month;
+          <div className="w-full min-w-0 overflow-x-auto pb-2">
+            <div className="flex h-64 min-w-max items-end gap-2 lg:min-w-0 lg:justify-center">
+              {visibleData.map((item) => {
+                const incomeHeight = `${Math.max((item.income / maxValue) * 100, 3)}%`;
+                const expenseHeight = `${Math.max((item.expense / maxValue) * 100, 3)}%`;
+                const isSelected = item.month === selectedData?.month;
 
-              return (
-                <button
-                  className={cn(
-                    "flex h-full min-w-14 flex-col items-center justify-end gap-2 rounded-xl px-2 py-1 hover:bg-slate-50 dark:hover:bg-slate-950/60",
-                    isSelected && "bg-slate-50 dark:bg-slate-950/70",
-                  )}
-                  key={item.month}
-                  onClick={() => setSelectedMonth(item.month)}
-                  type="button"
-                >
-                  <div className="flex h-44 items-end gap-1.5">
-                    <span
-                      className="w-4 rounded-t-full bg-blue-500"
-                      style={{ height: incomeHeight }}
-                    />
-                    <span
-                      className="w-4 rounded-t-full bg-red-500"
-                      style={{ height: expenseHeight }}
-                    />
-                  </div>
-                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                    {formatShortMonth(item.month, year)}
-                  </span>
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    className={cn(
+                      "flex h-full min-w-12 flex-col items-center justify-end gap-2 rounded-xl px-2 py-1 hover:bg-slate-50 dark:hover:bg-slate-950/60 sm:min-w-14",
+                      isSelected && "bg-slate-50 dark:bg-slate-950/70",
+                    )}
+                    key={item.month}
+                    onClick={() => setSelectedMonth(item.month)}
+                    type="button"
+                  >
+                    <div className="flex h-44 items-end gap-1.5">
+                      <span
+                        className="w-3 rounded-t-full bg-blue-500 sm:w-4"
+                        style={{ height: incomeHeight }}
+                      />
+
+                      <span
+                        className="w-3 rounded-t-full bg-red-500 sm:w-4"
+                        style={{ height: expenseHeight }}
+                      />
+                    </div>
+
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                      {formatShortMonth(item.month, year)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         ) : (
-          <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+          <div className="flex h-full min-h-56 items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
             Nenhum dado para este período.
           </div>
         )}
@@ -389,6 +409,7 @@ function IncomeExpenseChart({
           <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
           Renda
         </span>
+
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
           Despesa
@@ -401,7 +422,9 @@ function IncomeExpenseChart({
 export function ReportsView() {
   const [{ month, year }, setSelectedDate] = useState(getCurrentMonthReference);
   const [range, setRange] = useState<ReportRange>("SIX_MONTHS");
-  const [selectedChartMonth, setSelectedChartMonth] = useState<number | null>(month);
+  const [selectedChartMonth, setSelectedChartMonth] = useState<number | null>(
+    month,
+  );
   const [refreshKey, setRefreshKey] = useState(0);
 
   const categories = useReportsStore((state) => state.categories);
@@ -432,6 +455,7 @@ export function ReportsView() {
       {!isLoading && error ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <Alert variant="error">{error}</Alert>
+
           <Button
             className="mt-4"
             onClick={() => setRefreshKey((current) => current + 1)}
@@ -450,6 +474,7 @@ export function ReportsView() {
               categories={categories}
               totalExpense={summary.total_expense}
             />
+
             <IncomeExpenseChart
               data={chartData}
               month={month}
@@ -465,19 +490,29 @@ export function ReportsView() {
             <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-50">
               Resumo do Ano
             </h2>
+
             <div className="mt-3 grid gap-4 md:grid-cols-2">
               <MetricCard
                 description="Acumulado no ano"
                 icon={<CircleDollarSign aria-hidden="true" size={24} />}
                 label="Economia Total"
-                tone={(yearlySummary?.economia_total ?? 0) >= 0 ? "positive" : "negative"}
+                tone={
+                  (yearlySummary?.economia_total ?? 0) >= 0
+                    ? "positive"
+                    : "negative"
+                }
                 value={yearlySummary?.economia_total ?? 0}
               />
+
               <MetricCard
                 description={`Média até ${year}`}
                 icon={<BarChart3 aria-hidden="true" size={24} />}
                 label="Média Mensal"
-                tone={(yearlySummary?.media_mensal ?? 0) >= 0 ? "positive" : "negative"}
+                tone={
+                  (yearlySummary?.media_mensal ?? 0) >= 0
+                    ? "positive"
+                    : "negative"
+                }
                 value={yearlySummary?.media_mensal ?? 0}
               />
             </div>
@@ -491,6 +526,7 @@ export function ReportsView() {
               tone="positive"
               value={summary.total_income}
             />
+
             <MetricCard
               description="Despesas registradas no mês"
               icon={<TrendingDown aria-hidden="true" size={24} />}
@@ -498,11 +534,12 @@ export function ReportsView() {
               tone="negative"
               value={summary.total_expense}
             />
+
             <MetricCard
               description="Saldo disponível no mês"
               icon={<Wallet aria-hidden="true" size={24} />}
-              tone={summary.total_geral_disponivel >= 0 ? "positive" : "negative"}
               label="Saldo"
+              tone={summary.total_geral_disponivel >= 0 ? "positive" : "negative"}
               value={summary.total_geral_disponivel}
             />
           </div>

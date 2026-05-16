@@ -50,22 +50,25 @@ type ProfileShortcutProps = {
 function ProfileShortcut({ description, href, icon, title }: ProfileShortcutProps) {
   return (
     <Link
-      className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-900"
+      className="flex min-w-0 items-center justify-between gap-3 overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-900"
       href={href}
     >
-      <span className="flex min-w-0 items-center gap-3">
+      <span className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
           {icon}
         </span>
-        <span className="min-w-0">
+
+        <span className="min-w-0 flex-1 overflow-hidden">
           <span className="block truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
             {title}
           </span>
+
           <span className="mt-1 block truncate text-sm text-slate-500 dark:text-slate-400">
             {description}
           </span>
         </span>
       </span>
+
       <ChevronRight
         aria-hidden="true"
         className="shrink-0 text-slate-400"
@@ -92,34 +95,40 @@ export function ProfileView() {
 
   return (
     <>
-      <section className="mx-auto flex w-full max-w-4xl flex-col gap-5">
-        <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-center gap-4">
+      <section className="mx-auto flex w-full min-w-0 max-w-4xl flex-col gap-5 overflow-x-hidden px-3 sm:px-4 lg:px-0">
+        <article className="min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+          <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-4 overflow-hidden">
               <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-2xl font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
                 {initial || <UserRound aria-hidden="true" size={30} strokeWidth={2.25} />}
               </div>
-              <div className="min-w-0">
+
+              <div className="min-w-0 flex-1 overflow-hidden">
                 <h2 className="truncate text-2xl font-semibold text-slate-950 dark:text-slate-50">
                   {user?.name || "Usuario"}
                 </h2>
+
                 <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">
                   {user?.email || "email nao informado"}
                 </p>
+
                 <span
                   className={cn(
-                    "mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold",
+                    "mt-3 inline-flex max-w-full items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold",
                     roleInfo.className,
                   )}
                 >
-                  {roleInfo.icon}
-                  {roleInfo.label}
+                  <span className="shrink-0">{roleInfo.icon}</span>
+                  <span className="truncate">{roleInfo.label}</span>
                 </span>
               </div>
             </div>
 
             <Link
-              className={buttonClassName({ className: "w-full sm:w-auto", variant: "secondary" })}
+              className={buttonClassName({
+                className: "w-full min-w-0 sm:w-auto",
+                variant: "secondary",
+              })}
               href="/perfil/editar"
             >
               <Pencil aria-hidden="true" size={16} strokeWidth={2.25} />
@@ -128,17 +137,19 @@ export function ProfileView() {
           </div>
         </article>
 
-        <div>
+        <div className="min-w-0">
           <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-50">
             Configuracoes
           </h2>
-          <div className="mt-3 grid gap-3">
+
+          <div className="mt-3 grid min-w-0 gap-3">
             <ProfileShortcut
               description="Salario, Adiantamento e Renda Extra"
               href="/salario"
               icon={<CircleDollarSign aria-hidden="true" size={20} strokeWidth={2.25} />}
               title="Configuracoes de Renda"
             />
+
             <ProfileShortcut
               description="Crie e edite suas categorias"
               href="/perfil/categorias"
@@ -148,11 +159,12 @@ export function ProfileView() {
           </div>
         </div>
 
-        <div>
+        <div className="min-w-0">
           <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-50">
             Ajuda
           </h2>
-          <div className="mt-3">
+
+          <div className="mt-3 min-w-0">
             <ProfileShortcut
               description="Duvidas frequentes e suporte"
               href="/perfil/ajuda"
@@ -163,7 +175,7 @@ export function ProfileView() {
         </div>
 
         <Button
-          className="border-red-200 bg-red-50 text-red-700 shadow-sm hover:bg-red-100 focus-visible:ring-red-200 dark:border-red-900/70 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/50"
+          className="min-w-0 border-red-200 bg-red-50 text-red-700 shadow-sm hover:bg-red-100 focus-visible:ring-red-200 dark:border-red-900/70 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/50"
           onClick={() => setIsLogoutDialogOpen(true)}
           type="button"
           variant="secondary"
