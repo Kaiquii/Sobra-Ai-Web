@@ -2,7 +2,9 @@
 
 import {
   CalendarDays,
+  CheckCircle2,
   FileText,
+  ListFilter,
   Pencil,
   Plus,
   ReceiptText,
@@ -14,6 +16,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { DropdownSelect } from "@/components/ui/dropdown-select";
 import {
   getCurrentMonthReference,
   MonthSwitcher,
@@ -29,14 +32,36 @@ import type {
   Expense,
   ExpenseTypeFilter,
 } from "@/features/expenses/types/expense";
-import { cn } from "@/lib/utils";
 
 const moneyFormatter = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
   style: "currency",
 });
 
+type PaymentSourceFilter = "Adiantamento" | "Renda Extra" | "Salario" | "Todas";
+
 const typeFilters: ExpenseTypeFilter[] = ["Todas", "Parceladas", "\u00danicas", "Fixas"];
+const paymentSourceFilters: PaymentSourceFilter[] = [
+  "Todas",
+  "Salario",
+  "Adiantamento",
+  "Renda Extra",
+];
+
+const typeFilterOptions = typeFilters.map((filter) => ({
+  label: filter,
+  value: filter,
+}));
+
+const paymentSourceFilterOptions = paymentSourceFilters.map((source) => ({
+  label:
+    source === "Todas"
+      ? "Todas origens"
+      : source === "Salario"
+        ? "Sal\u00e1rio"
+        : source,
+  value: source,
+}));
 
 function formatMoney(value: number) {
   return moneyFormatter.format(value);
@@ -65,6 +90,28 @@ function matchesTypeFilter(expense: Expense, filter: ExpenseTypeFilter) {
   }
 
   return type === "unica";
+}
+
+function matchesPaymentSourceFilter(expense: Expense, filter: PaymentSourceFilter) {
+  if (filter === "Todas") {
+    return true;
+  }
+
+  const source = normalizeText(expense.payment_source);
+
+  if (filter === "Salario") {
+    return source === "salario";
+  }
+
+  return source === normalizeText(filter);
+}
+
+function matchesCategoryFilter(expense: Expense, selectedCategoryId: string) {
+  if (selectedCategoryId === "Todas") {
+    return true;
+  }
+
+  return expense.category_id === Number(selectedCategoryId);
 }
 
 function getCategoryName(expense: Expense, categoriesById: Map<number, string>) {
@@ -129,24 +176,24 @@ function ExpenseCard({ categoryName, expense, onDelete, onEdit }: ExpenseCardPro
   const installmentLabel = getInstallmentLabel(expense);
 
   return (
-    <article className="grid gap-4 rounded-[1.35rem] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700/45 dark:bg-slate-800/75 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:p-5">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-600 dark:bg-blue-950/65 dark:text-blue-400">
-        <ReceiptText aria-hidden="true" size={28} />
+    <article className="grid gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 shadow-sm transition hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/85 dark:hover:border-blue-900/70 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:px-4 sm:py-3">
+      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/55 dark:text-blue-300">
+        <ReceiptText aria-hidden="true" size={19} />
       </div>
 
       <div className="min-w-0">
-        <h2 className="truncate text-lg font-semibold text-slate-950 dark:text-white">
+        <h2 className="truncate text-sm font-semibold text-slate-950 dark:text-white sm:text-base">
           {expense.description}
         </h2>
-        <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-400 sm:text-sm">
           {categoryName}
         </p>
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-          <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 dark:bg-slate-700/65 dark:text-slate-300">
+        <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
+          <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-700/65 dark:text-slate-300">
             {expense.type}
           </span>
           {installmentLabel ? (
-            <span className="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+            <span className="rounded bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
               {installmentLabel}
             </span>
           ) : null}
@@ -154,34 +201,34 @@ function ExpenseCard({ categoryName, expense, onDelete, onEdit }: ExpenseCardPro
         </div>
       </div>
 
-      <div className="flex items-end justify-between gap-4 sm:flex-col sm:items-end">
-        <div className="flex items-center gap-1">
+      <div className="flex items-end justify-between gap-2 sm:flex-col sm:items-end">
+        <div className="flex items-center gap-0.5">
           <button
             aria-label={`Editar ${expense.description}`}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-blue-500 hover:bg-blue-500/10 hover:text-blue-400"
+            className="inline-flex h-6 w-6 items-center justify-center rounded-full text-blue-500 hover:bg-blue-500/10 hover:text-blue-400"
             onClick={() => onEdit(expense)}
             title="Editar"
             type="button"
           >
-            <Pencil aria-hidden="true" size={18} strokeWidth={2.4} />
+            <Pencil aria-hidden="true" size={16} strokeWidth={2.4} />
           </button>
           <button
             aria-label={`Excluir ${expense.description}`}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-red-400 hover:bg-red-500/10 hover:text-red-300"
+            className="inline-flex h-6 w-6 items-center justify-center rounded-full text-red-400 hover:bg-red-500/10 hover:text-red-300"
             onClick={() => onDelete(expense)}
             title="Excluir"
             type="button"
           >
-            <Trash2 aria-hidden="true" size={18} strokeWidth={2.4} />
+            <Trash2 aria-hidden="true" size={16} strokeWidth={2.4} />
           </button>
         </div>
 
-        <div className="text-right">
-          <strong className="text-xl font-semibold text-slate-950 dark:text-white">
+        <div className="flex flex-col items-end gap-1.5 text-right">
+          <strong className="text-base font-semibold text-red-600 dark:text-red-200 sm:text-lg">
             - {formatMoney(expense.amount)}
           </strong>
-          <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-300">
-            <WalletCards aria-hidden="true" className="text-blue-500" size={16} />
+          <p className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300 sm:text-sm">
+            <WalletCards aria-hidden="true" className="text-blue-500" size={14} />
             {getPaymentSourceLabel(expense.payment_source)}
           </p>
         </div>
@@ -192,10 +239,10 @@ function ExpenseCard({ categoryName, expense, onDelete, onEdit }: ExpenseCardPro
 
 function ExpensesSkeleton() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-2.5">
       {Array.from({ length: 4 }).map((_, index) => (
         <div
-          className="h-36 animate-pulse rounded-[1.35rem] border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
+          className="h-24 animate-pulse rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
           key={index}
         />
       ))}
@@ -208,10 +255,14 @@ export function ExpensesView() {
   const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
   const [formExpense, setFormExpense] = useState<Expense | null>(null);
   const [formMode, setFormMode] = useState<ExpenseFormMode | null>(null);
+  const [paymentSourceFilter, setPaymentSourceFilter] =
+    useState<PaymentSourceFilter>("Todas");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState("Todas");
   const [typeFilter, setTypeFilter] = useState<ExpenseTypeFilter>("Todas");
 
   const categories = useExpenseStore((state) => state.categories);
+  const clearFeedback = useExpenseStore((state) => state.clearFeedback);
   const error = useExpenseStore((state) => state.error);
   const expenses = useExpenseStore((state) => state.expenses);
   const isLoading = useExpenseStore((state) => state.isLoading);
@@ -222,6 +273,18 @@ export function ExpensesView() {
     void loadInitialData(month, year);
   }, [loadInitialData, month, year]);
 
+  useEffect(() => {
+    if (!message) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      clearFeedback();
+    }, 3500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [clearFeedback, message]);
+
   const categoriesById = useMemo(() => getCategoriesMap(categories), [categories]);
   const filteredExpenses = useMemo(() => {
     const search = normalizeText(searchQuery);
@@ -229,10 +292,15 @@ export function ExpensesView() {
     return expenses.filter((expense) => {
       const matchesSearch = normalizeText(expense.description).includes(search);
       const matchesType = matchesTypeFilter(expense, typeFilter);
+      const matchesPaymentSource = matchesPaymentSourceFilter(
+        expense,
+        paymentSourceFilter,
+      );
+      const matchesCategory = matchesCategoryFilter(expense, selectedCategoryId);
 
-      return matchesSearch && matchesType;
+      return matchesSearch && matchesType && matchesPaymentSource && matchesCategory;
     });
-  }, [expenses, searchQuery, typeFilter]);
+  }, [expenses, paymentSourceFilter, searchQuery, selectedCategoryId, typeFilter]);
 
   const totalAmount = filteredExpenses.reduce(
     (total, expense) => total + expense.amount,
@@ -262,55 +330,64 @@ export function ExpensesView() {
 
   return (
     <>
-      <section className="mx-auto flex w-full max-w-5xl flex-col gap-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">
-              Controle mensal
-            </p>
-            <h1 className="mt-1 text-3xl font-semibold text-slate-950 dark:text-slate-50">
-              Despesas Mensais
-            </h1>
-          </div>
-          <Button
-            className="hidden rounded-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400 sm:inline-flex"
-            onClick={openCreateDialog}
-            type="button"
-          >
-            <Plus aria-hidden="true" size={17} />
-            Nova despesa
-          </Button>
-        </div>
+      <section className="mx-auto flex w-full max-w-5xl flex-col gap-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[11rem_13rem_14rem_minmax(14rem,1fr)_auto] lg:items-center">
+            <DropdownSelect
+              ariaLabel="Filtrar por tipo"
+              icon={ReceiptText}
+              onChange={setTypeFilter}
+              options={typeFilterOptions}
+              value={typeFilter}
+            />
 
-        <div className="relative">
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
-            size={26}
-          />
-          <input
-            className="h-16 w-full rounded-[1.35rem] border border-slate-200 bg-white pl-14 pr-5 text-base text-slate-950 shadow-sm outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700/45 dark:bg-slate-800/75 dark:text-white dark:placeholder:text-slate-400 dark:focus:border-blue-500 dark:focus:ring-blue-950/50 sm:text-lg"
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Buscar despesa..."
-            value={searchQuery}
-          />
-        </div>
+            <DropdownSelect
+              ariaLabel="Filtrar por origem"
+              icon={WalletCards}
+              onChange={setPaymentSourceFilter}
+              options={paymentSourceFilterOptions}
+              value={paymentSourceFilter}
+            />
 
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {typeFilters.map((filter) => (
-            <button
-              className={cn(
-                "shrink-0 rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-500 hover:bg-slate-100 dark:bg-slate-800/75 dark:text-slate-400 dark:hover:bg-slate-800 sm:text-base",
-                typeFilter === filter &&
-                  "bg-blue-600 text-white shadow-sm shadow-blue-600/20 hover:bg-blue-700 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400",
-              )}
-              key={filter}
-              onClick={() => setTypeFilter(filter)}
+            <DropdownSelect
+              ariaLabel="Filtrar por categoria"
+              className="sm:col-span-2 lg:col-span-1"
+              icon={ListFilter}
+              onChange={setSelectedCategoryId}
+              options={[
+                { label: "Todas categorias", value: "Todas" },
+                ...categories.map((category) => ({
+                  label: category.name,
+                  value: String(category.id),
+                })),
+              ]}
+              value={selectedCategoryId}
+            />
+
+            <div className="relative sm:col-span-2 lg:col-span-1">
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                size={17}
+              />
+              <input
+                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 dark:border-slate-800 dark:bg-slate-950/50 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:bg-slate-950 dark:focus:ring-blue-950/60"
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Buscar..."
+                value={searchQuery}
+              />
+            </div>
+
+            <Button
+              className="hidden rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400 sm:col-span-2 sm:inline-flex lg:col-span-1"
+              onClick={openCreateDialog}
+              size="sm"
               type="button"
             >
-              {filter}
-            </button>
-          ))}
+              <Plus aria-hidden="true" size={16} />
+              Nova despesa
+            </Button>
+          </div>
         </div>
 
         <div className="flex justify-center">
@@ -322,7 +399,7 @@ export function ExpensesView() {
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300">
               <FileText aria-hidden="true" size={22} />
@@ -345,7 +422,6 @@ export function ExpensesView() {
         </div>
 
         {error ? <Alert variant="error">{error}</Alert> : null}
-        {message ? <Alert variant="success">{message}</Alert> : null}
 
         {isLoading ? <ExpensesSkeleton /> : null}
 
@@ -364,7 +440,7 @@ export function ExpensesView() {
         ) : null}
 
         {!isLoading && filteredExpenses.length ? (
-          <div className="space-y-4">
+          <div className="space-y-2.5">
             {filteredExpenses.map((expense) => (
               <ExpenseCard
                 categoryName={getCategoryName(expense, categoriesById)}
@@ -387,6 +463,23 @@ export function ExpensesView() {
         <Plus aria-hidden="true" size={30} strokeWidth={2.4} />
       </button>
 
+      {message ? (
+        <div
+          aria-live="polite"
+          className="fixed right-4 top-20 z-40 w-[calc(100vw-2rem)] max-w-sm rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 shadow-xl shadow-slate-950/20 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-100 sm:right-8"
+        >
+          <div className="flex items-start gap-3">
+            <CheckCircle2
+              aria-hidden="true"
+              className="mt-0.5 shrink-0"
+              size={18}
+              strokeWidth={2.25}
+            />
+            <span>{message}</span>
+          </div>
+        </div>
+      ) : null}
+
       <ExpenseFormDialog
         expense={formExpense}
         mode={formMode}
@@ -398,6 +491,7 @@ export function ExpensesView() {
 
       <ExpenseDeleteDialog
         expense={deleteTarget}
+        key={deleteTarget?.id ?? "empty-delete-dialog"}
         onClose={() => setDeleteTarget(null)}
         onSuccess={refreshExpenses}
       />

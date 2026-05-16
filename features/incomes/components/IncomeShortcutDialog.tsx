@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import { Alert } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
+import { useLockBodyScroll } from "@/components/ui/use-lock-body-scroll";
 import { useIncomeStore } from "@/features/incomes/store/useIncomeStore";
 import type { Income, IncomeSource } from "@/features/incomes/types/income";
 import { cn } from "@/lib/utils";
@@ -134,6 +135,8 @@ function IncomeShortcutDialogContent({
   onSuccess,
   shortcut,
 }: IncomeShortcutDialogContentProps) {
+  useLockBodyScroll();
+
   const clearFeedback = useIncomeStore((state) => state.clearFeedback);
   const createIncome = useIncomeStore((state) => state.createIncome);
   const deleteIncome = useIncomeStore((state) => state.deleteIncome);
@@ -201,8 +204,9 @@ function IncomeShortcutDialogContent({
             : {
                 amount: parsedAmount,
                 month: shortcut.month,
+                repeat_future: null,
                 source: shortcut.source,
-                type: applyFuture ? ("Fixa" as const) : ("\u00danica" as const),
+                type: "Fixa" as const,
                 year: shortcut.year,
               };
 
@@ -227,7 +231,7 @@ function IncomeShortcutDialogContent({
       role="dialog"
     >
       <form
-        className="w-full max-w-md rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-[#111111] sm:p-8"
+        className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-950/15 dark:border-slate-800 dark:bg-slate-900 sm:p-8"
         onSubmit={handleSubmit}
       >
         <h2 className="text-3xl font-semibold tracking-normal text-slate-950 dark:text-white">
@@ -260,7 +264,7 @@ function IncomeShortcutDialogContent({
                 value={amount}
               />
               {shortcut.action === "edit" ? (
-                <span className="absolute -top-3 left-4 bg-white px-1 text-sm text-slate-500 dark:bg-[#111111] dark:text-slate-300">
+                <span className="absolute -top-3 left-4 bg-white px-1 text-sm text-slate-500 dark:bg-slate-900 dark:text-slate-300">
                   Valor
                 </span>
               ) : null}
@@ -269,7 +273,7 @@ function IncomeShortcutDialogContent({
 
           <label
             className={cn(
-              "flex items-center gap-4 text-base text-slate-700 dark:text-slate-300",
+              "flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-300",
               isSubmitting && "opacity-70",
             )}
           >
@@ -291,9 +295,9 @@ function IncomeShortcutDialogContent({
           </label>
         </div>
 
-        <div className="mt-8 flex justify-end gap-8">
+        <div className="mt-8 flex justify-end gap-3">
           <button
-            className="text-sm font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-500"
+            className="inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-500 disabled:opacity-60 dark:text-blue-400 dark:hover:bg-blue-950/35"
             disabled={isSubmitting}
             onClick={onClose}
             type="button"
@@ -302,8 +306,9 @@ function IncomeShortcutDialogContent({
           </button>
           <button
             className={cn(
-              "inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-500 disabled:opacity-60 dark:text-blue-500",
-              isDelete && "text-red-500 hover:text-red-400 dark:text-red-400",
+              "inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-60 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400",
+              isDelete &&
+                "bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:text-white dark:hover:bg-red-400",
             )}
             disabled={isSubmitting || missingIncome}
             type="submit"

@@ -1,13 +1,16 @@
 "use client";
 
 import { AlertTriangle } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useLockBodyScroll } from "@/components/ui/use-lock-body-scroll";
 
 type ConfirmationDialogProps = {
   cancelLabel?: string;
   confirmLabel?: string;
   description: string;
+  children?: ReactNode;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -17,6 +20,7 @@ type ConfirmationDialogProps = {
 
 export function ConfirmationDialog({
   cancelLabel = "Cancelar",
+  children,
   confirmLabel = "Confirmar",
   description,
   isOpen,
@@ -25,6 +29,8 @@ export function ConfirmationDialog({
   title,
   tone = "default",
 }: ConfirmationDialogProps) {
+  useLockBodyScroll(isOpen);
+
   if (!isOpen) {
     return null;
   }
@@ -55,6 +61,7 @@ export function ConfirmationDialog({
             <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
               {description}
             </p>
+            {children ? <div className="mt-4">{children}</div> : null}
           </div>
         </div>
 

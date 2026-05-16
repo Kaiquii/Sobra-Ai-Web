@@ -15,6 +15,16 @@ export type LoginResponse = {
   user: AuthUser;
 };
 
+export type UpdateProfileRequest = {
+  name: string;
+  email: string;
+};
+
+export type UpdateProfileResponse = {
+  message?: string;
+  user?: AuthUser;
+};
+
 export type RegisterRequest = {
   name: string;
   email: string;

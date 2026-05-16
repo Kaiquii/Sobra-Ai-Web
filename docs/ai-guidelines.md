@@ -16,6 +16,9 @@ Este arquivo define regras permanentes para qualquer IA ou pessoa que trabalhar 
 - Sempre reutilizar componentes visuais existentes antes de criar novos.
 - Nao criar varios botoes, modais, inputs, cards ou elementos repetidos quando for possivel ter um componente global reutilizavel.
 - Preferir componentes compartilhados em `components/ui` ou `components/layout`.
+- Usar `components/ui/dropdown-select.tsx` como dropdown padrao do projeto; nao usar `<select>` nativo em telas ou modais sem justificativa tecnica registrada.
+- Usar `components/ui/date-picker.tsx` como seletor de data padrao do projeto; nao usar `<input type="date">` em telas ou modais sem justificativa tecnica registrada.
+- Seguir os padroes de componentes em `docs/ui-components.md`.
 - Antes de criar um componente novo, procure se ja existe algo equivalente no projeto.
 - Novos componentes devem seguir o padrao visual existente do projeto.
 - Acoes sensiveis, como sair da conta, excluir despesa ou remover dados, devem usar modal de confirmacao reutilizavel antes de executar a acao.

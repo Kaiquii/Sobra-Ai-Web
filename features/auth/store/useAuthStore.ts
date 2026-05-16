@@ -11,6 +11,7 @@ import type {
   LoginRequest,
   RegisterRequest,
   ResetPasswordRequest,
+  UpdateProfileRequest,
 } from "@/features/auth/types/auth";
 import { setApiAuthorizationToken } from "@/lib/api";
 
@@ -29,6 +30,7 @@ type AuthState = {
   register: (data: RegisterRequest) => Promise<void>;
   resetPassword: (data: ResetPasswordRequest) => Promise<void>;
   setHasHydrated: (hasHydrated: boolean) => void;
+  updateProfile: (data: UpdateProfileRequest) => Promise<void>;
 };
 
 function getErrorMessage(error: unknown) {
@@ -107,6 +109,7 @@ export const useAuthStore = create<AuthState>()(
         set({
           error: null,
           isAuthenticated: false,
+          isLoading: false,
           message: null,
           token: null,
           user: null,
@@ -138,11 +141,39 @@ export const useAuthStore = create<AuthState>()(
       },
 
       setHasHydrated: (hasHydrated) => set({ hasHydrated }),
+
+      updateProfile: async (data) => {
+        set({ error: null, isLoading: true, message: null });
+
+        try {
+          const response = await authApi.updateProfile(data);
+
+          set((state) => ({
+            isLoading: false,
+            message: response.message ?? "Perfil atualizado com sucesso!",
+            user: {
+              email: response.user?.email ?? data.email,
+              name: response.user?.name ?? data.name,
+              role: response.user?.role ?? state.user?.role ?? "user",
+            },
+          }));
+        } catch (error) {
+          set({ error: getErrorMessage(error), isLoading: false, message: null });
+          throw error;
+        }
+      },
     }),
     {
       name: "app-financeiro-auth",
       onRehydrateStorage: () => (state) => {
-        setApiAuthorizationToken(state?.token ?? null);
+        const token = state?.token ?? null;
+
+        setApiAuthorizationToken(token);
+
+        if (!token) {
+          state?.logout();
+        }
+
         state?.setHasHydrated(true);
       },
       partialize: (state) => ({

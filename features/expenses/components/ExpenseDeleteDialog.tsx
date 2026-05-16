@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
 import { Alert } from "@/components/ui/alert";
+import { useLockBodyScroll } from "@/components/ui/use-lock-body-scroll";
 import { useExpenseStore } from "@/features/expenses/store/useExpenseStore";
 import type { Expense } from "@/features/expenses/types/expense";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,7 @@ export function ExpenseDeleteDialog({
   const error = useExpenseStore((state) => state.error);
   const isSubmitting = useExpenseStore((state) => state.isSubmitting);
   const [deleteFuture, setDeleteFuture] = useState(false);
+  useLockBodyScroll(Boolean(expense));
 
   if (!expense) {
     return null;
@@ -45,11 +47,11 @@ export function ExpenseDeleteDialog({
 
   const currentExpense = expense;
   const showFutureOption = isInstallmentExpense(currentExpense);
-  const showFixedWarning = isFixedExpense(currentExpense);
+  const fixedExpense = isFixedExpense(currentExpense);
 
   async function handleDelete() {
     try {
-      await deleteExpense(currentExpense.id, showFutureOption && deleteFuture);
+      await deleteExpense(currentExpense.id, fixedExpense || (showFutureOption && deleteFuture));
       onSuccess();
     } catch {}
   }
@@ -60,7 +62,7 @@ export function ExpenseDeleteDialog({
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 px-4 py-6 backdrop-blur-sm"
       role="dialog"
     >
-      <div className="w-full max-w-md rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-[#111111] sm:p-8">
+      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-950/15 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
         <h2 className="text-3xl font-semibold tracking-normal text-slate-950 dark:text-white">
           Excluir despesa
         </h2>
@@ -73,7 +75,7 @@ export function ExpenseDeleteDialog({
           </p>
 
           {showFutureOption ? (
-            <label className="flex items-center gap-4 text-base text-slate-700 dark:text-slate-300">
+            <label className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-300">
               <input
                 checked={deleteFuture}
                 className="h-6 w-6 rounded border-slate-400 bg-transparent accent-red-500"
@@ -85,17 +87,17 @@ export function ExpenseDeleteDialog({
             </label>
           ) : null}
 
-          {showFixedWarning ? (
+          {fixedExpense ? (
             <Alert variant="info">
-              Despesa fixa: confirme com o back-end antes de aplicar exclusao futura.
-              Por enquanto este atalho remove apenas o registro atual.
+              Despesa fixa: ao excluir, esta despesa também será removida dos
+              próximos meses.
             </Alert>
           ) : null}
         </div>
 
-        <div className="mt-8 flex justify-end gap-8">
+        <div className="mt-8 flex justify-end gap-3">
           <button
-            className="text-sm font-semibold text-blue-600 transition-colors hover:text-blue-500 dark:text-blue-500"
+            className="inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-500 disabled:opacity-60 dark:text-blue-400 dark:hover:bg-blue-950/35"
             disabled={isSubmitting}
             onClick={onClose}
             type="button"
@@ -104,7 +106,7 @@ export function ExpenseDeleteDialog({
           </button>
           <button
             className={cn(
-              "inline-flex items-center gap-2 text-sm font-semibold text-red-500 transition-colors hover:text-red-400 disabled:opacity-60 dark:text-red-400",
+              "inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-red-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-60 dark:bg-red-500 dark:hover:bg-red-400",
             )}
             disabled={isSubmitting}
             onClick={handleDelete}

@@ -522,9 +522,22 @@ Regras:
 - Despesa `Única`: `DELETE /api/expenses/{expenseId}`
 - Despesa `Parcelada` com checkbox `Excluir esta e todas as futuras` marcado: `DELETE /api/expenses/{expenseId}?delete_future=true`
 - Despesa `Parcelada` sem checkbox marcado: `DELETE /api/expenses/{expenseId}`
-- Despesa `Fixa`: o Android mostra aviso dizendo que remove a despesa do mes atual e proximos meses, mas no codigo atual nao manda `delete_future=true` para fixa, so para parcelada.
+- Despesa `Fixa`: o back-end sempre trata como exclusao futura, mesmo sem query string.
 
-Alinhar a regra de despesa fixa com o back antes de implementar no web, porque a mensagem visual do Android diz uma coisa forte.
+Para despesa fixa, estas chamadas tem o mesmo efeito:
+
+```http
+DELETE /api/expenses/{expenseId}
+DELETE /api/expenses/{expenseId}?delete_future=true
+```
+
+Ambas removem a despesa do mes atual selecionado e todos os proximos registros da mesma serie, usando a regra:
+
+```ts
+year > ano_atual || (year === ano_atual && month >= mes_atual)
+```
+
+O back-end ainda nao suporta excluir somente o mes atual de uma despesa fixa.
 
 ## Resumo rapido
 
@@ -549,3 +562,81 @@ Filtros sao locais no front:
 - Origem por `payment_source`
 - Tipo por `type`
 - Busca por `description`
+
+## Relatorios
+
+Todas as rotas protegidas usam `Authorization: Bearer TOKEN` e seguem o tratamento global de `401`.
+
+### Resumo financeiro mensal
+
+```http
+GET /api/reports/summary?month=5&year=2026
+```
+
+Campos usados no front:
+
+- `total_income`
+- `total_expense`
+- `total_geral_disponivel`
+- saldos e gastos por origem quando necessario
+
+### Gastos por categoria
+
+```http
+GET /api/reports/categories?month=5&year=2026
+```
+
+Resposta esperada:
+
+```json
+[
+  {
+    "category_id": 1,
+    "category_name": "Mercado",
+    "total_amount": 800.0,
+    "percentage": 45.5
+  }
+]
+```
+
+No web, o grafico de categorias deve ser de pizza. A lista lateral deve ordenar por `total_amount` decrescente.
+
+### Grafico anual de renda vs despesa
+
+```http
+GET /api/reports/chart?year=2026
+```
+
+Resposta esperada:
+
+```json
+[
+  {
+    "month": 1,
+    "income": 2752.0,
+    "expense": 1800.0
+  }
+]
+```
+
+O filtro de periodo e local no front:
+
+- `1 mês`: somente o mes selecionado
+- `6 meses`: de `month - 3` ate `month + 2`, limitado entre 1 e 12
+- `1 ano`: todos os dados retornados
+
+### Resumo anual
+
+```http
+GET /api/reports/yearly-summary?year=2026
+```
+
+Resposta esperada:
+
+```json
+{
+  "economia_total": 5500.0,
+  "media_mensal": 458.33,
+  "year": 2026
+}
+```

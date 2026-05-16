@@ -1,6 +1,6 @@
 export type IncomeSource = "Adiantamento" | "Renda Extra" | "Salario";
 
-export type IncomeType = "Fixa" | "\u00danica";
+type IncomeType = "Fixa" | "\u00danica";
 
 export type Income = {
   amount: number;
@@ -14,7 +14,7 @@ export type Income = {
 export type CreateIncomeRequest = {
   amount: number;
   month: number;
-  repeat_future?: boolean;
+  repeat_future?: boolean | null;
   source: IncomeSource;
   type: IncomeType;
   year: number;

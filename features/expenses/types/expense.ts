@@ -43,6 +43,7 @@ export type CategoriesResponse = {
 
 export type CategoryMutationResponse = {
   data?: Category;
+  category?: Category;
   message: string;
 };
 
@@ -51,6 +52,10 @@ export type ExpenseMutationResponse = {
 };
 
 export type CreateCategoryRequest = {
+  name: string;
+};
+
+export type UpdateCategoryRequest = {
   name: string;
 };
 

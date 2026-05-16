@@ -1,9 +1,10 @@
 "use client";
 
-import { Home, LogOut, Menu } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { ChevronDown, Home, LogOut, Menu, UserRound } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
+import { dashboardNavigation } from "@/components/layout/navigation";
 import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -13,15 +14,63 @@ type HeaderProps = {
   onOpenSidebar: () => void;
 };
 
+const extraRouteTitles = [
+  { href: "/home", label: "Home" },
+  { href: "/salario", label: "Salario" },
+  { href: "/configuracoes", label: "Configuracoes" },
+];
+
+const routeTitles = [...extraRouteTitles, ...dashboardNavigation];
+
+function getCurrentPageTitle(pathname: string) {
+  const match = routeTitles
+    .filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))
+    .sort((first, second) => second.href.length - first.href.length)[0];
+
+  return match?.label ?? "App Financeiro";
+}
+
 export function Header({ onOpenSidebar }: HeaderProps) {
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
+  const pathname = usePathname();
   const router = useRouter();
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const currentPageTitle = getCurrentPageTitle(pathname);
+  const userName = user?.name ?? "Usuario";
+
+  useEffect(() => {
+    if (!isUserMenuOpen) {
+      return;
+    }
+
+    function handleClickOutside(event: MouseEvent) {
+      if (!userMenuRef.current?.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isUserMenuOpen]);
 
   function handleLogout() {
     logout();
     setIsLogoutDialogOpen(false);
+    setIsUserMenuOpen(false);
     router.replace("/login");
   }
 
@@ -44,11 +93,11 @@ export function Header({ onOpenSidebar }: HeaderProps) {
 
             <div className="min-w-0">
               <h1 className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50 sm:text-base">
-                App Financeiro
+                {currentPageTitle}
               </h1>
-              {user?.name ? (
+              {currentPageTitle !== "App Financeiro" ? (
                 <p className="hidden truncate text-xs text-slate-500 dark:text-slate-400 sm:block">
-                  Ola, {user.name}
+                  App Financeiro
                 </p>
               ) : null}
             </div>
@@ -70,27 +119,46 @@ export function Header({ onOpenSidebar }: HeaderProps) {
               className="h-8 w-8 rounded-full border border-slate-300 bg-white p-0 dark:border-slate-700 dark:bg-slate-900"
               iconSize={16}
             />
-            <Button
-              className="hidden rounded-full border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900 sm:inline-flex"
-              onClick={() => setIsLogoutDialogOpen(true)}
-              size="sm"
-              type="button"
-              variant="secondary"
-            >
-              <LogOut aria-hidden="true" size={14} strokeWidth={2.25} />
-              Sair
-            </Button>
-            <Button
-              aria-label="Sair"
-              className="rounded-full border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900 sm:hidden"
-              onClick={() => setIsLogoutDialogOpen(true)}
-              size="iconSm"
-              title="Sair"
-              type="button"
-              variant="secondary"
-            >
-              <LogOut aria-hidden="true" size={14} strokeWidth={2.25} />
-            </Button>
+            <div className="relative" ref={userMenuRef}>
+              <button
+                aria-expanded={isUserMenuOpen}
+                aria-haspopup="menu"
+                className="inline-flex h-8 items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-2.5 text-xs font-semibold text-slate-900 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 sm:px-3"
+                onClick={() => setIsUserMenuOpen((isOpen) => !isOpen)}
+                type="button"
+              >
+                <UserRound aria-hidden="true" size={14} strokeWidth={2.25} />
+                <span className="hidden max-w-32 truncate sm:inline">
+                  Ola, {userName}
+                </span>
+                <ChevronDown
+                  aria-hidden="true"
+                  className={isUserMenuOpen ? "rotate-180 transition" : "transition"}
+                  size={14}
+                  strokeWidth={2.25}
+                />
+              </button>
+
+              {isUserMenuOpen ? (
+                <div
+                  className="absolute right-0 top-10 z-50 w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg shadow-slate-950/10 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/30"
+                  role="menu"
+                >
+                  <button
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/40"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      setIsLogoutDialogOpen(true);
+                    }}
+                    role="menuitem"
+                    type="button"
+                  >
+                    <LogOut aria-hidden="true" size={15} strokeWidth={2.25} />
+                    Sair
+                  </button>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </header>

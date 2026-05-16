@@ -9,6 +9,7 @@ import type {
   CreateCategoryRequest,
   CreateExpenseRequest,
   Expense,
+  UpdateCategoryRequest,
   UpdateExpenseRequest,
 } from "@/features/expenses/types/expense";
 
@@ -24,11 +25,13 @@ type ExpenseState = {
   clearFeedback: () => void;
   createCategory: (data: CreateCategoryRequest) => Promise<Category | null>;
   createExpense: (data: CreateExpenseRequest) => Promise<void>;
+  deleteCategory: (id: number) => Promise<void>;
   deleteExpense: (id: number, deleteFuture: boolean) => Promise<void>;
   loadCategories: () => Promise<void>;
   loadExpense: (id: number) => Promise<Expense | null>;
   loadExpenses: (month: number, year: number) => Promise<void>;
   loadInitialData: (month: number, year: number) => Promise<void>;
+  updateCategory: (id: number, data: UpdateCategoryRequest) => Promise<void>;
   updateExpense: (id: number, data: UpdateExpenseRequest) => Promise<void>;
 };
 
@@ -67,7 +70,7 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
 
     try {
       const response = await expensesApi.createCategory(data);
-      const category = response.data ?? null;
+      const category = response.data ?? response.category ?? null;
 
       set((state) => ({
         categories: category ? [...state.categories, category] : state.categories,
@@ -88,6 +91,22 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
     try {
       const response = await expensesApi.createExpense(data);
       set({ isSubmitting: false, message: response.message });
+    } catch (error) {
+      set({ error: getErrorMessage(error), isSubmitting: false, message: null });
+      throw error;
+    }
+  },
+
+  deleteCategory: async (id) => {
+    set({ error: null, isSubmitting: true, message: null });
+
+    try {
+      const response = await expensesApi.deleteCategory(id);
+      set((state) => ({
+        categories: state.categories.filter((category) => category.id !== id),
+        isSubmitting: false,
+        message: response.message,
+      }));
     } catch (error) {
       set({ error: getErrorMessage(error), isSubmitting: false, message: null });
       throw error;
@@ -168,6 +187,28 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
       });
     } catch (error) {
       set({ error: getErrorMessage(error), isLoading: false });
+    }
+  },
+
+  updateCategory: async (id, data) => {
+    set({ error: null, isSubmitting: true, message: null });
+
+    try {
+      const response = await expensesApi.updateCategory(id, data);
+      const updatedCategory = response.data ?? response.category ?? null;
+
+      set((state) => ({
+        categories: state.categories.map((category) =>
+          category.id === id
+            ? { ...category, name: updatedCategory?.name ?? data.name }
+            : category,
+        ),
+        isSubmitting: false,
+        message: response.message,
+      }));
+    } catch (error) {
+      set({ error: getErrorMessage(error), isSubmitting: false, message: null });
+      throw error;
     }
   },
 

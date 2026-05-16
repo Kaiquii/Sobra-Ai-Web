@@ -27,7 +27,7 @@ export function getCurrentMonthReference() {
   };
 }
 
-export function addMonths(month: number, year: number, amount: number) {
+function addMonths(month: number, year: number, amount: number) {
   const date = new Date(year, month - 1 + amount, 1);
 
   return {
@@ -43,7 +43,7 @@ export function formatShortMonth(month: number, year: number) {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-export function formatMonthYear(month: number, year: number) {
+function formatMonthYear(month: number, year: number) {
   return `${formatShortMonth(month, year)}/${String(year).slice(-2)}`;
 }
 

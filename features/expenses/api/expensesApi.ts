@@ -8,6 +8,7 @@ import type {
   ExpenseMutationResponse,
   ExpenseResponse,
   ExpensesResponse,
+  UpdateCategoryRequest,
   UpdateExpenseRequest,
 } from "@/features/expenses/types/expense";
 
@@ -51,6 +52,14 @@ export const expensesApi = {
     return response.data;
   },
 
+  async deleteCategory(id: number) {
+    const response = await apiClient.delete<CategoryMutationResponse>(
+      `/api/categories/${id}`,
+    );
+
+    return response.data;
+  },
+
   async getCategories() {
     const response = await apiClient.get<CategoriesResponse>("/api/categories/");
 
@@ -76,6 +85,15 @@ export const expensesApi = {
   async updateExpense(id: number, data: UpdateExpenseRequest) {
     const response = await apiClient.patch<ExpenseMutationResponse>(
       `/api/expenses/${id}`,
+      data,
+    );
+
+    return response.data;
+  },
+
+  async updateCategory(id: number, data: UpdateCategoryRequest) {
+    const response = await apiClient.patch<CategoryMutationResponse>(
+      `/api/categories/${id}`,
       data,
     );
 

@@ -1,12 +1,15 @@
 "use client";
 
-import { Loader2, Plus, Save } from "lucide-react";
+import { ListFilter, Loader2, Plus, ReceiptText, Save, WalletCards } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import { Alert } from "@/components/ui/alert";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { DatePicker } from "@/components/ui/date-picker";
+import { DropdownSelect } from "@/components/ui/dropdown-select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLockBodyScroll } from "@/components/ui/use-lock-body-scroll";
 import { useExpenseStore } from "@/features/expenses/store/useExpenseStore";
 import type {
   Category,
@@ -43,8 +46,18 @@ type ExpenseDraft = {
 const paymentSources: PaymentSource[] = ["Sal\u00e1rio", "Adiantamento", "Renda Extra"];
 const expenseTypes: ExpenseType[] = ["\u00danica", "Parcelada", "Fixa"];
 
-const selectClassName =
-  "h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:focus:border-emerald-400 dark:focus:ring-emerald-950";
+const dropdownTriggerClassName =
+  "h-11 rounded-md border-slate-300 bg-white text-slate-950 shadow-sm focus-visible:border-emerald-500 focus-visible:bg-white focus-visible:ring-emerald-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:focus-visible:border-emerald-400 dark:focus-visible:bg-slate-950 dark:focus-visible:ring-emerald-950";
+
+const paymentSourceOptions = paymentSources.map((source) => ({
+  label: source,
+  value: source,
+}));
+
+const expenseTypeOptions = expenseTypes.map((type) => ({
+  label: type,
+  value: type,
+}));
 
 function normalizeText(value: string) {
   return value
@@ -207,6 +220,8 @@ function ExpenseFormDialogContent({
   onSuccess,
   year,
 }: Required<ExpenseFormDialogProps>) {
+  useLockBodyScroll();
+
   const categories = useExpenseStore((state) => state.categories);
   const createCategory = useExpenseStore((state) => state.createCategory);
   const createExpense = useExpenseStore((state) => state.createExpense);
@@ -253,11 +268,12 @@ function ExpenseFormDialogContent({
 
   const categoryOptions = useMemo(
     () =>
-      categories.map((category) => (
-        <option key={category.id} value={category.id}>
-          {category.name}
-        </option>
-      )),
+      categories.length
+        ? categories.map((category) => ({
+            label: category.name,
+            value: String(category.id),
+          }))
+        : [{ label: "Cadastre uma categoria", value: "" }],
     [categories],
   );
 
@@ -357,7 +373,7 @@ function ExpenseFormDialogContent({
         role="dialog"
       >
         <form
-          className="my-auto w-full max-w-2xl rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-[#111111] sm:p-8"
+          className="my-auto w-full max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-950/15 dark:border-slate-800 dark:bg-slate-900 sm:p-8"
           onSubmit={handleSubmit}
         >
           <h2 className="text-3xl font-semibold tracking-normal text-slate-950 dark:text-white">
@@ -384,10 +400,9 @@ function ExpenseFormDialogContent({
 
               <div className="space-y-2">
                 <Label htmlFor="expense-date">Data de pagamento</Label>
-                <Input
+                <DatePicker
                   id="expense-date"
-                  onChange={(event) => updateDraft({ date: event.target.value })}
-                  type="date"
+                  onChange={(date) => updateDraft({ date })}
                   value={draft.date}
                 />
               </div>
@@ -406,20 +421,16 @@ function ExpenseFormDialogContent({
             <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
               <div className="space-y-2">
                 <Label htmlFor="expense-category">Categoria</Label>
-                <select
-                  className={selectClassName}
-                  disabled={!categories.length}
+                <DropdownSelect
+                  ariaLabel="Selecionar categoria"
                   id="expense-category"
-                  onChange={(event) =>
-                    updateDraft({ categoryId: Number(event.target.value) })
-                  }
-                  value={selectedCategoryId ?? ""}
-                >
-                  {!categories.length ? (
-                    <option value="">Cadastre uma categoria</option>
-                  ) : null}
-                  {categoryOptions}
-                </select>
+                  icon={ListFilter}
+                  disabled={!categories.length}
+                  onChange={(value) => updateDraft({ categoryId: Number(value) })}
+                  options={categoryOptions}
+                  triggerClassName={dropdownTriggerClassName}
+                  value={selectedCategoryId ? String(selectedCategoryId) : ""}
+                />
               </div>
 
               <button
@@ -433,7 +444,7 @@ function ExpenseFormDialogContent({
             </div>
 
             {isAddingCategory ? (
-              <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950 sm:grid-cols-[1fr_auto]">
+              <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/70 sm:grid-cols-[1fr_auto]">
                 <Input
                   onChange={(event) => setNewCategoryName(event.target.value)}
                   placeholder="Nome da categoria"
@@ -453,39 +464,29 @@ function ExpenseFormDialogContent({
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="expense-source">Origem</Label>
-                <select
-                  className={selectClassName}
+                <DropdownSelect
+                  ariaLabel="Selecionar origem"
                   id="expense-source"
-                  onChange={(event) =>
-                    updateDraft({ paymentSource: event.target.value as PaymentSource })
-                  }
+                  icon={WalletCards}
+                  onChange={(value) => updateDraft({ paymentSource: value })}
+                  options={paymentSourceOptions}
+                  triggerClassName={dropdownTriggerClassName}
                   value={draft.paymentSource}
-                >
-                  {paymentSources.map((source) => (
-                    <option key={source} value={source}>
-                      {source}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="expense-type">Tipo</Label>
-                <select
-                  className={selectClassName}
-                  disabled={mode === "edit"}
+                <DropdownSelect
+                  ariaLabel="Selecionar tipo"
                   id="expense-type"
-                  onChange={(event) =>
-                    updateDraft({ installments: 1, type: event.target.value as ExpenseType })
-                  }
+                  disabled={mode === "edit"}
+                  icon={ReceiptText}
+                  onChange={(value) => updateDraft({ installments: 1, type: value })}
+                  options={expenseTypeOptions}
+                  triggerClassName={dropdownTriggerClassName}
                   value={draft.type}
-                >
-                  {expenseTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div className="space-y-2">
@@ -504,7 +505,7 @@ function ExpenseFormDialogContent({
             </div>
 
             {showUpdateFuture ? (
-              <label className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+              <label className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-300">
                 <input
                   checked={draft.updateFuture}
                   className="h-5 w-5 rounded border-slate-400 bg-transparent accent-blue-600"
