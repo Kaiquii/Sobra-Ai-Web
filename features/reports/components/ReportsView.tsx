@@ -165,7 +165,7 @@ function CategoryPieCard({ categories, totalExpense }: CategoryPieCardProps) {
   }));
 
   return (
-    <article className="flex h-full min-h-[31rem] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:h-[32rem]">
+    <article className="flex h-full min-h-124 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:h-128">
       <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
@@ -202,7 +202,7 @@ function CategoryPieCard({ categories, totalExpense }: CategoryPieCardProps) {
             />
           </div>
 
-          <div className="max-h-72 min-h-0 space-y-3 overflow-y-auto pr-2 xl:max-h-[23rem]">
+          <div className="max-h-72 min-h-0 space-y-3 overflow-y-auto pr-2 xl:max-h-92">
             {sortedCategories.map((category, index) => (
               <div className="space-y-1.5" key={category.category_id}>
                 <div className="flex items-center justify-between gap-3 text-sm">
@@ -292,7 +292,7 @@ function IncomeExpenseChart({
     : 0;
 
   return (
-    <article className="flex h-full min-h-[31rem] flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:h-[32rem]">
+    <article className="flex h-full min-h-124 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:h-128">
       <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
@@ -353,7 +353,7 @@ function IncomeExpenseChart({
               return (
                 <button
                   className={cn(
-                    "flex h-full min-w-14 flex-col items-center justify-end gap-2 rounded-xl px-2 py-1 transition hover:bg-slate-50 dark:hover:bg-slate-950/60",
+                    "flex h-full min-w-14 flex-col items-center justify-end gap-2 rounded-xl px-2 py-1 hover:bg-slate-50 dark:hover:bg-slate-950/60",
                     isSelected && "bg-slate-50 dark:bg-slate-950/70",
                   )}
                   key={item.month}

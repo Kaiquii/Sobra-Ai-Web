@@ -176,7 +176,7 @@ function ExpenseCard({ categoryName, expense, onDelete, onEdit }: ExpenseCardPro
   const installmentLabel = getInstallmentLabel(expense);
 
   return (
-    <article className="grid gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 shadow-sm transition hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/85 dark:hover:border-blue-900/70 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:px-4 sm:py-3">
+    <article className="grid gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 shadow-sm hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/85 dark:hover:border-blue-900/70 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:px-4 sm:py-3">
       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/55 dark:text-blue-300">
         <ReceiptText aria-hidden="true" size={19} />
       </div>

@@ -297,7 +297,7 @@ function IncomeShortcutDialogContent({
 
         <div className="mt-8 flex justify-end gap-3">
           <button
-            className="inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-500 disabled:opacity-60 dark:text-blue-400 dark:hover:bg-blue-950/35"
+            className="inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-blue-600 hover:bg-blue-50 hover:text-blue-500 disabled:opacity-60 dark:text-blue-400 dark:hover:bg-blue-950/35"
             disabled={isSubmitting}
             onClick={onClose}
             type="button"
@@ -306,7 +306,7 @@ function IncomeShortcutDialogContent({
           </button>
           <button
             className={cn(
-              "inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-60 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400",
+              "inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400",
               isDelete &&
                 "bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:text-white dark:hover:bg-red-400",
             )}

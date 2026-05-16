@@ -50,7 +50,7 @@ type ProfileShortcutProps = {
 function ProfileShortcut({ description, href, icon, title }: ProfileShortcutProps) {
   return (
     <Link
-      className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-900"
+      className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-900"
       href={href}
     >
       <span className="flex min-w-0 items-center gap-3">

@@ -97,7 +97,7 @@ export function ExpenseDeleteDialog({
 
         <div className="mt-8 flex justify-end gap-3">
           <button
-            className="inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-500 disabled:opacity-60 dark:text-blue-400 dark:hover:bg-blue-950/35"
+            className="inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-blue-600 hover:bg-blue-50 hover:text-blue-500 disabled:opacity-60 dark:text-blue-400 dark:hover:bg-blue-950/35"
             disabled={isSubmitting}
             onClick={onClose}
             type="button"
@@ -106,7 +106,7 @@ export function ExpenseDeleteDialog({
           </button>
           <button
             className={cn(
-              "inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-red-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-60 dark:bg-red-500 dark:hover:bg-red-400",
+              "inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60 dark:bg-red-500 dark:hover:bg-red-400",
             )}
             disabled={isSubmitting}
             onClick={handleDelete}
