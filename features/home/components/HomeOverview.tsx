@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
 import { dashboardNavigation } from "@/components/layout/navigation";
@@ -11,16 +12,31 @@ export function HomeOverview() {
   return (
     <div className="flex flex-col gap-5">
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-        <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-          Painel financeiro
-        </p>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-950 dark:text-slate-50 sm:text-3xl">
-          {user?.name ? `${user.name}, escolha uma área.` : "Escolha uma área."}
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-          Acesse rapidamente as principais áreas do app e mantenha sua rotina
-          financeira organizada.
-        </p>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+              Painel financeiro
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold text-slate-950 dark:text-slate-50 sm:text-3xl">
+              {user?.name ? `${user.name}, escolha uma área.` : "Escolha uma área."}
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+              Acesse rapidamente as principais áreas do app e mantenha sua rotina
+              financeira organizada.
+            </p>
+          </div>
+
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 shadow-sm dark:border-slate-800 sm:h-24 sm:w-24">
+            <Image
+              alt="App Financeiro"
+              className="h-full w-full object-cover"
+              height={96}
+              priority
+              src="/logo_app.png"
+              width={96}
+            />
+          </div>
+        </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

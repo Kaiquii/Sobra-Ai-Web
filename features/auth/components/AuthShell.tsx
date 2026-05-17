@@ -1,4 +1,5 @@
-import { CreditCard, ShieldCheck, WalletCards } from "lucide-react";
+import { CreditCard, ShieldCheck } from "lucide-react";
+import Image from "next/image";
 import type { ReactNode } from "react";
 
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -16,8 +17,15 @@ export function AuthShell({ children, description, title }: AuthShellProps) {
         <section className="flex min-h-65 flex-col justify-between rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8 lg:min-h-[calc(100vh-40px)]">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-600 text-white dark:bg-emerald-500 dark:text-slate-950">
-                <WalletCards className="h-5 w-5" />
+              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-950 shadow-sm dark:border-slate-800">
+                <Image
+                  alt="App Financeiro"
+                  className="h-full w-full object-cover"
+                  height={48}
+                  priority
+                  src="/logo_app.png"
+                  width={48}
+                />
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-950 dark:text-slate-50">
@@ -63,7 +71,7 @@ export function AuthShell({ children, description, title }: AuthShellProps) {
               </div>
               <p className="text-sm font-semibold">Acesso protegido</p>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                Token salvo para sua sessao web.
+                Token salvo para sua sessão web.
               </p>
             </div>
           </div>
