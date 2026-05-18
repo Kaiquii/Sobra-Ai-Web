@@ -1,11 +1,28 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 import { Providers } from "@/app/providers";
 
 export const metadata: Metadata = {
+  applicationName: "App Financeiro",
   title: "App Financeiro",
   description: "Controle financeiro pessoal",
+  appleWebApp: {
+    capable: true,
+    title: "App Financeiro",
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: dark)", color: "#020617" },
+  ],
 };
 
 export default function RootLayout({

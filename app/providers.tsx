@@ -20,6 +20,22 @@ export function Providers({ children }: Readonly<{ children: React.ReactNode }>)
   }, [theme]);
 
   useEffect(() => {
+    const canRegisterServiceWorker =
+      "serviceWorker" in navigator &&
+      (window.location.protocol === "https:" ||
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1");
+
+    if (!canRegisterServiceWorker) {
+      return;
+    }
+
+    navigator.serviceWorker
+      .register("/sw.js", { scope: "/", updateViaCache: "none" })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     const interceptorId = apiClient.interceptors.response.use(
       (response) => response,
       (error) => {
