@@ -31,9 +31,11 @@ export function PasswordRecoveryForm() {
 
   async function handleSendCode(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const trimmedEmail = email.trim();
 
     try {
-      await forgotPassword({ email });
+      setEmail(trimmedEmail);
+      await forgotPassword({ email: trimmedEmail });
       setStep("reset");
     } catch {}
   }
@@ -42,7 +44,11 @@ export function PasswordRecoveryForm() {
     event.preventDefault();
 
     try {
-      await resetPassword({ code, email, new_password: newPassword });
+      await resetPassword({
+        code: code.trim(),
+        email: email.trim(),
+        new_password: newPassword.trim(),
+      });
       setStep("done");
     } catch {}
   }

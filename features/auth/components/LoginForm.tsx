@@ -43,7 +43,7 @@ export function LoginForm() {
     event.preventDefault();
 
     try {
-      await login({ email, password });
+      await login({ email: email.trim(), password: password.trim() });
       router.push("/home");
     } catch {}
   }
