@@ -71,6 +71,10 @@ function getVisibleChartData(
   return chartData;
 }
 
+function getBarHeight(value: number, maxValue: number) {
+  return `${Math.max((value / maxValue) * 100, 3)}%`;
+}
+
 type MetricCardProps = {
   description: string;
   icon: React.ReactNode;
@@ -270,8 +274,11 @@ function IncomeExpenseChart({
     null;
 
   const maxValue =
-    Math.max(...visibleData.map((item) => Math.max(item.income, item.expense)), 0) ||
-    1;
+    Math.max(
+      ...visibleData.map((item) => Math.max(item.income, item.expense)),
+      0,
+    ) || 1;
+  const isFullYearRange = range === "ONE_YEAR";
 
   useEffect(() => {
     if (!visibleData.length) {
@@ -344,10 +351,15 @@ function IncomeExpenseChart({
       <div className="mt-5 min-w-0 flex-1">
         {visibleData.length ? (
           <div className="w-full min-w-0 overflow-x-auto pb-2">
-            <div className="flex h-64 min-w-max items-end gap-2 lg:min-w-0 lg:justify-center">
+            <div
+              className={cn(
+                "flex h-64 min-w-max items-end gap-2",
+                !isFullYearRange && "lg:min-w-0 lg:justify-center",
+              )}
+            >
               {visibleData.map((item) => {
-                const incomeHeight = `${Math.max((item.income / maxValue) * 100, 3)}%`;
-                const expenseHeight = `${Math.max((item.expense / maxValue) * 100, 3)}%`;
+                const incomeHeight = getBarHeight(item.income, maxValue);
+                const expenseHeight = getBarHeight(item.expense, maxValue);
                 const isSelected = item.month === selectedData?.month;
 
                 return (
@@ -522,7 +534,9 @@ export function ReportsView() {
               description="Saldo disponível no mês."
               icon={<Wallet aria-hidden="true" size={24} />}
               label="Saldo"
-              tone={summary.total_geral_disponivel >= 0 ? "positive" : "negative"}
+              tone={
+                summary.total_geral_disponivel >= 0 ? "positive" : "negative"
+              }
               value={summary.total_geral_disponivel}
             />
           </div>
