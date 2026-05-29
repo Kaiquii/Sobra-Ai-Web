@@ -1,4 +1,9 @@
-import { BarChart3, Home, TrendingDown, UserRound } from "lucide-react";
+import {
+  BarChart3,
+  Home,
+  TrendingDown,
+  UserRound,
+} from "lucide-react";
 
 export const dashboardNavigation = [
   {

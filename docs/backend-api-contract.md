@@ -640,3 +640,104 @@ Resposta esperada:
   "year": 2026
 }
 ```
+
+## Assistente com IA
+
+Todas as rotas do assistente são protegidas e usam:
+
+```http
+Authorization: Bearer TOKEN
+```
+
+O front não precisa enviar o histórico inteiro. O back-end salva e carrega as mensagens pelo banco usando o usuário autenticado pelo JWT.
+
+### Enviar mensagem
+
+Nova conversa:
+
+```http
+POST /api/assistant/chat
+```
+
+Body:
+
+```json
+{
+  "message": "Quanto gastei em maio?"
+}
+```
+
+Continuar conversa:
+
+```json
+{
+  "message": "E quanto foi com alimentacao?",
+  "conversation_id": 1
+}
+```
+
+Resposta esperada:
+
+```json
+{
+  "conversation_id": 1,
+  "reply": "Em 5/2026, voce gastou R$ 350,00 no total.",
+  "tool_call": "get_monthly_summary",
+  "tool_result": {
+    "month": 5,
+    "year": 2026,
+    "total_expense": 350
+  }
+}
+```
+
+O front deve guardar o `conversation_id` retornado e enviar esse valor nas próximas mensagens da mesma conversa.
+
+### Histórico
+
+```http
+GET /api/assistant/conversations
+GET /api/assistant/conversations/{id}/messages
+DELETE /api/assistant/conversations/{id}
+```
+
+`GET /api/assistant/conversations` retorna as conversas do usuário, da mais recente para a mais antiga.
+
+`GET /api/assistant/conversations/{id}/messages` retorna as mensagens da conversa com `role`, `content` e horário.
+
+### Cadastro de despesa pelo chat
+
+Quando a IA identificar uma despesa, o back-end pode retornar uma resposta pedindo confirmação:
+
+```json
+{
+  "conversation_id": 1,
+  "reply": "Gostaria de cadastrar uma despesa de Uber, no valor de R$ 25,00, paga com Salario, na data 2026-05-01. Posso confirmar?",
+  "tool_call": "create_expense",
+  "tool_result": {
+    "status": "needs_confirmation",
+    "description": "Uber",
+    "amount": 25,
+    "payment_source": "Salario",
+    "date": "2026-05-01",
+    "confirm": false
+  }
+}
+```
+
+O front mostra a resposta normalmente. Se o usuário responder confirmando, o back-end usa a última despesa pendente e cadastra no banco.
+
+### Limite ou erro da IA
+
+A API pode responder com:
+
+```json
+{
+  "conversation_id": 1,
+  "reply": "O limite gratuito do Gemini foi atingido agora. Tente novamente em alguns instantes.",
+  "error_code": "gemini_quota_exceeded",
+  "retry_after_seconds": 30
+}
+```
+
+Quando `retry_after_seconds` vier, o front pode desabilitar temporariamente o input e mostrar o tempo restante.

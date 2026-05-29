@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Home, LogOut, Menu, UserRound } from "lucide-react";
+import { Bot, ChevronDown, Home, LogOut, Menu, UserRound } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -8,6 +8,7 @@ import { dashboardNavigation } from "@/components/layout/navigation";
 import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { AssistantChatDialog } from "@/features/assistant/components/AssistantChatView";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 
 type HeaderProps = {
@@ -33,6 +34,7 @@ function getCurrentPageTitle(pathname: string) {
 }
 
 export function Header({ onOpenSidebar }: HeaderProps) {
+  const [isAssistantDialogOpen, setIsAssistantDialogOpen] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const logout = useAuthStore((state) => state.logout);
@@ -117,6 +119,17 @@ export function Header({ onOpenSidebar }: HeaderProps) {
             >
               <Home aria-hidden="true" size={16} strokeWidth={2.25} />
             </Button>
+            <Button
+              aria-label="Abrir assistente com IA"
+              className="rounded-full border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"
+              onClick={() => setIsAssistantDialogOpen(true)}
+              size="iconSm"
+              title="Assistente com IA"
+              type="button"
+              variant="secondary"
+            >
+              <Bot aria-hidden="true" size={16} strokeWidth={2.25} />
+            </Button>
             <ThemeToggle
               className="h-8 w-8 rounded-full border border-slate-300 bg-white p-0 dark:border-slate-700 dark:bg-slate-900"
               iconSize={16}
@@ -173,6 +186,10 @@ export function Header({ onOpenSidebar }: HeaderProps) {
         onConfirm={handleLogout}
         title="Tem certeza que deseja sair?"
         tone="danger"
+      />
+      <AssistantChatDialog
+        isOpen={isAssistantDialogOpen}
+        onClose={() => setIsAssistantDialogOpen(false)}
       />
     </>
   );
