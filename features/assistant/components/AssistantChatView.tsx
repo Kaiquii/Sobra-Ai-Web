@@ -231,6 +231,7 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
   const [deleteTarget, setDeleteTarget] = useState<AssistantConversation | null>(null);
   const [draft, setDraft] = useState("");
   const [isMobileHistoryOpen, setIsMobileHistoryOpen] = useState(false);
+  const draftInputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -259,6 +260,26 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
 
     return () => window.clearTimeout(timeoutId);
   }, [clearRetry, retryUntil]);
+
+  useEffect(() => {
+    const input = draftInputRef.current;
+
+    if (!input) {
+      return;
+    }
+
+    input.style.height = "auto";
+
+    const styles = window.getComputedStyle(input);
+    const borderHeight =
+      Number.parseFloat(styles.borderTopWidth) +
+      Number.parseFloat(styles.borderBottomWidth);
+    const maxHeight = Number.parseFloat(styles.maxHeight);
+    const nextHeight = input.scrollHeight + borderHeight;
+
+    input.style.height = `${Math.min(nextHeight, maxHeight)}px`;
+    input.style.overflowY = nextHeight > maxHeight ? "auto" : "hidden";
+  }, [draft, isOpen]);
 
   if (!isOpen) {
     return null;
@@ -470,7 +491,8 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
             >
               <div className="flex items-end gap-2">
                 <textarea
-                  className="max-h-28 min-h-10 flex-1 resize-none rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm leading-6 text-slate-950 outline-none placeholder:text-slate-500 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-emerald-400 dark:focus:bg-slate-950 dark:focus:ring-emerald-950 sm:min-h-11 sm:px-4 sm:py-2.5"
+                  ref={draftInputRef}
+                  className="max-h-28 min-h-10 flex-1 resize-none overflow-y-hidden rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm leading-6 text-slate-950 outline-none placeholder:text-slate-500 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-emerald-400 dark:focus:bg-slate-950 dark:focus:ring-emerald-950 sm:max-h-32 sm:min-h-11 sm:px-4 sm:py-2.5"
                   disabled={isInputDisabled}
                   onChange={(event) => setDraft(event.target.value)}
                   onKeyDown={(event) => {
