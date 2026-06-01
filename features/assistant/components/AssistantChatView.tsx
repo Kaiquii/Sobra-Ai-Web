@@ -42,6 +42,10 @@ function formatMessageTime(value?: string) {
   return Number.isNaN(date.getTime()) ? null : timeFormatter.format(date);
 }
 
+function getMessageTime(message: AssistantMessage) {
+  return message.display_time ?? formatMessageTime(message.created_at);
+}
+
 function getConversationLabel(conversation: AssistantConversation) {
   return (
     conversation.title?.trim() ||
@@ -51,6 +55,16 @@ function getConversationLabel(conversation: AssistantConversation) {
 }
 
 function getConversationDescription(conversation: AssistantConversation) {
+  if (conversation.display_label?.trim()) {
+    return conversation.display_label;
+  }
+
+  if (conversation.display_date?.trim()) {
+    return conversation.display_time
+      ? `${conversation.display_date} ${conversation.display_time}`
+      : conversation.display_date;
+  }
+
   if (conversation.last_message?.trim() && conversation.title?.trim()) {
     return conversation.last_message;
   }
@@ -106,10 +120,10 @@ function ConversationButton({
   return (
     <div
       className={cn(
-        "group flex min-w-0 items-center gap-2 rounded-lg px-2 py-2",
+        "group flex min-w-0 items-center gap-2 rounded-lg px-2 py-2 transition-colors",
         isActive
-          ? "bg-emerald-50 dark:bg-emerald-950/35"
-          : "hover:bg-slate-100 dark:hover:bg-slate-800/70",
+          ? "bg-emerald-50 [--conversation-hover-bg:#d1fae5] hover:bg-[var(--conversation-hover-bg)] dark:bg-emerald-950/35 dark:[--conversation-hover-bg:rgb(2_44_34_/_0.45)]"
+          : "[--conversation-hover-bg:#ecfdf5] hover:bg-[var(--conversation-hover-bg)] dark:[--conversation-hover-bg:rgb(2_44_34_/_0.4)]",
       )}
     >
       <button
@@ -139,7 +153,7 @@ function ConversationButton({
 
 function ChatMessage({ message }: { message: AssistantMessage }) {
   const isUser = message.role === "user";
-  const time = formatMessageTime(message.created_at);
+  const time = getMessageTime(message);
 
   return (
     <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
@@ -282,7 +296,7 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
       >
         <div className="flex h-[calc(100vh-2rem)] min-h-0 w-[calc(100vw-1.5rem)] max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-950/25 dark:border-slate-800 dark:bg-slate-900 sm:h-[82vh] sm:min-h-[620px] sm:w-[92vw] sm:max-h-[820px] sm:flex-row">
           <aside className="flex h-48 w-full shrink-0 flex-col border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/70 sm:h-auto sm:w-80 sm:border-b-0 sm:border-r">
-            <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-3 py-3 dark:border-slate-800">
+            <div className="flex h-20 shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-3 py-3 dark:border-slate-800">
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-slate-950 dark:text-slate-50">
                   Histórico
@@ -333,7 +347,7 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
           </aside>
 
           <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-slate-100 dark:bg-slate-950">
-            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex h-20 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
               <div className="flex min-w-0 items-center gap-3">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/45 dark:text-emerald-300">
                   <MessageCircle aria-hidden="true" size={21} strokeWidth={2.25} />

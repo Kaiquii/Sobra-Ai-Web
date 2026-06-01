@@ -1,7 +1,11 @@
 export type AssistantRole = "assistant" | "system" | "user" | string;
 
 export type AssistantConversation = {
+  conversation_id?: number;
   created_at?: string;
+  display_date?: string;
+  display_label?: string;
+  display_time?: string;
   id: number;
   last_message?: string | null;
   message_count?: number;
@@ -13,8 +17,12 @@ export type AssistantMessage = {
   content: string;
   conversation_id?: number;
   created_at?: string;
+  display_time?: string;
   id?: number | string;
+  message_id?: number;
   role: AssistantRole;
+  tool_call?: string | null;
+  tool_result?: unknown;
 };
 
 export type AssistantChatRequest = {
@@ -36,6 +44,7 @@ export type AssistantConversationsResponse =
   | {
       conversations?: AssistantConversation[];
       data?: AssistantConversation[];
+      total?: number;
     };
 
 export type AssistantMessagesResponse =

@@ -1,6 +1,14 @@
 "use client";
 
-import { Bot, ChevronDown, Home, LogOut, Menu, UserRound } from "lucide-react";
+import {
+  Bot,
+  ChevronDown,
+  Home,
+  LogOut,
+  Menu,
+  MessageCircle,
+  UserRound,
+} from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -128,7 +136,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
               type="button"
               variant="secondary"
             >
-              <Bot aria-hidden="true" size={16} strokeWidth={2.25} />
+              <MessageCircle aria-hidden="true" size={16} strokeWidth={2.25} />
             </Button>
             <ThemeToggle
               className="h-8 w-8 rounded-full border border-slate-300 bg-white p-0 dark:border-slate-700 dark:bg-slate-900"

@@ -14,6 +14,7 @@ function logoutAndRedirect() {
 
 export function Providers({ children }: Readonly<{ children: React.ReactNode }>) {
   const theme = useThemeStore((state) => state.theme);
+  const isProduction = process.env.NODE_ENV === "production";
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
@@ -30,10 +31,30 @@ export function Providers({ children }: Readonly<{ children: React.ReactNode }>)
       return;
     }
 
+    if (!isProduction) {
+      void navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) =>
+          Promise.all(registrations.map((registration) => registration.unregister())),
+        )
+        .catch(() => {});
+
+      if ("caches" in window) {
+        void window.caches
+          .keys()
+          .then((cacheNames) =>
+            Promise.all(cacheNames.map((cacheName) => window.caches.delete(cacheName))),
+          )
+          .catch(() => {});
+      }
+
+      return;
+    }
+
     navigator.serviceWorker
       .register("/sw.js", { scope: "/", updateViaCache: "none" })
       .catch(() => {});
-  }, []);
+  }, [isProduction]);
 
   useEffect(() => {
     const interceptorId = apiClient.interceptors.response.use(

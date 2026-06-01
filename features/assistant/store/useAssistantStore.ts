@@ -11,6 +11,36 @@ import type {
 } from "@/features/assistant/types/assistant";
 import { getApiErrorMessage } from "@/lib/api-errors";
 
+const isAssistantDebugEnabled = process.env.NODE_ENV !== "production";
+
+function logAssistantDebug(label: string, data?: unknown) {
+  if (isAssistantDebugEnabled) {
+    console.debug(`[assistant-store] ${label}`, data);
+  }
+}
+
+function logAssistantError(label: string, error: unknown, extra?: unknown) {
+  if (!isAssistantDebugEnabled) {
+    return;
+  }
+
+  if (axios.isAxiosError(error)) {
+    console.error(`[assistant-store] ${label}`, {
+      extra,
+      message: error.message,
+      method: error.config?.method,
+      params: error.config?.params,
+      requestData: error.config?.data,
+      responseData: error.response?.data,
+      status: error.response?.status,
+      url: error.config?.url,
+    });
+    return;
+  }
+
+  console.error(`[assistant-store] ${label}`, { error, extra });
+}
+
 type AssistantState = {
   activeConversationId: number | null;
   conversations: AssistantConversation[];
@@ -127,8 +157,16 @@ export const useAssistantStore = create<AssistantState>((set, get) => ({
 
     try {
       const conversations = await assistantApi.getConversations();
+      logAssistantDebug("loadConversations:success", {
+        conversationIds: conversations.map((conversation) => ({
+          conversation_id: conversation.conversation_id,
+          id: conversation.id,
+          title: conversation.title,
+        })),
+      });
       set({ conversations, isLoadingConversations: false });
     } catch (error) {
+      logAssistantError("loadConversations:error", error);
       set({
         error: getApiErrorMessage(
           error,
@@ -140,6 +178,15 @@ export const useAssistantStore = create<AssistantState>((set, get) => ({
   },
 
   loadMessages: async (conversationId) => {
+    logAssistantDebug("loadMessages:start", {
+      conversationId,
+      knownConversations: get().conversations.map((conversation) => ({
+        conversation_id: conversation.conversation_id,
+        id: conversation.id,
+        title: conversation.title,
+      })),
+    });
+
     set({
       activeConversationId: conversationId,
       error: null,
@@ -149,8 +196,18 @@ export const useAssistantStore = create<AssistantState>((set, get) => ({
 
     try {
       const messages = await assistantApi.getConversationMessages(conversationId);
+      logAssistantDebug("loadMessages:success", {
+        conversationId,
+        messageIds: messages.map((message) => ({
+          conversation_id: message.conversation_id,
+          id: message.id,
+          message_id: message.message_id,
+          role: message.role,
+        })),
+      });
       set({ isLoadingMessages: false, messages });
     } catch (error) {
+      logAssistantError("loadMessages:error", error, { conversationId });
       set({
         error: getApiErrorMessage(
           error,
@@ -171,6 +228,11 @@ export const useAssistantStore = create<AssistantState>((set, get) => ({
     const { activeConversationId } = get();
     const userMessage = createLocalMessage("user", trimmedMessage);
 
+    logAssistantDebug("sendMessage:start", {
+      activeConversationId,
+      message: trimmedMessage,
+    });
+
     set((state) => ({
       error: null,
       isSending: true,
@@ -183,6 +245,8 @@ export const useAssistantStore = create<AssistantState>((set, get) => ({
         message: trimmedMessage,
       });
       const assistantMessage = createLocalMessage("assistant", response.reply);
+
+      logAssistantDebug("sendMessage:success", response);
 
       set((state) => ({
         activeConversationId: response.conversation_id,
@@ -197,6 +261,11 @@ export const useAssistantStore = create<AssistantState>((set, get) => ({
       const payload = getAssistantErrorPayload(error);
       const retryUntil = payload ? getRetryUntil(payload) : null;
       const reply = payload?.reply;
+
+      logAssistantError("sendMessage:error", error, {
+        activeConversationId,
+        payload,
+      });
 
       set((state) => ({
         error: getApiErrorMessage(
@@ -214,15 +283,25 @@ export const useAssistantStore = create<AssistantState>((set, get) => ({
   },
 
   setActiveConversation: (conversationId) => {
+    logAssistantDebug("setActiveConversation", {
+      conversationId,
+      matchedConversation: get().conversations.find(
+        (conversation) => conversation.id === conversationId,
+      ),
+    });
     void get().loadMessages(conversationId);
   },
 
   startNewConversation: () =>
-    set({
+    set(() => {
+      logAssistantDebug("startNewConversation");
+
+      return {
       activeConversationId: null,
       error: null,
       messages: [],
       retryAfterSeconds: null,
       retryUntil: null,
+      };
     }),
 }));
