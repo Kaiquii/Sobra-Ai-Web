@@ -2,6 +2,7 @@
 
 import {
   Bot,
+  ChevronDown,
   Loader2,
   MessageCircle,
   Plus,
@@ -120,10 +121,10 @@ function ConversationButton({
   return (
     <div
       className={cn(
-        "group flex min-w-0 items-center gap-2 rounded-lg px-2 py-2 transition-colors",
+        "group flex min-w-0 items-center gap-2 rounded-lg px-2 py-2",
         isActive
-          ? "bg-emerald-50 [--conversation-hover-bg:#d1fae5] hover:bg-[var(--conversation-hover-bg)] dark:bg-emerald-950/35 dark:[--conversation-hover-bg:rgb(2_44_34_/_0.45)]"
-          : "[--conversation-hover-bg:#ecfdf5] hover:bg-[var(--conversation-hover-bg)] dark:[--conversation-hover-bg:rgb(2_44_34_/_0.4)]",
+          ? "bg-emerald-50 [--conversation-hover-bg:#d1fae5] hover:bg-(--conversation-hover-bg) dark:bg-emerald-950/35 dark:[--conversation-hover-bg:rgb(2_44_34/0.45)]"
+          : "[--conversation-hover-bg:#ecfdf5] hover:bg-(--conversation-hover-bg) dark:[--conversation-hover-bg:rgb(2_44_34/0.4)]",
       )}
     >
       <button
@@ -157,7 +158,7 @@ function ChatMessage({ message }: { message: AssistantMessage }) {
 
   return (
     <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
-      <div className="max-w-[82%]">
+      <div className="max-w-[88%] sm:max-w-[82%]">
         <div
           className={cn(
             "whitespace-pre-wrap rounded-lg px-3.5 py-2.5 text-sm leading-6 shadow-sm",
@@ -229,6 +230,7 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
 
   const [deleteTarget, setDeleteTarget] = useState<AssistantConversation | null>(null);
   const [draft, setDraft] = useState("");
+  const [isMobileHistoryOpen, setIsMobileHistoryOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -287,16 +289,34 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
     } catch {}
   }
 
+  function handleSelectConversation(conversationId: number) {
+    setActiveConversation(conversationId);
+    setIsMobileHistoryOpen(false);
+  }
+
+  function handleStartNewConversation() {
+    clearError();
+    startNewConversation();
+    setIsMobileHistoryOpen(false);
+  }
+
   return (
     <>
       <div
         aria-modal="true"
-        className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 px-3 py-4 backdrop-blur-sm sm:px-5"
+        className="fixed inset-0 z-50 flex items-stretch justify-stretch bg-slate-950/75 p-0 backdrop-blur-sm sm:items-center sm:justify-center sm:px-5 sm:py-4"
         role="dialog"
       >
-        <div className="flex h-[calc(100vh-2rem)] min-h-0 w-[calc(100vw-1.5rem)] max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-950/25 dark:border-slate-800 dark:bg-slate-900 sm:h-[82vh] sm:min-h-[620px] sm:w-[92vw] sm:max-h-[820px] sm:flex-row">
-          <aside className="flex h-48 w-full shrink-0 flex-col border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/70 sm:h-auto sm:w-80 sm:border-b-0 sm:border-r">
-            <div className="flex h-20 shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-3 py-3 dark:border-slate-800">
+        <div className="relative flex h-dvh min-h-0 w-screen max-w-5xl flex-col overflow-hidden bg-white shadow-2xl shadow-slate-950/25 dark:bg-slate-900 sm:h-[82vh] sm:min-h-155 sm:w-[92vw] sm:max-h-205 sm:flex-row sm:rounded-2xl sm:border sm:border-slate-200 sm:dark:border-slate-800">
+          <aside
+            className={cn(
+              "z-20 w-full shrink-0 flex-col overflow-hidden border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 sm:static sm:flex sm:h-auto sm:max-h-none sm:w-80 sm:border-b-0 sm:border-r sm:bg-slate-50 sm:dark:bg-slate-950/70",
+              isMobileHistoryOpen
+                ? "absolute left-0 right-0 top-16 flex max-h-[54dvh]"
+                : "hidden",
+            )}
+          >
+            <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-2 dark:border-slate-800 sm:h-20 sm:px-3 sm:py-3">
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-slate-950 dark:text-slate-50">
                   Histórico
@@ -307,10 +327,7 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
               </div>
               <Button
                 aria-label="Nova conversa"
-                onClick={() => {
-                  clearError();
-                  startNewConversation();
-                }}
+                onClick={handleStartNewConversation}
                 size="iconSm"
                 title="Nova conversa"
                 type="button"
@@ -339,7 +356,7 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
                     conversation={conversation}
                     isActive={conversation.id === activeConversationId}
                     onDelete={setDeleteTarget}
-                    onSelect={setActiveConversation}
+                    onSelect={handleSelectConversation}
                   />
                 </div>
               ))}
@@ -347,13 +364,13 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
           </aside>
 
           <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-slate-100 dark:bg-slate-950">
-            <div className="flex h-20 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-2 dark:border-slate-800 dark:bg-slate-900 sm:h-20 sm:py-3">
               <div className="flex min-w-0 items-center gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/45 dark:text-emerald-300">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/45 dark:text-emerald-300 sm:h-10 sm:w-10">
                   <MessageCircle aria-hidden="true" size={21} strokeWidth={2.25} />
                 </span>
                 <div className="min-w-0">
-                  <h1 className="truncate text-base font-semibold text-slate-950 dark:text-slate-50">
+                  <h1 className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50 sm:text-base">
                     Chat com IA
                   </h1>
                   <p className="truncate text-xs text-slate-500 dark:text-slate-400">
@@ -365,6 +382,25 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
               </div>
 
               <div className="flex items-center gap-1">
+                <button
+                  aria-expanded={isMobileHistoryOpen}
+                  aria-label="Abrir histórico"
+                  className="inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-800 sm:hidden"
+                  onClick={() => setIsMobileHistoryOpen((isOpen) => !isOpen)}
+                  title="Histórico"
+                  type="button"
+                >
+                  Histórico
+                  <ChevronDown
+                    aria-hidden="true"
+                    className={cn(
+                      "transition-transform",
+                      isMobileHistoryOpen ? "rotate-180" : "rotate-0",
+                    )}
+                    size={15}
+                    strokeWidth={2.25}
+                  />
+                </button>
                 <button
                   aria-label="Fechar assistente"
                   className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
@@ -393,7 +429,7 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
               </div>
             ) : null}
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5">
+            <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-4 sm:py-5">
               {isLoadingMessages ? (
                 <div className="flex h-full items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                   <Loader2 aria-hidden="true" className="animate-spin" size={17} />
@@ -429,12 +465,12 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
             </div>
 
             <form
-              className="shrink-0 border-t border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"
+              className="shrink-0 border-t border-slate-200 bg-white p-2.5 dark:border-slate-800 dark:bg-slate-900 sm:p-3"
               onSubmit={handleSubmit}
             >
               <div className="flex items-end gap-2">
                 <textarea
-                  className="max-h-28 min-h-11 flex-1 resize-none rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm leading-6 text-slate-950 outline-none placeholder:text-slate-500 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-emerald-400 dark:focus:bg-slate-950 dark:focus:ring-emerald-950"
+                  className="max-h-28 min-h-10 flex-1 resize-none rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm leading-6 text-slate-950 outline-none placeholder:text-slate-500 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-emerald-400 dark:focus:bg-slate-950 dark:focus:ring-emerald-950 sm:min-h-11 sm:px-4 sm:py-2.5"
                   disabled={isInputDisabled}
                   onChange={(event) => setDraft(event.target.value)}
                   onKeyDown={(event) => {
@@ -449,7 +485,7 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
                 />
                 <Button
                   aria-label="Enviar mensagem"
-                  className="h-11 w-11 rounded-full bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
+                  className="h-10 w-10 rounded-full bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400 sm:h-11 sm:w-11"
                   disabled={isInputDisabled || !draft.trim()}
                   size="icon"
                   title="Enviar mensagem"

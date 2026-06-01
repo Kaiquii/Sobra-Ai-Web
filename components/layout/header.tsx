@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Bot,
   ChevronDown,
   Home,
   LogOut,
