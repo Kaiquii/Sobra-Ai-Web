@@ -2,6 +2,7 @@
 
 import {
   BarChart3,
+  ChevronRight,
   Pencil,
   PiggyBank,
   Plus,
@@ -10,6 +11,7 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { Alert } from "@/components/ui/alert";
@@ -18,6 +20,11 @@ import {
   getCurrentMonthReference,
   MonthSwitcher,
 } from "@/components/ui/month-switcher";
+import {
+  ExpenseFormDialog,
+  type ExpenseFormMode,
+} from "@/features/expenses/components/ExpenseFormDialog";
+import { useExpenseStore } from "@/features/expenses/store/useExpenseStore";
 import {
   IncomeShortcutDialog,
   type IncomeShortcut,
@@ -65,6 +72,14 @@ function getAmountState(value: number): AmountState {
   return "positive";
 }
 
+function getSpentPercentage(expense: number, income: number) {
+  if (income <= 0) {
+    return 0;
+  }
+
+  return Math.round((expense / income) * 100);
+}
+
 function SummaryCard({
   action,
   className,
@@ -83,10 +98,10 @@ function SummaryCard({
   return (
     <article
       className={cn(
-        "relative min-h-33 overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700/45 dark:bg-slate-800/75",
+        "relative min-h-28 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700/45 dark:bg-slate-800/75",
         "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/40 after:content-[''] dark:after:bg-white/5",
         isFeatured &&
-          "min-h-38 bg-blue-100 p-6 dark:border-blue-900/45 dark:bg-blue-950",
+          "min-h-32 bg-blue-100 p-5 dark:border-blue-900/45 dark:bg-blue-950",
         isRemaining &&
           "border-violet-200 bg-violet-100/85 dark:border-violet-900/35 dark:bg-violet-950/70",
         isExtra &&
@@ -98,11 +113,11 @@ function SummaryCard({
         className,
       )}
     >
-      <div className="flex h-full flex-col justify-between gap-5">
-        <div className="flex items-start justify-between gap-4">
+      <div className="flex h-full flex-col justify-between gap-4">
+        <div className="flex items-start justify-between gap-3">
           <p
             className={cn(
-              "text-sm font-medium text-slate-500 dark:text-slate-400",
+              "text-sm font-medium leading-tight text-slate-500 dark:text-slate-400",
               isFeatured && "text-blue-700/70 dark:text-blue-200/55",
               isRemaining && "text-violet-700/70 dark:text-violet-200/55",
               amountState === "negative" &&
@@ -116,13 +131,13 @@ function SummaryCard({
           ) : null}
         </div>
 
-        <div className="flex items-end justify-between gap-4">
+        <div className="flex items-end justify-between gap-3">
           <div className="min-w-0">
             <strong
               className={cn(
-                "block wrap-break-word text-2xl font-semibold tracking-normal text-slate-950 dark:text-white sm:text-3xl",
+                "block wrap-break-word text-2xl font-semibold leading-none tracking-normal text-slate-950 dark:text-white sm:text-[2rem]",
                 isFeatured &&
-                  "text-3xl text-blue-700 dark:text-blue-400 sm:text-4xl",
+                  "text-[2rem] text-blue-700 dark:text-blue-400 sm:text-4xl",
                 isExtra && "text-emerald-600 dark:text-emerald-400",
                 isRemaining && "text-violet-950 dark:text-white",
                 isExpenseTone && "text-slate-950 dark:text-white",
@@ -137,7 +152,7 @@ function SummaryCard({
             {hint ? (
               <p
                 className={cn(
-                  "mt-2 text-sm font-medium text-slate-500 dark:text-slate-500",
+                  "mt-1.5 text-sm font-medium leading-tight text-slate-500 dark:text-slate-500",
                   isFeatured && "text-blue-700/60 dark:text-blue-200/45",
                   amountState === "negative" &&
                     "text-red-700/70 dark:text-red-200/60",
@@ -242,13 +257,13 @@ function IncomeActions({
 
 function SummarySkeleton() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
       {Array.from({ length: 9 }).map((_, index) => (
         <div
           className={cn(
-            "h-36 animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900",
-            index === 0 && "md:col-span-2 xl:col-span-4",
-            index === 4 && "md:col-span-2 xl:col-span-4",
+            "h-28 animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900",
+            index === 0 && "md:col-span-2 lg:col-span-4",
+            index === 4 && "md:col-span-2 lg:col-span-4",
           )}
           key={index}
         />
@@ -260,12 +275,16 @@ function SummarySkeleton() {
 export function MonthlySummaryView() {
   const [{ month, year }, setSelectedDate] = useState(getCurrentMonthReference);
   const [error, setError] = useState<string | null>(null);
+  const [expenseFormMode, setExpenseFormMode] = useState<ExpenseFormMode | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [incomeShortcut, setIncomeShortcut] = useState<IncomeShortcut | null>(
     null,
   );
   const [refreshKey, setRefreshKey] = useState(0);
   const [summary, setSummary] = useState<MonthlySummary | null>(null);
+  const loadCategories = useExpenseStore((state) => state.loadCategories);
 
   useEffect(() => {
     let isMounted = true;
@@ -308,20 +327,77 @@ export function MonthlySummaryView() {
   const gastoAdiantamento = summary
     ? Math.max(summary.adiantamento - summary.restante_adiantamento, 0)
     : 0;
+  const spentPercentage = summary
+    ? getSpentPercentage(summary.total_expense, summary.total_income)
+    : null;
+  const spentProgressPercentage =
+    spentPercentage !== null ? Math.min(spentPercentage, 100) : 0;
+
+  async function openExpenseDialog() {
+    await loadCategories();
+    setExpenseFormMode("create");
+  }
+
+  function closeExpenseDialog() {
+    setExpenseFormMode(null);
+  }
+
+  function handleExpenseSuccess() {
+    closeExpenseDialog();
+    setRefreshKey((current) => current + 1);
+  }
 
   return (
     <>
-      <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <section className="mx-auto flex w-full max-w-6xl flex-col gap-4">
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+            <p className="text-sm font-semibold leading-tight text-emerald-700 dark:text-emerald-300">
               Visão Mensal
             </p>
-            <h1 className="mt-1 text-2xl font-semibold capitalize text-slate-950 dark:text-slate-50">
-              {monthLabel}
-            </h1>
+            <div className="mt-0.5 flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl font-semibold leading-tight capitalize text-slate-950 dark:text-slate-50">
+                {monthLabel}
+              </h1>
+              {spentPercentage !== null ? (
+                <span className="inline-flex h-7 items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-2.5 text-xs font-semibold text-blue-700 dark:border-blue-900/70 dark:bg-blue-950/45 dark:text-blue-300">
+                  <span>Gasto: {spentPercentage}%</span>
+                  <span
+                    aria-hidden="true"
+                    className="h-1 w-16 overflow-hidden rounded-full bg-blue-100 dark:bg-blue-950"
+                  >
+                    <span
+                      className="block h-full rounded-full bg-blue-500 dark:bg-blue-400"
+                      style={{ width: `${spentProgressPercentage}%` }}
+                    />
+                  </span>
+                </span>
+              ) : null}
+            </div>
           </div>
-          <MonthSwitcher month={month} onChange={setSelectedDate} year={year} />
+          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+            <MonthSwitcher
+              className="!w-72 !max-w-none sm:!w-80"
+              month={month}
+              onChange={setSelectedDate}
+              year={year}
+            />
+            <button
+              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 text-xs font-semibold text-blue-700 hover:bg-blue-100 dark:border-blue-900/70 dark:bg-blue-950/45 dark:text-blue-300 dark:hover:bg-blue-950"
+              onClick={() => void openExpenseDialog()}
+              type="button"
+            >
+              <Plus aria-hidden="true" size={14} strokeWidth={2.4} />
+              Adicionar despesa
+            </button>
+            <Link
+              className="inline-flex h-8 items-center justify-center gap-1 rounded-full px-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              href="/despesas"
+            >
+              Ver despesas
+              <ChevronRight aria-hidden="true" size={14} strokeWidth={2.4} />
+            </Link>
+          </div>
         </div>
 
         {isLoading ? <SummarySkeleton /> : null}
@@ -342,26 +418,26 @@ export function MonthlySummaryView() {
         ) : null}
 
         {!isLoading && summary ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
             <SummaryCard
-              className="md:col-span-2 xl:col-span-4"
+              className="md:col-span-2 lg:col-span-4"
               hint="Saldo livre no mês."
-              icon={<PiggyBank aria-hidden="true" size={48} />}
+              icon={<PiggyBank aria-hidden="true" size={42} />}
               label="Total Geral Disponível"
               tone="balance"
               value={summary.total_geral_disponivel}
             />
 
             <SummaryCard
-              className="xl:col-span-2"
-              icon={<TrendingUp aria-hidden="true" size={34} />}
+              className="lg:col-span-2"
+              icon={<TrendingUp aria-hidden="true" size={30} />}
               label="Total Recebido"
               tone="income"
               value={summary.total_income}
             />
             <SummaryCard
-              className="xl:col-span-2"
-              icon={<Wallet aria-hidden="true" size={34} />}
+              className="lg:col-span-2"
+              icon={<Wallet aria-hidden="true" size={30} />}
               label="Total Gasto"
               tone="expense"
               value={summary.total_expense}
@@ -407,7 +483,7 @@ export function MonthlySummaryView() {
                 />
               }
               className="md:col-span-2"
-              icon={<BarChart3 aria-hidden="true" size={38} />}
+              icon={<BarChart3 aria-hidden="true" size={34} />}
               label="Renda Extra (Disponível)"
               tone="extra"
               value={summary.restante_renda_extra}
@@ -425,13 +501,13 @@ export function MonthlySummaryView() {
             />
 
             <SummaryCard
-              icon={<ReceiptText aria-hidden="true" size={30} />}
+              icon={<ReceiptText aria-hidden="true" size={28} />}
               label="Gasto Salário"
               tone="spent"
               value={gastoSalario}
             />
             <SummaryCard
-              icon={<ReceiptText aria-hidden="true" size={30} />}
+              icon={<ReceiptText aria-hidden="true" size={28} />}
               label="Gasto Adiant."
               tone="spent"
               value={gastoAdiantamento}
@@ -447,6 +523,14 @@ export function MonthlySummaryView() {
           setRefreshKey((current) => current + 1);
         }}
         shortcut={incomeShortcut}
+      />
+      <ExpenseFormDialog
+        expense={null}
+        mode={expenseFormMode}
+        month={month}
+        onClose={closeExpenseDialog}
+        onSuccess={handleExpenseSuccess}
+        year={year}
       />
     </>
   );
