@@ -66,6 +66,38 @@ function normalizeText(value: string) {
     .toLowerCase();
 }
 
+function normalizeNumericSearch(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+function matchesSearchFilter(expense: Expense, searchQuery: string) {
+  const normalizedSearch = normalizeText(searchQuery.trim());
+
+  if (!normalizedSearch) {
+    return true;
+  }
+
+  if (normalizeText(expense.description).includes(normalizedSearch)) {
+    return true;
+  }
+
+  const numericSearch = normalizeNumericSearch(searchQuery);
+
+  if (!numericSearch) {
+    return false;
+  }
+
+  const amountSearchTargets = [
+    formatMoney(expense.amount),
+    String(expense.amount),
+    expense.amount.toFixed(2),
+  ]
+    .map(normalizeNumericSearch)
+    .join(" ");
+
+  return amountSearchTargets.includes(numericSearch);
+}
+
 function matchesTypeFilter(expense: Expense, filter: ExpenseTypeFilter) {
   const type = normalizeText(expense.type);
 
@@ -279,10 +311,8 @@ export function ExpensesView() {
 
   const categoriesById = useMemo(() => getCategoriesMap(categories), [categories]);
   const filteredExpenses = useMemo(() => {
-    const search = normalizeText(searchQuery);
-
     return expenses.filter((expense) => {
-      const matchesSearch = normalizeText(expense.description).includes(search);
+      const matchesSearch = matchesSearchFilter(expense, searchQuery);
       const matchesType = matchesTypeFilter(expense, typeFilter);
       const matchesPaymentSource = matchesPaymentSourceFilter(
         expense,
