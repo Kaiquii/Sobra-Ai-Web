@@ -1,6 +1,6 @@
-# App Financeiro Web
+# SobraAí Web
 
-Aplicação web do App Financeiro, criada com Next.js, React, TypeScript, Tailwind CSS, Zustand e Axios.
+Aplicação web do SobraAí, criada com Next.js, React, TypeScript, Tailwind CSS, Zustand e Axios.
 
 O projeto consome uma API externa para autenticação, despesas, rendas, categorias e relatórios financeiros.
 

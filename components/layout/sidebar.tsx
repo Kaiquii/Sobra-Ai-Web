@@ -39,7 +39,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               <WalletCards className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold">App Financeiro</p>
+              <p className="text-sm font-semibold">SobraAí</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">Navegacao</p>
             </div>
           </div>

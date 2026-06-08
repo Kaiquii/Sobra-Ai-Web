@@ -19,7 +19,7 @@ export function AuthShell({ children, description, title }: AuthShellProps) {
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-950 shadow-sm dark:border-slate-800">
                 <Image
-                  alt="App Financeiro"
+                  alt="SobraAí"
                   className="h-full w-full object-cover"
                   height={48}
                   priority
@@ -29,7 +29,7 @@ export function AuthShell({ children, description, title }: AuthShellProps) {
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-950 dark:text-slate-50">
-                  App Financeiro
+                  SobraAí
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Painel web

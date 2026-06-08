@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "App Financeiro",
-    short_name: "Financeiro",
+    name: "SobraAí",
+    short_name: "SobraAí",
     description: "Controle financeiro pessoal",
     start_url: "/",
     scope: "/",

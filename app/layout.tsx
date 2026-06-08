@@ -4,12 +4,12 @@ import "./globals.css";
 import { Providers } from "@/app/providers";
 
 export const metadata: Metadata = {
-  applicationName: "App Financeiro",
-  title: "App Financeiro",
+  applicationName: "SobraAí",
+  title: "SobraAí",
   description: "Controle financeiro pessoal",
   appleWebApp: {
     capable: true,
-    title: "App Financeiro",
+    title: "SobraAí",
     statusBarStyle: "black-translucent",
   },
   formatDetection: {
