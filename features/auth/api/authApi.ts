@@ -1,6 +1,7 @@
 import { apiClient } from "@/lib/api";
 import type {
   ForgotPasswordRequest,
+  GetProfileResponse,
   LoginRequest,
   LoginResponse,
   MessageResponse,
@@ -9,6 +10,7 @@ import type {
   ResetPasswordRequest,
   UpdateProfileRequest,
   UpdateProfileResponse,
+  UploadProfilePhotoResponse,
 } from "@/features/auth/types/auth";
 
 export const authApi = {
@@ -36,6 +38,31 @@ export const authApi = {
     const response = await apiClient.patch<UpdateProfileResponse>(
       "/api/users/profile",
       data,
+    );
+
+    return response.data;
+  },
+
+  getProfile: async () => {
+    const response = await apiClient.get<GetProfileResponse>("/api/users/profile");
+    return response.data;
+  },
+
+  uploadProfilePhoto: async (file: File) => {
+    const formData = new FormData();
+    formData.append("photo", file);
+
+    const response = await apiClient.patch<UploadProfilePhotoResponse>(
+      "/api/users/profile/photo",
+      formData,
+    );
+
+    return response.data;
+  },
+
+  deleteProfilePhoto: async () => {
+    const response = await apiClient.delete<MessageResponse>(
+      "/api/users/profile/photo",
     );
 
     return response.data;

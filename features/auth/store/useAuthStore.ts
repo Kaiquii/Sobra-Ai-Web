@@ -27,7 +27,9 @@ type AuthState = {
   message: string | null;
   user: AuthUser | null;
   clearFeedback: () => void;
+  deleteProfilePhoto: () => Promise<void>;
   forgotPassword: (data: ForgotPasswordRequest) => Promise<void>;
+  loadProfile: () => Promise<void>;
   login: (data: LoginRequest) => Promise<void>;
   logout: () => void;
   register: (data: RegisterRequest) => Promise<void>;
@@ -35,6 +37,7 @@ type AuthState = {
   restoreSession: () => void;
   setHasHydrated: (hasHydrated: boolean) => void;
   updateProfile: (data: UpdateProfileRequest) => Promise<void>;
+  uploadProfilePhoto: (file: File) => Promise<void>;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -49,6 +52,25 @@ export const useAuthStore = create<AuthState>()(
 
       clearFeedback: () => set({ error: null, message: null }),
 
+      deleteProfilePhoto: async () => {
+        set({ error: null, isLoading: true, message: null });
+
+        try {
+          const response = await authApi.deleteProfilePhoto();
+
+          set((state) => ({
+            isLoading: false,
+            message: response.message,
+            user: state.user
+              ? { ...state.user, avatar_cache_key: null, avatar_url: null }
+              : null,
+          }));
+        } catch (error) {
+          set({ error: getApiErrorMessage(error), isLoading: false, message: null });
+          throw error;
+        }
+      },
+
       forgotPassword: async (data) => {
         set({ error: null, isLoading: true, message: null });
 
@@ -57,6 +79,30 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: false, message: response.message });
         } catch (error) {
           set({ error: getApiErrorMessage(error), isLoading: false, message: null });
+          throw error;
+        }
+      },
+
+      loadProfile: async () => {
+        set({ error: null });
+
+        try {
+          const response = await authApi.getProfile();
+
+          set((state) => ({
+            user: {
+              avatar_cache_key:
+                response.user.avatar_url === state.user?.avatar_url
+                  ? (state.user?.avatar_cache_key ?? null)
+                  : Date.now(),
+              avatar_url: response.user.avatar_url ?? null,
+              email: response.user.email ?? state.user?.email ?? "",
+              name: response.user.name ?? state.user?.name ?? "",
+              role: response.user.role ?? state.user?.role ?? "user",
+            },
+          }));
+        } catch (error) {
+          set({ error: getApiErrorMessage(error) });
           throw error;
         }
       },
@@ -73,7 +119,10 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
             isLoading: false,
             message: response.message,
-            user: response.user,
+            user: {
+              ...response.user,
+              avatar_cache_key: response.user.avatar_url ? Date.now() : null,
+            },
           });
         } catch (error) {
           set({
@@ -147,10 +196,35 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
             message: response.message ?? "Perfil atualizado com sucesso!",
             user: {
+              avatar_cache_key: state.user?.avatar_cache_key ?? null,
+              avatar_url: response.user?.avatar_url ?? state.user?.avatar_url ?? null,
               email: response.user?.email ?? data.email,
               name: response.user?.name ?? data.name,
               role: response.user?.role ?? state.user?.role ?? "user",
             },
+          }));
+        } catch (error) {
+          set({ error: getApiErrorMessage(error), isLoading: false, message: null });
+          throw error;
+        }
+      },
+
+      uploadProfilePhoto: async (file) => {
+        set({ error: null, isLoading: true, message: null });
+
+        try {
+          const response = await authApi.uploadProfilePhoto(file);
+
+          set((state) => ({
+            isLoading: false,
+            message: response.message,
+            user: state.user
+              ? {
+                  ...state.user,
+                  avatar_cache_key: response.avatar_url ? Date.now() : null,
+                  avatar_url: response.avatar_url ?? null,
+                }
+              : null,
           }));
         } catch (error) {
           set({ error: getApiErrorMessage(error), isLoading: false, message: null });

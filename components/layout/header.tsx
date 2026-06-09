@@ -10,15 +10,18 @@ import {
   Star,
   UserRound,
 } from "lucide-react";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { dashboardNavigation } from "@/components/layout/navigation";
 import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { ProfilePhotoPreviewDialog } from "@/components/ui/profile-photo-preview-dialog";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { AssistantChatDialog } from "@/features/assistant/components/AssistantChatView";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { buildApiAssetUrl } from "@/lib/api";
 
 type HeaderProps = {
   onOpenSidebar: () => void;
@@ -44,13 +47,17 @@ function getCurrentPageTitle(pathname: string) {
 
 export function Header({ onOpenSidebar }: HeaderProps) {
   const [isAssistantDialogOpen, setIsAssistantDialogOpen] = useState(false);
+  const [isPhotoPreviewOpen, setIsPhotoPreviewOpen] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const loadProfile = useAuthStore((state) => state.loadProfile);
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
   const pathname = usePathname();
   const router = useRouter();
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const avatarUrl = buildApiAssetUrl(user?.avatar_url, user?.avatar_cache_key);
+  const profileEmail = user?.email;
   const currentPageTitle = getCurrentPageTitle(pathname);
   const userName = user?.name ?? "Usuário";
   const userEmail = user?.email ?? "E-mail não informado.";
@@ -60,6 +67,14 @@ export function Header({ onOpenSidebar }: HeaderProps) {
     : user?.role === "user"
       ? "Usuário"
       : user?.role || "Perfil não informado";
+
+  useEffect(() => {
+    if (!profileEmail) {
+      return;
+    }
+
+    void loadProfile().catch(() => {});
+  }, [loadProfile, profileEmail]);
 
   useEffect(() => {
     if (!isUserMenuOpen) {
@@ -158,7 +173,18 @@ export function Header({ onOpenSidebar }: HeaderProps) {
                 onClick={() => setIsUserMenuOpen((isOpen) => !isOpen)}
                 type="button"
               >
-                <UserRound aria-hidden="true" size={14} strokeWidth={2.25} />
+                {avatarUrl ? (
+                  <Image
+                    alt=""
+                    aria-hidden="true"
+                    className="h-5 w-5 rounded-full object-cover"
+                    height={20}
+                    src={avatarUrl}
+                    width={20}
+                  />
+                ) : (
+                  <UserRound aria-hidden="true" size={14} strokeWidth={2.25} />
+                )}
                 <span className="hidden max-w-32 truncate sm:inline">
                   Olá, {userName}
                 </span>
@@ -177,13 +203,31 @@ export function Header({ onOpenSidebar }: HeaderProps) {
                   role="dialog"
                 >
                   <div className="grid gap-3 border-b border-slate-200 p-3.5 dark:border-slate-800">
-                    <div className="flex min-w-0 items-start gap-2.5">
-                      <UserRound
-                        aria-hidden="true"
-                        className="mt-0.5 shrink-0 text-slate-400 dark:text-slate-500"
-                        size={15}
-                        strokeWidth={2.25}
-                      />
+                    <div className="flex min-w-0 items-center gap-3">
+                      {avatarUrl ? (
+                        <button
+                          aria-label="Visualizar foto de perfil"
+                          className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-emerald-100 text-emerald-700 transition hover:border-emerald-300 hover:ring-2 hover:ring-emerald-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 dark:border-slate-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            setIsPhotoPreviewOpen(true);
+                          }}
+                          title="Visualizar foto"
+                          type="button"
+                        >
+                          <Image
+                            alt="Foto de perfil"
+                            className="h-full w-full object-cover"
+                            height={40}
+                            src={avatarUrl}
+                            width={40}
+                          />
+                        </button>
+                      ) : (
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-emerald-100 text-emerald-700 dark:border-slate-800 dark:bg-emerald-950/50 dark:text-emerald-300">
+                          <UserRound aria-hidden="true" size={18} strokeWidth={2.25} />
+                        </div>
+                      )}
                       <div className="min-w-0 flex-1">
                         <p className="text-[11px] font-semibold uppercase text-slate-400 dark:text-slate-500">
                           Nome
@@ -271,6 +315,11 @@ export function Header({ onOpenSidebar }: HeaderProps) {
         onConfirm={handleLogout}
         title="Tem certeza que deseja sair?"
         tone="danger"
+      />
+      <ProfilePhotoPreviewDialog
+        avatarUrl={avatarUrl}
+        isOpen={isPhotoPreviewOpen}
+        onClose={() => setIsPhotoPreviewOpen(false)}
       />
       <AssistantChatDialog
         isOpen={isAssistantDialogOpen}

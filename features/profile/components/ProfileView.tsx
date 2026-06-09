@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Camera,
   ChevronRight,
   CircleDollarSign,
   HelpCircle,
@@ -8,15 +9,20 @@ import {
   Pencil,
   Shapes,
   Star,
+  Trash2,
   UserRound,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
 
+import { Alert } from "@/components/ui/alert";
 import { buttonClassName, Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { ProfilePhotoPreviewDialog } from "@/components/ui/profile-photo-preview-dialog";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { buildApiAssetUrl } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 function getInitial(name: string | undefined) {
@@ -79,18 +85,72 @@ function ProfileShortcut({ description, href, icon, title }: ProfileShortcutProp
   );
 }
 
+
 export function ProfileView() {
+  const [isDeletePhotoDialogOpen, setIsDeletePhotoDialogOpen] = useState(false);
+  const [isPhotoBusy, setIsPhotoBusy] = useState(false);
+  const [isPhotoPreviewOpen, setIsPhotoPreviewOpen] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+  const clearFeedback = useAuthStore((state) => state.clearFeedback);
+  const deleteProfilePhoto = useAuthStore((state) => state.deleteProfilePhoto);
+  const error = useAuthStore((state) => state.error);
+  const loadProfile = useAuthStore((state) => state.loadProfile);
   const logout = useAuthStore((state) => state.logout);
+  const message = useAuthStore((state) => state.message);
+  const uploadProfilePhoto = useAuthStore((state) => state.uploadProfilePhoto);
   const user = useAuthStore((state) => state.user);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const roleInfo = getRoleInfo(user?.role);
-  const initial = getInitial(user?.name);
+  const avatarUrl = buildApiAssetUrl(user?.avatar_url, user?.avatar_cache_key);
+  const profileEmail = user?.email;
+
+  useEffect(() => {
+    clearFeedback();
+  }, [clearFeedback]);
+
+  useEffect(() => {
+    if (!profileEmail) {
+      return;
+    }
+
+    void loadProfile().catch(() => {});
+  }, [loadProfile, profileEmail]);
 
   function handleLogout() {
     logout();
     setIsLogoutDialogOpen(false);
     router.replace("/login");
+  }
+
+  async function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    clearFeedback();
+    setIsPhotoBusy(true);
+
+    try {
+      await uploadProfilePhoto(file);
+    } finally {
+      setIsPhotoBusy(false);
+      event.target.value = "";
+    }
+  }
+
+  async function handleDeletePhoto() {
+    clearFeedback();
+    setIsDeletePhotoDialogOpen(false);
+    setIsPhotoBusy(true);
+
+    try {
+      await deleteProfilePhoto();
+    } finally {
+      setIsPhotoBusy(false);
+    }
   }
 
   return (
@@ -99,9 +159,30 @@ export function ProfileView() {
         <article className="min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center gap-4 overflow-hidden">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-2xl font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
-                {initial || <UserRound aria-hidden="true" size={30} strokeWidth={2.25} />}
-              </div>
+              {avatarUrl ? (
+                <button
+                  aria-label="Visualizar foto de perfil"
+                  className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-emerald-100 text-2xl font-semibold text-emerald-700 hover:border-emerald-300 hover:ring-2 hover:ring-emerald-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 dark:border-slate-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+                  onClick={() => setIsPhotoPreviewOpen(true)}
+                  title="Visualizar foto"
+                  type="button"
+                >
+                  <Image
+                    alt="Foto de perfil"
+                    className="h-full w-full object-cover"
+                    height={64}
+                    loading="eager"
+                    src={avatarUrl}
+                    width={64}
+                  />
+                </button>
+              ) : (
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-emerald-100 text-2xl font-semibold text-emerald-700 dark:border-slate-800 dark:bg-emerald-950/50 dark:text-emerald-300">
+                  {getInitial(user?.name) || (
+                    <UserRound aria-hidden="true" size={30} strokeWidth={2.25} />
+                  )}
+                </div>
+              )}
 
               <div className="min-w-0 flex-1 overflow-hidden">
                 <h2 className="truncate text-2xl font-semibold text-slate-950 dark:text-slate-50">
@@ -121,6 +202,40 @@ export function ProfileView() {
                   <span className="shrink-0">{roleInfo.icon}</span>
                   <span className="truncate">{roleInfo.label}</span>
                 </span>
+
+                <input
+                  accept="image/jpeg,image/png,image/gif"
+                  className="hidden"
+                  onChange={handlePhotoChange}
+                  ref={fileInputRef}
+                  type="file"
+                />
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button
+                    className="h-8 px-2.5 text-xs"
+                    disabled={isPhotoBusy}
+                    onClick={() => fileInputRef.current?.click()}
+                    type="button"
+                    variant="secondary"
+                  >
+                    <Camera aria-hidden="true" size={15} strokeWidth={2.25} />
+                    Alterar foto
+                  </Button>
+
+                  {avatarUrl ? (
+                    <Button
+                      className="h-8 border-red-200 bg-red-50 px-2.5 text-xs text-red-700 hover:bg-red-100 dark:border-red-900/70 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/50"
+                      disabled={isPhotoBusy}
+                      onClick={() => setIsDeletePhotoDialogOpen(true)}
+                      type="button"
+                      variant="secondary"
+                    >
+                      <Trash2 aria-hidden="true" size={15} strokeWidth={2.25} />
+                      Remover
+                    </Button>
+                  ) : null}
+                </div>
               </div>
             </div>
 
@@ -136,6 +251,9 @@ export function ProfileView() {
             </Link>
           </div>
         </article>
+
+        {error ? <Alert variant="error">{error}</Alert> : null}
+        {message ? <Alert variant="success">{message}</Alert> : null}
 
         <div className="min-w-0">
           <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-50">
@@ -193,6 +311,24 @@ export function ProfileView() {
         onConfirm={handleLogout}
         title="Sair da conta?"
         tone="danger"
+      />
+
+      <ConfirmationDialog
+        confirmLabel="Remover foto"
+        description="Sua foto atual será removida do perfil. Você poderá enviar outra depois, quando quiser."
+        isOpen={isDeletePhotoDialogOpen}
+        onClose={() => setIsDeletePhotoDialogOpen(false)}
+        onConfirm={() => {
+          void handleDeletePhoto();
+        }}
+        title="Remover foto de perfil?"
+        tone="danger"
+      />
+
+      <ProfilePhotoPreviewDialog
+        avatarUrl={avatarUrl}
+        isOpen={isPhotoPreviewOpen}
+        onClose={() => setIsPhotoPreviewOpen(false)}
       />
     </>
   );

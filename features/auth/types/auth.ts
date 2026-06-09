@@ -1,4 +1,6 @@
 export type AuthUser = {
+  avatar_cache_key?: number | null;
+  avatar_url?: string | null;
   email: string;
   name: string;
   role: string;
@@ -23,6 +25,15 @@ export type UpdateProfileRequest = {
 export type UpdateProfileResponse = {
   message?: string;
   user?: AuthUser;
+};
+
+export type GetProfileResponse = {
+  user: AuthUser;
+};
+
+export type UploadProfilePhotoResponse = {
+  avatar_url: string | null;
+  message: string;
 };
 
 export type RegisterRequest = {

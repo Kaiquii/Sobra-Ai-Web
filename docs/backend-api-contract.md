@@ -12,6 +12,64 @@ Authorization: Bearer TOKEN
 
 Se qualquer rota protegida retornar `401`, o front deve limpar a sessao local e redirecionar para `/login`.
 
+## Perfil do usuario
+
+Todas as rotas de perfil usam `Authorization: Bearer TOKEN`.
+
+### Buscar perfil
+
+```http
+GET /api/users/profile
+```
+
+Resposta esperada:
+
+```json
+{
+  "user": {
+    "email": "usuario@email.com",
+    "name": "Usuario",
+    "role": "admin",
+    "avatar_url": "/uploads/users/1/avatar.jpg"
+  }
+}
+```
+
+Para exibir a foto, o front monta a URL completa com:
+
+```ts
+`${NEXT_PUBLIC_API_BASE_URL}${avatar_url}`
+```
+
+Se `avatar_url` vier vazio ou `null`, exibir o fallback com a inicial do usuario.
+
+### Atualizar foto
+
+```http
+PATCH /api/users/profile/photo
+```
+
+Enviar `multipart/form-data` com o arquivo no campo `photo`.
+
+Importante: o front nao deve enviar base64 e nao deve setar `Content-Type` manualmente no upload. O navegador monta o multipart correto.
+
+Resposta esperada:
+
+```json
+{
+  "message": "Foto de perfil atualizada com sucesso!",
+  "avatar_url": "/uploads/users/1/avatar.jpg"
+}
+```
+
+### Remover foto
+
+```http
+DELETE /api/users/profile/photo
+```
+
+Depois da remocao, o front deve limpar `avatar_url` do estado local.
+
 ## Rendas
 
 As rendas usam os endpoints de `incomes`.
