@@ -1,20 +1,18 @@
 "use client";
 
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { apiClient } from "@/lib/api";
+import { getApiErrorMessage } from "@/lib/api-errors";
 import { useThemeStore } from "@/store/useThemeStore";
-
-function logoutAndRedirect() {
-  useAuthStore.getState().logout();
-  window.location.replace("/login");
-}
 
 export function Providers({ children }: Readonly<{ children: React.ReactNode }>) {
   const theme = useThemeStore((state) => state.theme);
   const isProduction = process.env.NODE_ENV === "production";
+  const router = useRouter();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
@@ -60,8 +58,16 @@ export function Providers({ children }: Readonly<{ children: React.ReactNode }>)
     const interceptorId = apiClient.interceptors.response.use(
       (response) => response,
       (error) => {
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          logoutAndRedirect();
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+
+          if (status === 401 || status === 403) {
+            const errorMessage =
+              status === 403 ? getApiErrorMessage(error) : undefined;
+
+            useAuthStore.getState().logout(errorMessage);
+            router.replace("/login");
+          }
         }
 
         return Promise.reject(error);
@@ -71,7 +77,7 @@ export function Providers({ children }: Readonly<{ children: React.ReactNode }>)
     return () => {
       apiClient.interceptors.response.eject(interceptorId);
     };
-  }, []);
+  }, [router]);
 
   return children;
 }

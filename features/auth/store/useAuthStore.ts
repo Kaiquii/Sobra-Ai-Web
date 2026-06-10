@@ -31,7 +31,7 @@ type AuthState = {
   forgotPassword: (data: ForgotPasswordRequest) => Promise<void>;
   loadProfile: () => Promise<void>;
   login: (data: LoginRequest) => Promise<void>;
-  logout: () => void;
+  logout: (errorMessage?: string | null) => void;
   register: (data: RegisterRequest) => Promise<void>;
   resetPassword: (data: ResetPasswordRequest) => Promise<void>;
   restoreSession: () => void;
@@ -136,10 +136,10 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      logout: () => {
+      logout: (errorMessage = null) => {
         clearBrowserAuthToken();
         set({
-          error: null,
+          error: errorMessage,
           isAuthenticated: false,
           isLoading: false,
           message: null,

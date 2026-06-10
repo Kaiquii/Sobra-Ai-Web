@@ -1,4 +1,6 @@
 export type AuthUser = {
+  access_blocked?: boolean;
+  access_blocked_at?: string | null;
   avatar_cache_key?: number | null;
   avatar_url?: string | null;
   email: string;

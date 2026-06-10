@@ -12,6 +12,18 @@ Authorization: Bearer TOKEN
 
 Se qualquer rota protegida retornar `401`, o front deve limpar a sessao local e redirecionar para `/login`.
 
+Se qualquer rota protegida retornar `403` por acesso revogado, o front tambem deve limpar a sessao local, redirecionar para `/login` e exibir a mensagem retornada pela API.
+
+Resposta esperada para acesso revogado:
+
+```json
+{
+  "error": "Acesso revogado. Entre em contato com o suporte."
+}
+```
+
+Esse `403` pode acontecer no login ou em qualquer rota autenticada quando o usuario ja tinha token salvo antes do bloqueio administrativo.
+
 ## Perfil do usuario
 
 Todas as rotas de perfil usam `Authorization: Bearer TOKEN`.
