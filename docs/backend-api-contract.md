@@ -35,10 +35,23 @@ Resposta esperada:
 }
 ```
 
-Para exibir a foto, o front monta a URL completa com:
+`avatar_url` pode vir em dois formatos:
+
+- Relativo, para fotos antigas/local da API: `/uploads/users/1/avatar.jpg`
+- Absoluto, para uploads novos no Oracle Object Storage: `https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grdi592jtydg/b/storage-app-financeiro/o/users/1/avatar.jpg`
+
+Para exibir a foto, o front deve usar URL absoluta diretamente e so prefixar a base da API quando `avatar_url` for relativo:
 
 ```ts
-`${NEXT_PUBLIC_API_BASE_URL}${avatar_url}`
+function resolveAvatarUrl(avatarUrl?: string | null) {
+  if (!avatarUrl) return null;
+
+  if (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) {
+    return avatarUrl;
+  }
+
+  return `${NEXT_PUBLIC_API_BASE_URL}${avatarUrl}`;
+}
 ```
 
 Se `avatar_url` vier vazio ou `null`, exibir o fallback com a inicial do usuario.
@@ -58,7 +71,7 @@ Resposta esperada:
 ```json
 {
   "message": "Foto de perfil atualizada com sucesso!",
-  "avatar_url": "/uploads/users/1/avatar.jpg"
+  "avatar_url": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grdi592jtydg/b/storage-app-financeiro/o/users/1/avatar.jpg"
 }
 ```
 
