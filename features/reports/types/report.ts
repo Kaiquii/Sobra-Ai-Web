@@ -36,6 +36,79 @@ export type YearlySummary = {
   year: number;
 };
 
+export type MonthComparisonParams = {
+  compareMonth: number;
+  compareYear: number;
+  month: number;
+  year: number;
+};
+
+export type MonthComparisonStatus =
+  | "caiu"
+  | "igual"
+  | "melhorou"
+  | "piorou"
+  | "subiu"
+  | string;
+
+export type MonthComparisonSummary = {
+  despesas_atual: number;
+  despesas_comparado: number;
+  diferenca_despesas: number;
+  diferenca_receitas: number;
+  diferenca_saldo: number;
+  percentual_despesas: number;
+  percentual_receitas: number;
+  percentual_saldo: number;
+  receitas_atual: number;
+  receitas_comparado: number;
+  saldo_atual: number;
+  saldo_comparado: number;
+  status_despesas: MonthComparisonStatus;
+  status_receitas: MonthComparisonStatus;
+  status_saldo: MonthComparisonStatus;
+};
+
+export type MonthComparisonCategory = {
+  categoria_id: number;
+  categoria_nome: string;
+  diferenca: number;
+  percentual: number;
+  status: MonthComparisonStatus;
+  valor_atual: number;
+  valor_comparado: number;
+};
+
+export type MonthComparisonPaymentSource = {
+  diferenca: number;
+  fonte_pagamento: string;
+  percentual: number;
+  status: MonthComparisonStatus;
+  valor_atual: number;
+  valor_comparado: number;
+};
+
+export type MonthComparisonExpenseType = {
+  diferenca: number;
+  percentual: number;
+  status: MonthComparisonStatus;
+  tipo: string;
+  valor_atual: number;
+  valor_comparado: number;
+};
+
+export type MonthComparisonResponse = {
+  ano_atual: number;
+  ano_comparado: number;
+  categorias: MonthComparisonCategory[];
+  fontes_pagamento: MonthComparisonPaymentSource[];
+  insights: string[];
+  mes_atual: number;
+  mes_comparado: number;
+  resumo: MonthComparisonSummary;
+  tipos_despesa: MonthComparisonExpenseType[];
+};
+
 export type InstallmentCommitmentsParams = {
   includeCurrentMonthAsPaid?: boolean;
   month: number;

@@ -708,6 +708,43 @@ O filtro de periodo e local no front:
 - `6 meses`: de `month - 3` ate `month + 2`, limitado entre 1 e 12
 - `1 ano`: todos os dados retornados
 
+### Comparativo mensal
+
+```http
+GET /api/reports/month-comparison?month=6&year=2026&compare_month=5&compare_year=2026
+```
+
+Esse relatorio compara um mes financeiro principal com outro mes escolhido pelo usuario.
+
+Query params:
+
+- `month`: mes principal da comparacao. Obrigatorio, de `1` a `12`.
+- `year`: ano principal da comparacao. Obrigatorio, minimo `2000`.
+- `compare_month`: mes comparado. Opcional, mas deve ser enviado junto com `compare_year`.
+- `compare_year`: ano comparado. Opcional, mas deve ser enviado junto com `compare_month`.
+
+Se o front enviar apenas `month` e `year`, a API compara automaticamente com o mes anterior. No Web, a tela de relatorios envia tambem `compare_month` e `compare_year` porque o usuario pode trocar manualmente o mes comparado.
+
+Campos principais da resposta:
+
+- `resumo.receitas_atual` e `resumo.receitas_comparado`.
+- `resumo.despesas_atual` e `resumo.despesas_comparado`.
+- `resumo.saldo_atual` e `resumo.saldo_comparado`.
+- `resumo.diferenca_receitas`, `resumo.diferenca_despesas` e `resumo.diferenca_saldo`.
+- `resumo.percentual_receitas`, `resumo.percentual_despesas` e `resumo.percentual_saldo`.
+- `resumo.status_receitas`, `resumo.status_despesas` e `resumo.status_saldo`.
+- `categorias`: comparacao de gastos por categoria.
+- `fontes_pagamento`: comparacao de gastos por origem de pagamento.
+- `tipos_despesa`: comparacao por tipo de despesa.
+- `insights`: observacoes prontas para exibir ao usuario.
+
+Status possiveis:
+
+- Para receitas, despesas, categorias, fontes e tipos: `subiu`, `caiu`, `igual`.
+- Para saldo: `melhorou`, `piorou`, `igual`.
+
+Na UI, aumento de receita e melhora de saldo devem aparecer como positivo. Aumento de despesa, categoria, fonte ou tipo deve aparecer como negativo.
+
 ### Resumo anual
 
 ```http

@@ -1,6 +1,8 @@
 import type {
   InstallmentCommitmentsParams,
   InstallmentCommitmentsResponse,
+  MonthComparisonParams,
+  MonthComparisonResponse,
   ReportCategory,
   ReportChartItem,
   ReportSummary,
@@ -13,6 +15,33 @@ function normalizeArrayResponse<T>(data: T[] | null) {
 }
 
 export const reportsApi = {
+  async getMonthComparison({
+    compareMonth,
+    compareYear,
+    month,
+    year,
+  }: MonthComparisonParams) {
+    const response = await apiClient.get<MonthComparisonResponse>(
+      "/api/reports/month-comparison",
+      {
+        params: {
+          compare_month: compareMonth,
+          compare_year: compareYear,
+          month,
+          year,
+        },
+      },
+    );
+
+    return {
+      ...response.data,
+      categorias: normalizeArrayResponse(response.data.categorias),
+      fontes_pagamento: normalizeArrayResponse(response.data.fontes_pagamento),
+      insights: normalizeArrayResponse(response.data.insights),
+      tipos_despesa: normalizeArrayResponse(response.data.tipos_despesa),
+    };
+  },
+
   async getInstallmentCommitments({
     includeCurrentMonthAsPaid = false,
     month,

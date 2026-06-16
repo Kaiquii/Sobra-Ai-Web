@@ -22,7 +22,10 @@ import {
   formatShortMonth,
   getCurrentMonthReference,
   MonthSwitcher,
+  type MonthReference,
 } from "@/components/ui/month-switcher";
+import { MonthComparisonSection } from "@/features/reports/components/MonthComparisonSection";
+import { useMonthComparisonStore } from "@/features/reports/store/useMonthComparisonStore";
 import { useReportsStore } from "@/features/reports/store/useReportsStore";
 import type {
   ReportCategory,
@@ -75,6 +78,23 @@ function getVisibleChartData(
 
 function getBarHeight(value: number, maxValue: number) {
   return `${Math.max((value / maxValue) * 100, 3)}%`;
+}
+
+function addMonthsToReference(date: MonthReference, amount: number) {
+  const nextDate = new Date(date.year, date.month - 1 + amount, 1);
+
+  return {
+    month: nextDate.getMonth() + 1,
+    year: nextDate.getFullYear(),
+  };
+}
+
+function getPreviousMonthReference(date: MonthReference) {
+  return addMonthsToReference(date, -1);
+}
+
+function isSameMonthReference(first: MonthReference, second: MonthReference) {
+  return first.month === second.month && first.year === second.year;
 }
 
 type MetricCardProps = {
@@ -417,7 +437,11 @@ function IncomeExpenseChart({
 }
 
 export function ReportsView() {
-  const [{ month, year }, setSelectedDate] = useState(getCurrentMonthReference);
+  const [selectedDate, setSelectedDate] = useState(getCurrentMonthReference);
+  const { month, year } = selectedDate;
+  const [compareDate, setCompareDate] = useState(() =>
+    getPreviousMonthReference(getCurrentMonthReference()),
+  );
   const [range, setRange] = useState<ReportRange>("SIX_MONTHS");
   const [selectedChartMonth, setSelectedChartMonth] = useState<number | null>(
     month,
@@ -432,9 +456,54 @@ export function ReportsView() {
   const summary = useReportsStore((state) => state.summary);
   const yearlySummary = useReportsStore((state) => state.yearlySummary);
 
+  const comparisonData = useMonthComparisonStore((state) => state.data);
+  const comparisonError = useMonthComparisonStore((state) => state.error);
+  const isComparisonLoading = useMonthComparisonStore(
+    (state) => state.isLoading,
+  );
+  const loadComparison = useMonthComparisonStore(
+    (state) => state.loadComparison,
+  );
+  const displayedCompareDate = isSameMonthReference(compareDate, selectedDate)
+    ? getPreviousMonthReference(selectedDate)
+    : compareDate;
+
+  function handleSelectedDateChange(date: MonthReference) {
+    setSelectedDate(date);
+    setCompareDate(getPreviousMonthReference(date));
+  }
+
+  function moveCompareDate(amount: number) {
+    setCompareDate((current) => {
+      let nextDate = addMonthsToReference(current, amount);
+
+      if (isSameMonthReference(nextDate, selectedDate)) {
+        nextDate = addMonthsToReference(nextDate, amount);
+      }
+
+      return nextDate;
+    });
+  }
+
   useEffect(() => {
     void loadReports(month, year);
   }, [loadReports, month, refreshKey, year]);
+
+  useEffect(() => {
+    void loadComparison({
+      compareMonth: displayedCompareDate.month,
+      compareYear: displayedCompareDate.year,
+      month,
+      year,
+    });
+  }, [
+    displayedCompareDate.month,
+    displayedCompareDate.year,
+    loadComparison,
+    month,
+    refreshKey,
+    year,
+  ]);
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
@@ -442,7 +511,7 @@ export function ReportsView() {
         <MonthSwitcher
           className="border-transparent bg-transparent shadow-none dark:border-transparent dark:bg-transparent"
           month={month}
-          onChange={setSelectedDate}
+          onChange={handleSelectedDateChange}
           year={year}
         />
         <Link
@@ -492,6 +561,18 @@ export function ReportsView() {
               year={year}
             />
           </div>
+
+          <MonthComparisonSection
+            compareMonth={displayedCompareDate.month}
+            compareYear={displayedCompareDate.year}
+            currentMonth={month}
+            currentYear={year}
+            data={comparisonData}
+            errorMessage={comparisonError}
+            isLoading={isComparisonLoading}
+            onNextCompareClick={() => moveCompareDate(1)}
+            onPrevCompareClick={() => moveCompareDate(-1)}
+          />
 
           <div>
             <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-50">
