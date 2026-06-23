@@ -37,21 +37,23 @@ export function RegisterForm() {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Criar conta</CardTitle>
-        <CardDescription>Cadastre seus dados para iniciar o acesso.</CardDescription>
+    <Card className="w-full rounded-3xl border-emerald-500/20 bg-white/95 shadow-2xl shadow-slate-200/70 ring-1 ring-emerald-500/10 dark:border-emerald-400/15 dark:bg-slate-950/90 dark:shadow-black/25 dark:ring-emerald-400/10">
+      <CardHeader className="p-5 pb-3 sm:p-6 sm:pb-3">
+        <CardTitle className="text-2xl">Criar conta</CardTitle>
+        <CardDescription className="leading-6">
+          Cadastre seus dados para iniciar o acesso.
+        </CardDescription>
       </CardHeader>
 
-      <CardContent>
-        <form className="space-y-5" onSubmit={handleSubmit}>
+      <CardContent className="px-5 pb-5 pt-0 sm:px-6 sm:pb-6">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <Label htmlFor="name">Nome</Label>
             <div className="relative">
               <UserRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 autoComplete="name"
-                className="pl-10"
+                className="h-10 bg-slate-50/80 pl-10 dark:bg-slate-900/70"
                 disabled={isLoading}
                 id="name"
                 name="name"
@@ -73,7 +75,7 @@ export function RegisterForm() {
               <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 autoComplete="email"
-                className="pl-10"
+                className="h-10 bg-slate-50/80 pl-10 dark:bg-slate-900/70"
                 disabled={isLoading}
                 id="email"
                 name="email"
@@ -93,6 +95,7 @@ export function RegisterForm() {
             <Label htmlFor="password">Senha</Label>
             <PasswordInput
               autoComplete="new-password"
+              className="h-10 bg-slate-50/80 dark:bg-slate-900/70"
               disabled={isLoading}
               id="password"
               minLength={4}
@@ -110,13 +113,13 @@ export function RegisterForm() {
           {error ? <Alert variant="error">{error}</Alert> : null}
           {message ? <Alert variant="success">{message}</Alert> : null}
 
-          <Button className="w-full" disabled={isLoading} type="submit">
+          <Button className="h-10 w-full rounded-xl" disabled={isLoading} type="submit">
             {isLoading ? "Criando..." : "Criar conta"}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-5 text-center text-sm text-slate-600 dark:text-slate-400">
           Já tem uma conta?{" "}
           <Link
             className="font-semibold text-emerald-700 underline-offset-4 hover:underline dark:text-emerald-300"

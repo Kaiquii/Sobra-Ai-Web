@@ -54,24 +54,24 @@ export function PasswordRecoveryForm() {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Recuperar acesso</CardTitle>
-        <CardDescription>
+    <Card className="w-full rounded-3xl border-emerald-500/20 bg-white/95 shadow-2xl shadow-slate-200/70 ring-1 ring-emerald-500/10 dark:border-emerald-400/15 dark:bg-slate-950/90 dark:shadow-black/25 dark:ring-emerald-400/10">
+      <CardHeader className="p-5 pb-3 sm:p-6 sm:pb-3">
+        <CardTitle className="text-2xl">Recuperar acesso</CardTitle>
+        <CardDescription className="leading-6">
           Envie o código para o e-mail e cadastre uma nova senha.
         </CardDescription>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="px-5 pb-5 pt-0 sm:px-6 sm:pb-6">
         {step === "email" ? (
-          <form className="space-y-5" onSubmit={handleSendCode}>
+          <form className="space-y-4" onSubmit={handleSendCode}>
             <div className="space-y-2">
               <Label htmlFor="email">E-mail</Label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   autoComplete="email"
-                  className="pl-10"
+                  className="h-10 bg-slate-50/80 pl-10 dark:bg-slate-900/70"
                   disabled={isLoading}
                   id="email"
                   name="email"
@@ -89,7 +89,7 @@ export function PasswordRecoveryForm() {
 
             {error ? <Alert variant="error">{error}</Alert> : null}
 
-            <Button className="w-full" disabled={isLoading} type="submit">
+            <Button className="h-10 w-full rounded-xl" disabled={isLoading} type="submit">
               {isLoading ? "Enviando..." : "Enviar código"}
               <ArrowRight className="h-4 w-4" />
             </Button>
@@ -97,7 +97,7 @@ export function PasswordRecoveryForm() {
         ) : null}
 
         {step === "reset" ? (
-          <form className="space-y-5" onSubmit={handleResetPassword}>
+          <form className="space-y-4" onSubmit={handleResetPassword}>
             {message ? <Alert variant="success">{message}</Alert> : null}
 
             <div className="space-y-2">
@@ -106,7 +106,7 @@ export function PasswordRecoveryForm() {
                 <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   autoComplete="one-time-code"
-                  className="pl-10"
+                  className="h-10 bg-slate-50/80 pl-10 dark:bg-slate-900/70"
                   disabled={isLoading}
                   id="code"
                   inputMode="numeric"
@@ -126,6 +126,7 @@ export function PasswordRecoveryForm() {
               <Label htmlFor="new-password">Nova senha</Label>
               <PasswordInput
                 autoComplete="new-password"
+                className="h-10 bg-slate-50/80 dark:bg-slate-900/70"
                 disabled={isLoading}
                 id="new-password"
                 minLength={4}
@@ -142,7 +143,7 @@ export function PasswordRecoveryForm() {
 
             {error ? <Alert variant="error">{error}</Alert> : null}
 
-            <Button className="w-full" disabled={isLoading} type="submit">
+            <Button className="h-10 w-full rounded-xl" disabled={isLoading} type="submit">
               {isLoading ? "Atualizando..." : "Trocar senha"}
               <ArrowRight className="h-4 w-4" />
             </Button>
@@ -150,10 +151,10 @@ export function PasswordRecoveryForm() {
         ) : null}
 
         {step === "done" ? (
-          <div className="space-y-5">
+          <div className="space-y-4">
             <Alert variant="success">{message ?? "Senha atualizada com sucesso!"}</Alert>
             <Link
-              className={buttonClassName({ className: "w-full" })}
+              className={buttonClassName({ className: "h-10 w-full rounded-xl" })}
               href="/login"
             >
               Voltar para o login
@@ -162,7 +163,7 @@ export function PasswordRecoveryForm() {
         ) : null}
 
         {step !== "done" ? (
-          <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+          <p className="mt-5 text-center text-sm text-slate-600 dark:text-slate-400">
             Lembrou a senha?{" "}
             <Link
               className="font-semibold text-emerald-700 underline-offset-4 hover:underline dark:text-emerald-300"
