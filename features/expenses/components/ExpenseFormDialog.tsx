@@ -361,18 +361,18 @@ function ExpenseFormDialogContent({
     <>
       <div
         aria-modal="true"
-        className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/75 px-4 py-6 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-slate-950/75 px-3 py-3 backdrop-blur-sm sm:px-4"
         role="dialog"
       >
         <form
-          className="my-auto w-full max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-950/15 dark:border-slate-800 dark:bg-slate-900 sm:p-8"
+          className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-950/15 dark:border-slate-800 dark:bg-slate-900 sm:max-h-[calc(100dvh-2rem)] sm:p-6"
           onSubmit={handleSubmit}
         >
-          <h2 className="text-3xl font-semibold tracking-normal text-slate-950 dark:text-white">
+          <h2 className="shrink-0 text-2xl font-semibold tracking-normal text-slate-950 dark:text-white sm:text-3xl">
             {mode === "create" ? "Nova despesa" : "Editar despesa"}
           </h2>
 
-          <div className="mt-7 space-y-5">
+          <div className="mt-5 min-h-0 space-y-4 overflow-y-auto pr-1">
             {error || localError ? (
               <Alert variant="error">{localError ?? error}</Alert>
             ) : null}
@@ -418,6 +418,7 @@ function ExpenseFormDialogContent({
                 </span>
               </div>
               <Textarea
+                className="min-h-20"
                 id="expense-notes"
                 maxLength={NOTES_MAX_LENGTH}
                 onChange={(event) => updateDraft({ notes: event.target.value })}
@@ -513,7 +514,7 @@ function ExpenseFormDialogContent({
             </div>
 
             {showUpdateFuture ? (
-              <label className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-300">
+              <label className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-300">
                 <input
                   checked={draft.updateFuture}
                   className="h-5 w-5 rounded border-slate-400 bg-transparent accent-blue-600"
@@ -525,7 +526,7 @@ function ExpenseFormDialogContent({
             ) : null}
           </div>
 
-          <div className="mt-8 flex justify-end gap-8">
+          <div className="mt-5 flex shrink-0 justify-end gap-6">
             <button
               className="text-sm font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-500"
               disabled={isSubmitting}
