@@ -20,6 +20,7 @@ export type Expense = {
   id: number;
   installments: number;
   month?: number;
+  notes?: string | null;
   payment_source: PaymentSource | string;
   type: ExpenseType | string;
   user_id?: number;
@@ -65,6 +66,7 @@ export type CreateExpenseRequest = {
   date: string;
   description: string;
   installments: number;
+  notes?: string;
   payment_source: PaymentSource;
   type: ExpenseType;
 };
@@ -74,6 +76,7 @@ export type UpdateExpenseRequest = {
   category_id: number;
   date: string;
   description: string;
+  notes?: string;
   payment_source: PaymentSource;
   update_future: boolean | null;
 };

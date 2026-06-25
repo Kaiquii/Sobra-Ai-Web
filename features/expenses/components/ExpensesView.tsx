@@ -3,6 +3,7 @@
 import {
   CalendarDays,
   CheckCircle2,
+  Eye,
   FileText,
   ListFilter,
   Pencil,
@@ -22,6 +23,7 @@ import {
   MonthSwitcher,
 } from "@/components/ui/month-switcher";
 import { ExpenseDeleteDialog } from "@/features/expenses/components/ExpenseDeleteDialog";
+import { ExpenseDetailsDialog } from "@/features/expenses/components/ExpenseDetailsDialog";
 import {
   ExpenseFormDialog,
   type ExpenseFormMode,
@@ -194,13 +196,24 @@ type ExpenseCardProps = {
   expense: Expense;
   onDelete: (expense: Expense) => void;
   onEdit: (expense: Expense) => void;
+  onView: (expense: Expense) => void;
 };
 
-function ExpenseCard({ categoryName, expense, onDelete, onEdit }: ExpenseCardProps) {
+function ExpenseCard({
+  categoryName,
+  expense,
+  onDelete,
+  onEdit,
+  onView,
+}: ExpenseCardProps) {
   const installmentLabel = getInstallmentLabel(expense);
+  const notes = expense.notes?.trim();
 
   return (
-    <article className="grid gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 shadow-sm hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/85 dark:hover:border-blue-900/70 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:px-4 sm:py-3">
+    <article
+      className="grid gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 shadow-sm hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/85 dark:hover:border-blue-900/70 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:px-4 sm:py-3"
+      onDoubleClick={() => onView(expense)}
+    >
       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/55 dark:text-blue-300">
         <ReceiptText aria-hidden="true" size={19} />
       </div>
@@ -223,10 +236,31 @@ function ExpenseCard({ categoryName, expense, onDelete, onEdit }: ExpenseCardPro
           ) : null}
           <span>• {formatExpenseDate(expense.date)}</span>
         </div>
+        {notes ? (
+          <p
+            className="mt-2 flex max-w-full items-center gap-1.5 truncate rounded-md bg-slate-50 px-2 py-1 text-xs text-slate-500 dark:bg-slate-950/60 dark:text-slate-400"
+            title={notes}
+          >
+            <FileText aria-hidden="true" className="shrink-0 text-blue-500" size={13} />
+            <span className="truncate">{notes}</span>
+          </p>
+        ) : null}
       </div>
 
       <div className="flex items-end justify-between gap-2 sm:flex-col sm:items-end">
-        <div className="flex items-center gap-0.5">
+        <div
+          className="flex items-center gap-0.5"
+          onDoubleClick={(event) => event.stopPropagation()}
+        >
+          <button
+            aria-label={`Visualizar ${expense.description}`}
+            className="inline-flex h-6 w-6 items-center justify-center rounded-full text-slate-500 hover:bg-slate-500/10 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            onClick={() => onView(expense)}
+            title="Visualizar"
+            type="button"
+          >
+            <Eye aria-hidden="true" size={16} strokeWidth={2.4} />
+          </button>
           <button
             aria-label={`Editar ${expense.description}`}
             className="inline-flex h-6 w-6 items-center justify-center rounded-full text-blue-500 hover:bg-blue-500/10 hover:text-blue-400"
@@ -277,6 +311,7 @@ function ExpensesSkeleton() {
 export function ExpensesView() {
   const [{ month, year }, setSelectedDate] = useState(getCurrentMonthReference);
   const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
+  const [detailsTarget, setDetailsTarget] = useState<Expense | null>(null);
   const [formExpense, setFormExpense] = useState<Expense | null>(null);
   const [formMode, setFormMode] = useState<ExpenseFormMode | null>(null);
   const [paymentSourceFilter, setPaymentSourceFilter] =
@@ -470,6 +505,7 @@ export function ExpensesView() {
                 key={expense.id}
                 onDelete={setDeleteTarget}
                 onEdit={openEditDialog}
+                onView={setDetailsTarget}
               />
             ))}
           </div>
@@ -516,6 +552,15 @@ export function ExpensesView() {
         key={deleteTarget?.id ?? "empty-delete-dialog"}
         onClose={() => setDeleteTarget(null)}
         onSuccess={refreshExpenses}
+      />
+
+      <ExpenseDetailsDialog
+        categoryName={
+          detailsTarget ? getCategoryName(detailsTarget, categoriesById) : ""
+        }
+        expense={detailsTarget}
+        key={detailsTarget?.id ?? "empty-details-dialog"}
+        onClose={() => setDetailsTarget(null)}
       />
     </>
   );

@@ -9,6 +9,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { DropdownSelect } from "@/components/ui/dropdown-select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useLockBodyScroll } from "@/components/ui/use-lock-body-scroll";
 import { useExpenseStore } from "@/features/expenses/store/useExpenseStore";
 import type {
@@ -39,11 +40,13 @@ type ExpenseDraft = {
   date: string;
   description: string;
   installments: number;
+  notes: string;
   paymentSource: PaymentSource;
   type: ExpenseType;
   updateFuture: boolean;
 };
 
+const NOTES_MAX_LENGTH = 500;
 const paymentSources: PaymentSource[] = ["Sal\u00e1rio", "Adiantamento", "Renda Extra"];
 const expenseTypes: ExpenseType[] = ["\u00danica", "Parcelada", "Fixa"];
 
@@ -138,6 +141,7 @@ function buildCreateDraft(month: number, year: number): ExpenseDraft {
     date: getDefaultDate(month, year),
     description: "",
     installments: 1,
+    notes: "",
     paymentSource: "Sal\u00e1rio",
     type: "\u00danica",
     updateFuture: false,
@@ -156,6 +160,7 @@ function buildEditDraft(
     date: getDateInputValue(expense.date, month, year),
     description: expense.description,
     installments: expense.installments || 1,
+    notes: expense.notes ?? "",
     paymentSource: normalizePaymentSource(expense.payment_source),
     type: normalizeType(expense.type),
     updateFuture: false,
@@ -302,6 +307,11 @@ function ExpenseFormDialogContent({
       return;
     }
 
+    if (draft.notes.length > NOTES_MAX_LENGTH) {
+      setLocalError("Observa\u00e7\u00f5es devem ter no m\u00e1ximo 500 caracteres.");
+      return;
+    }
+
     if (mode === "edit" && draft.type === "Fixa" && draft.updateFuture && !confirmedFixedFuture) {
       setIsFixedUpdateDialogOpen(true);
       return;
@@ -309,6 +319,7 @@ function ExpenseFormDialogContent({
 
     try {
       setLocalError(null);
+      const notes = draft.notes.trim();
 
       if (mode === "create") {
         const payload: CreateExpenseRequest = {
@@ -317,6 +328,7 @@ function ExpenseFormDialogContent({
           date: toApiDate(draft.date),
           description: draft.description.trim(),
           installments: draft.type === "Parcelada" ? draft.installments : 1,
+          notes,
           payment_source: draft.paymentSource,
           type: draft.type,
         };
@@ -328,6 +340,7 @@ function ExpenseFormDialogContent({
           category_id: selectedCategoryId,
           date: toApiDate(draft.date),
           description: draft.description.trim(),
+          notes,
           payment_source: draft.paymentSource,
           update_future: getUpdateFuture(draft.type, draft.updateFuture),
         };
@@ -394,6 +407,22 @@ function ExpenseFormDialogContent({
                 onChange={(event) => updateDraft({ description: event.target.value })}
                 placeholder="Ex: Supermercado"
                 value={draft.description}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="expense-notes">Observações</Label>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  {draft.notes.length} / {NOTES_MAX_LENGTH}
+                </span>
+              </div>
+              <Textarea
+                id="expense-notes"
+                maxLength={NOTES_MAX_LENGTH}
+                onChange={(event) => updateDraft({ notes: event.target.value })}
+                placeholder="Ex: Divisão do valor, motivo ou lembrete."
+                value={draft.notes}
               />
             </div>
 

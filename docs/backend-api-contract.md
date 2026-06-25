@@ -364,6 +364,7 @@ Resposta esperada:
       "type": "Única",
       "installments": 1,
       "current_installment": null,
+      "notes": "R$ 80 meu e R$ 80 da minha namorada.",
       "payment_source": "Salário"
     }
   ],
@@ -469,6 +470,7 @@ Campos do formulario:
 - `date`
 - `type`
 - `installments`
+- `notes` opcional, com limite de 500 caracteres
 
 Origens possiveis:
 
@@ -501,7 +503,8 @@ Body de despesa unica:
   "payment_source": "Salário",
   "date": "2026-05-08T00:00:00-03:00",
   "type": "Única",
-  "installments": 1
+  "installments": 1,
+  "notes": "R$ 80 meu e R$ 80 da minha namorada."
 }
 ```
 
@@ -515,7 +518,8 @@ Body de despesa parcelada:
   "payment_source": "Adiantamento",
   "date": "2026-05-08T00:00:00-03:00",
   "type": "Parcelada",
-  "installments": 5
+  "installments": 5,
+  "notes": ""
 }
 ```
 
@@ -529,7 +533,8 @@ Body de despesa fixa:
   "payment_source": "Salário",
   "date": "2026-05-08T00:00:00-03:00",
   "type": "Fixa",
-  "installments": 1
+  "installments": 1,
+  "notes": ""
 }
 ```
 
@@ -557,6 +562,7 @@ Preencher formulario com:
 - `payment_source`
 - `date`
 - `type`
+- `notes`
 
 Na edicao, o app Android nao deixa trocar o tipo diretamente. Ele guarda o tipo original em `originalType`.
 
@@ -576,6 +582,7 @@ Body:
   "category_id": 2,
   "payment_source": "Salário",
   "date": "2026-05-08T00:00:00-03:00",
+  "notes": "Atualizei a observacao depois de conferir a divisao.",
   "update_future": null
 }
 ```
@@ -645,6 +652,7 @@ Filtros sao locais no front:
 - Origem por `payment_source`
 - Tipo por `type`
 - Busca por `description`
+- Observacoes por `notes`, campo opcional com limite de 500 caracteres
 
 ## Relatorios
 
