@@ -1,7 +1,9 @@
 "use client";
 
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { cn } from "@/lib/utils";
 
@@ -80,11 +82,47 @@ export function DatePicker({
   value,
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [calendarStyle, setCalendarStyle] = useState<CSSProperties | null>(null);
   const [visibleMonth, setVisibleMonth] = useState(() => parseDateInputValue(value));
+  const calendarRef = useRef<HTMLDivElement>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const selectedDate = useMemo(() => parseDateInputValue(value), [value]);
   const calendarDays = useMemo(() => getCalendarDays(visibleMonth), [visibleMonth]);
   const today = useMemo(() => new Date(), []);
+
+  const updateCalendarPosition = useCallback(() => {
+    const trigger = triggerRef.current;
+
+    if (!trigger) {
+      return;
+    }
+
+    const rect = trigger.getBoundingClientRect();
+    const viewportPadding = 12;
+    const gap = 8;
+    const panelWidth = Math.min(320, window.innerWidth - viewportPadding * 2);
+    const estimatedPanelHeight = 386;
+    const spaceBelow = window.innerHeight - rect.bottom - viewportPadding - gap;
+    const spaceAbove = rect.top - viewportPadding - gap;
+    const shouldOpenAbove = spaceBelow < estimatedPanelHeight && spaceAbove > spaceBelow;
+    const left = Math.min(
+      Math.max(viewportPadding, rect.right - panelWidth),
+      window.innerWidth - panelWidth - viewportPadding,
+    );
+
+    setCalendarStyle({
+      left,
+      maxHeight: Math.max(
+        260,
+        Math.min(estimatedPanelHeight, shouldOpenAbove ? spaceAbove : spaceBelow),
+      ),
+      width: panelWidth,
+      ...(shouldOpenAbove
+        ? { bottom: window.innerHeight - rect.top + gap }
+        : { top: rect.bottom + gap }),
+    });
+  }, []);
 
   useEffect(() => {
     if (!isOpen) {
@@ -92,7 +130,9 @@ export function DatePicker({
     }
 
     function handleClickOutside(event: MouseEvent) {
-      if (!pickerRef.current?.contains(event.target as Node)) {
+      const target = event.target as Node;
+
+      if (!pickerRef.current?.contains(target) && !calendarRef.current?.contains(target)) {
         setIsOpen(false);
       }
     }
@@ -105,12 +145,22 @@ export function DatePicker({
 
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
+    window.addEventListener("resize", updateCalendarPosition);
+    window.addEventListener("scroll", updateCalendarPosition, true);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("resize", updateCalendarPosition);
+      window.removeEventListener("scroll", updateCalendarPosition, true);
     };
-  }, [isOpen]);
+  }, [isOpen, updateCalendarPosition]);
+
+  useLayoutEffect(() => {
+    if (isOpen) {
+      updateCalendarPosition();
+    }
+  }, [isOpen, updateCalendarPosition]);
 
   function moveMonth(direction: -1 | 1) {
     setVisibleMonth((current) => {
@@ -143,8 +193,10 @@ export function DatePicker({
         id={id}
         onClick={() => {
           setVisibleMonth(selectedDate);
+          updateCalendarPosition();
           setIsOpen((current) => !current);
         }}
+        ref={triggerRef}
         type="button"
       >
         <span className="min-w-0 flex-1">{formatDisplayDate(value)}</span>
@@ -156,10 +208,13 @@ export function DatePicker({
         />
       </button>
 
-      {isOpen ? (
+      {isOpen && calendarStyle
+        ? createPortal(
         <div
-          className="absolute right-0 top-13 z-50 w-80 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl shadow-slate-950/15 dark:border-slate-800 dark:bg-slate-950 dark:shadow-black/40"
+          className="fixed z-[70] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl shadow-slate-950/15 dark:border-slate-800 dark:bg-slate-950 dark:shadow-black/40"
+          ref={calendarRef}
           role="dialog"
+          style={calendarStyle}
         >
           <div className="flex items-center justify-between gap-2">
             <strong className="px-2 text-sm font-semibold capitalize text-slate-950 dark:text-slate-50">
@@ -229,8 +284,10 @@ export function DatePicker({
               Hoje
             </button>
           </div>
-        </div>
-      ) : null}
+        </div>,
+          document.body,
+        )
+        : null}
     </div>
   );
 }

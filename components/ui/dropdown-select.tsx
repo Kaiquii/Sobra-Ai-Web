@@ -1,7 +1,9 @@
 "use client";
 
 import { ChevronDown, Check } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import type { CSSProperties } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { cn } from "@/lib/utils";
 
@@ -41,9 +43,46 @@ export function DropdownSelect<TValue extends string>({
   value,
 }: DropdownSelectProps<TValue>) {
   const [isOpen, setIsOpen] = useState(false);
+  const [menuStyle, setMenuStyle] = useState<CSSProperties | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const listboxId = useId();
   const selectedOption = options.find((option) => option.value === value) ?? options[0];
+
+  const updateMenuPosition = useCallback(() => {
+    const trigger = triggerRef.current;
+
+    if (!trigger) {
+      return;
+    }
+
+    const rect = trigger.getBoundingClientRect();
+    const viewportPadding = 12;
+    const gap = 8;
+    const maxMenuHeight = 256;
+    const spaceBelow = window.innerHeight - rect.bottom - viewportPadding - gap;
+    const spaceAbove = rect.top - viewportPadding - gap;
+    const shouldOpenAbove = spaceBelow < 160 && spaceAbove > spaceBelow;
+    const availableHeight = Math.max(
+      120,
+      Math.min(maxMenuHeight, shouldOpenAbove ? spaceAbove : spaceBelow),
+    );
+    const width = Math.min(rect.width, window.innerWidth - viewportPadding * 2);
+    const left = Math.min(
+      Math.max(viewportPadding, rect.left),
+      window.innerWidth - width - viewportPadding,
+    );
+
+    setMenuStyle({
+      left,
+      maxHeight: availableHeight,
+      width,
+      ...(shouldOpenAbove
+        ? { bottom: window.innerHeight - rect.top + gap }
+        : { top: rect.bottom + gap }),
+    });
+  }, []);
 
   useEffect(() => {
     if (!isOpen) {
@@ -51,7 +90,12 @@ export function DropdownSelect<TValue extends string>({
     }
 
     function handleClickOutside(event: MouseEvent) {
-      if (!dropdownRef.current?.contains(event.target as Node)) {
+      const target = event.target as Node;
+
+      if (
+        !dropdownRef.current?.contains(target) &&
+        !menuRef.current?.contains(target)
+      ) {
         setIsOpen(false);
       }
     }
@@ -64,12 +108,22 @@ export function DropdownSelect<TValue extends string>({
 
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
+    window.addEventListener("resize", updateMenuPosition);
+    window.addEventListener("scroll", updateMenuPosition, true);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("resize", updateMenuPosition);
+      window.removeEventListener("scroll", updateMenuPosition, true);
     };
-  }, [isOpen]);
+  }, [isOpen, updateMenuPosition]);
+
+  useLayoutEffect(() => {
+    if (isOpen) {
+      updateMenuPosition();
+    }
+  }, [isOpen, updateMenuPosition]);
 
   function selectOption(nextValue: TValue) {
     if (disabled) {
@@ -92,7 +146,11 @@ export function DropdownSelect<TValue extends string>({
         )}
         disabled={disabled}
         id={id}
-        onClick={() => setIsOpen((current) => !current)}
+        onClick={() => {
+          updateMenuPosition();
+          setIsOpen((current) => !current);
+        }}
+        ref={triggerRef}
         type="button"
       >
         {Icon ? (
@@ -112,43 +170,48 @@ export function DropdownSelect<TValue extends string>({
         />
       </button>
 
-      {isOpen ? (
-        <div
-          className="absolute left-0 top-12 z-50 max-h-64 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg shadow-slate-950/10 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/30"
-          id={listboxId}
-          role="listbox"
-        >
-          {options.map((option) => {
-            const isSelected = option.value === value;
+      {isOpen && menuStyle
+        ? createPortal(
+            <div
+              className="fixed z-[70] overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg shadow-slate-950/10 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/30"
+              id={listboxId}
+              ref={menuRef}
+              role="listbox"
+              style={menuStyle}
+            >
+              {options.map((option) => {
+                const isSelected = option.value === value;
 
-            return (
-              <button
-                aria-selected={isSelected}
-                className={cn(
-                  "flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold",
-                  isSelected
-                    ? "bg-blue-50 text-blue-700 dark:bg-blue-950/45 dark:text-blue-200"
-                    : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800",
-                )}
-                key={option.value}
-                onClick={() => selectOption(option.value)}
-                role="option"
-                type="button"
-              >
-                <span className="min-w-0 truncate">{option.label}</span>
-                {isSelected ? (
-                  <Check
-                    aria-hidden="true"
-                    className="shrink-0"
-                    size={15}
-                    strokeWidth={2.4}
-                  />
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
-      ) : null}
+                return (
+                  <button
+                    aria-selected={isSelected}
+                    className={cn(
+                      "flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold",
+                      isSelected
+                        ? "bg-blue-50 text-blue-700 dark:bg-blue-950/45 dark:text-blue-200"
+                        : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800",
+                    )}
+                    key={option.value}
+                    onClick={() => selectOption(option.value)}
+                    role="option"
+                    type="button"
+                  >
+                    <span className="min-w-0 truncate">{option.label}</span>
+                    {isSelected ? (
+                      <Check
+                        aria-hidden="true"
+                        className="shrink-0"
+                        size={15}
+                        strokeWidth={2.4}
+                      />
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>,
+          document.body,
+        )
+        : null}
     </div>
   );
 }
