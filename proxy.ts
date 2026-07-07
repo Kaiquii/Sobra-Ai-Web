@@ -2,10 +2,11 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { AUTH_TOKEN_COOKIE } from "@/lib/auth-cookie";
 
-const publicRoutes = ["/login", "/register", "/forget-password"];
+const authPublicRoutes = ["/login", "/register", "/forget-password"];
+const alwaysPublicRoutes = ["/politica-de-privacidade"];
 
-function isPublicRoute(pathname: string) {
-  return publicRoutes.some(
+function matchesRoute(pathname: string, routes: string[]) {
+  return routes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 }
@@ -13,13 +14,18 @@ function isPublicRoute(pathname: string) {
 export function proxy(request: NextRequest) {
   const token = request.cookies.get(AUTH_TOKEN_COOKIE)?.value;
   const { pathname } = request.nextUrl;
-  const isPublic = isPublicRoute(pathname);
+  const isAuthPublic = matchesRoute(pathname, authPublicRoutes);
+  const isAlwaysPublic = matchesRoute(pathname, alwaysPublicRoutes);
 
-  if (!token && !isPublic) {
+  if (isAlwaysPublic) {
+    return NextResponse.next();
+  }
+
+  if (!token && !isAuthPublic) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (token && isPublic) {
+  if (token && isAuthPublic) {
     return NextResponse.redirect(new URL("/home", request.url));
   }
 

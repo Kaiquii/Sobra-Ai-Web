@@ -7,7 +7,6 @@ import {
   HelpCircle,
   LogOut,
   Pencil,
-  ShieldCheck,
   Shapes,
   Star,
   Trash2,
@@ -291,16 +290,6 @@ export function ProfileView() {
               title="Central de Ajuda"
             />
 
-            <div className="mt-3">
-              <ProfileShortcut
-                description="Como tratamos dados no web, back-end e Android."
-                href="/politica-de-privacidade"
-                icon={
-                  <ShieldCheck aria-hidden="true" size={20} strokeWidth={2.25} />
-                }
-                title="Política de Privacidade"
-              />
-            </div>
           </div>
         </div>
 
