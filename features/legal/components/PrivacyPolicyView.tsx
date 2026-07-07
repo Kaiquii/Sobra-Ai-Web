@@ -1,7 +1,7 @@
-import { ArrowLeft, LogIn, Mail, ShieldCheck } from "lucide-react";
-import Link from "next/link";
+import { Mail, ShieldCheck } from "lucide-react";
 
 import { buttonClassName } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const lastUpdated = "6 de julho de 2026";
 
@@ -118,16 +118,10 @@ export function PrivacyPolicyView() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2 sm:justify-end">
-              <Link className={buttonClassName({ variant: "secondary" })} href="/perfil">
-                <ArrowLeft aria-hidden="true" size={16} strokeWidth={2.25} />
-                Perfil
-              </Link>
-              <Link className={buttonClassName({})} href="/login">
-                <LogIn aria-hidden="true" size={16} strokeWidth={2.25} />
-                Entrar
-              </Link>
-            </div>
+            <ThemeToggle
+              className="h-10 w-10 shrink-0 self-start border-slate-200 bg-white text-slate-700 shadow-sm hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300 sm:self-end"
+              iconSize={17}
+            />
           </div>
         </header>
 
