@@ -39,9 +39,14 @@ export type UploadProfilePhotoResponse = {
 };
 
 export type RegisterRequest = {
+  code: string;
   name: string;
   email: string;
   password: string;
+};
+
+export type RequestRegisterCodeRequest = {
+  email: string;
 };
 
 export type RegisterResponse = {

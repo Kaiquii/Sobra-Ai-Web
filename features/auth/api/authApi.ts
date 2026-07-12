@@ -7,6 +7,7 @@ import type {
   MessageResponse,
   RegisterRequest,
   RegisterResponse,
+  RequestRegisterCodeRequest,
   ResetPasswordRequest,
   UpdateProfileRequest,
   UpdateProfileResponse,
@@ -21,6 +22,15 @@ export const authApi = {
 
   register: async (data: RegisterRequest) => {
     const response = await apiClient.post<RegisterResponse>("/api/auth/register", data);
+    return response.data;
+  },
+
+  requestRegisterCode: async (data: RequestRegisterCodeRequest) => {
+    const response = await apiClient.post<MessageResponse>(
+      "/api/auth/request-register-code",
+      data,
+    );
+
     return response.data;
   },
 

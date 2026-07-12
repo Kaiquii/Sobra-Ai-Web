@@ -23,8 +23,8 @@ Este arquivo define regras permanentes para qualquer IA ou pessoa que trabalhar 
 - Novos componentes devem seguir o padrao visual existente do projeto.
 - Acoes sensiveis, como sair da conta, excluir despesa ou remover dados, devem usar modal de confirmacao reutilizavel antes de executar a acao.
 - Manter header e sidebar reutilizaveis na area autenticada; nao duplicar botao de menu, logout ou troca de tema dentro das paginas.
-- A Home autenticada e `/home`; a tela `Inicio` e separada e deve usar `/inicio`.
-- O header da area autenticada deve ter um botao discreto de Home para voltar para `/home`.
+- A tela inicial autenticada e a tela de inicio informativa sao experiencias separadas.
+- O header da area autenticada deve ter um botao discreto para voltar para a tela inicial autenticada.
 
 ## Icones
 
@@ -65,7 +65,7 @@ Este arquivo define regras permanentes para qualquer IA ou pessoa que trabalhar 
 - Configuracoes compartilhadas do Axios devem ficar em `lib/api.ts`.
 - A base URL da API deve ser lida de `NEXT_PUBLIC_API_BASE_URL` no `.env`.
 - Chamadas especificas de uma feature devem ficar em `features/<feature>/api`.
-- O contrato de endpoints, bodies, filtros e regras de `update_future`, `delete_future` e `repeat_future` fica em `docs/backend-api-contract.md`.
+- As regras de comportamento da integracao ficam em `docs/backend-api-contract.md`; detalhes de transporte nao devem ser registrados em Markdown publico.
 - Evitar espalhar URLs, headers e tratamento de erro diretamente em componentes.
 
 ## Responsividade

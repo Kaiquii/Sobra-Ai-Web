@@ -31,10 +31,9 @@ Este projeto deve manter uma arquitetura simples, previsivel e facil de evoluir.
 - Layouts devem cuidar de estrutura visual compartilhada.
 - Route groups, como `(auth)` e `(dashboard)`, devem ser usados para organizar rotas sem alterar a URL.
 - Todo arquivo especial do App Router, como `page.tsx` e `layout.tsx`, deve exportar um React Component como default export.
-- O fluxo padrao de autenticacao e entrar por `/login` e, apos login com sucesso, redirecionar para `/home`.
-- A rota `/home` deve ser a tela inicial autenticada do usuario.
-- A rota `/inicio` e uma tela propria, separada da Home. Nao tratar `Inicio` como sinonimo de `Home`.
-- O `header.tsx` da area autenticada deve manter um botao discreto para voltar para `/home`.
+- O fluxo padrao de autenticacao deve conduzir o usuario para a area autenticada apos login com sucesso.
+- A tela inicial autenticada e separada da tela de inicio informativa; nao tratar essas experiencias como sinonimos.
+- O header da area autenticada deve manter um botao discreto para voltar para a tela inicial autenticada.
 
 ## Features
 

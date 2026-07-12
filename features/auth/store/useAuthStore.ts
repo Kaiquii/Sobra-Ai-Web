@@ -9,6 +9,7 @@ import type {
   ForgotPasswordRequest,
   LoginRequest,
   RegisterRequest,
+  RequestRegisterCodeRequest,
   ResetPasswordRequest,
   UpdateProfileRequest,
 } from "@/features/auth/types/auth";
@@ -33,6 +34,7 @@ type AuthState = {
   login: (data: LoginRequest) => Promise<void>;
   logout: (errorMessage?: string | null) => void;
   register: (data: RegisterRequest) => Promise<void>;
+  requestRegisterCode: (data: RequestRegisterCodeRequest) => Promise<void>;
   resetPassword: (data: ResetPasswordRequest) => Promise<void>;
   restoreSession: () => void;
   setHasHydrated: (hasHydrated: boolean) => void;
@@ -152,6 +154,18 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           const response = await authApi.register(data);
+          set({ isLoading: false, message: response.message });
+        } catch (error) {
+          set({ error: getApiErrorMessage(error), isLoading: false, message: null });
+          throw error;
+        }
+      },
+
+      requestRegisterCode: async (data) => {
+        set({ error: null, isLoading: true, message: null });
+
+        try {
+          const response = await authApi.requestRegisterCode(data);
           set({ isLoading: false, message: response.message });
         } catch (error) {
           set({ error: getApiErrorMessage(error), isLoading: false, message: null });

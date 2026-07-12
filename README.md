@@ -87,7 +87,7 @@ npm run start
 - O token fica salvo no cookie `app-financeiro-token`.
 - O `proxy.ts` protege as rotas autenticadas pela presença do cookie.
 - O Axios lê o cookie a cada request e envia `Authorization: Bearer TOKEN`.
-- Se a API retornar `401`, a sessão local é limpa e o usuário volta para `/login`.
+- Se a API retornar `401`, a sessão local é limpa e o usuário volta ao fluxo de autenticação.
 
 ## Estrutura principal
 
@@ -100,21 +100,6 @@ lib/                 Cliente Axios, cookies, formatadores e helpers.
 store/               Stores globais compartilhadas.
 docs/                Contratos e orientações do projeto.
 ```
-
-## Rotas principais
-
-- `/login`
-- `/register`
-- `/forget-password`
-- `/home`
-- `/inicio`
-- `/despesas`
-- `/relatorios`
-- `/perfil`
-- `/perfil/editar`
-- `/perfil/categorias`
-- `/perfil/ajuda`
-- `/salario`
 
 ## Observações
 
