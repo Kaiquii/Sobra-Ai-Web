@@ -19,6 +19,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { getApiErrorStatus } from "@/lib/api-errors";
+
+const LOGIN_COOLDOWN_SECONDS = 5 * 60;
+
+function formatCooldown(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
+}
 
 export function LoginForm() {
   const router = useRouter();
@@ -31,6 +41,7 @@ export function LoginForm() {
     login,
   } = useAuthStore();
   const [email, setEmail] = useState("");
+  const [loginCooldown, setLoginCooldown] = useState(0);
   const [password, setPassword] = useState("");
 
   useEffect(() => {
@@ -39,13 +50,33 @@ export function LoginForm() {
     }
   }, [hasHydrated, isAuthenticated, router]);
 
+  useEffect(() => {
+    if (!loginCooldown) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setLoginCooldown((current) => Math.max(current - 1, 0));
+    }, 1000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [loginCooldown]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (loginCooldown > 0) {
+      return;
+    }
 
     try {
       await login({ email: email.trim(), password: password.trim() });
       router.push("/home");
-    } catch {}
+    } catch (loginError) {
+      if (getApiErrorStatus(loginError) === 429) {
+        setLoginCooldown(LOGIN_COOLDOWN_SECONDS);
+      }
+    }
   }
 
   return (
@@ -109,8 +140,22 @@ export function LoginForm() {
 
           {error ? <Alert variant="error">{error}</Alert> : null}
 
-          <Button className="h-10 w-full rounded-xl" disabled={isLoading} type="submit">
-            {isLoading ? "Entrando..." : "Entrar"}
+          {loginCooldown > 0 ? (
+            <Alert variant="info">
+              O bloqueio é temporário. Você pode ajustar seus dados, mas aguarde {formatCooldown(loginCooldown)} para tentar novamente.
+            </Alert>
+          ) : null}
+
+          <Button
+            className="h-10 w-full rounded-xl"
+            disabled={isLoading || loginCooldown > 0}
+            type="submit"
+          >
+            {isLoading
+              ? "Entrando..."
+              : loginCooldown > 0
+                ? `Tente novamente em ${formatCooldown(loginCooldown)}`
+                : "Entrar"}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </form>

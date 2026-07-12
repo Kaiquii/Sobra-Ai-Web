@@ -16,7 +16,7 @@ Este documento registra regras de comportamento entre o front-end e o back-end s
 - O reenvio deve ter bloqueio visual temporario no cliente; o back-end continua sendo a autoridade para limites e expiracao.
 - Quando o e-mail ja possuir cadastro, a interface deve sugerir o login.
 - A recuperacao de senha tambem usa codigo temporario e deve bloquear reenvios brevemente quando houver limite de solicitacoes.
-- O login normal permanece independente desse fluxo de confirmacao.
+- O login normal permanece independente desse fluxo de confirmacao, mas pode receber bloqueio temporario apos tentativas repetidas. Nesse caso, manter os campos editaveis, exibir a mensagem recebida e bloquear apenas a nova tentativa localmente por alguns minutos.
 
 ## Perfil
 
