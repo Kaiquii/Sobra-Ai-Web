@@ -8,6 +8,7 @@ This version has breaking changes - APIs, conventions, and file structure may al
 
 Antes de alterar codigo neste projeto, leia e siga:
 
+- `rules.md`
 - `docs/ai-guidelines.md`
 - `docs/project-architecture.md`
 - `docs/backend-api-contract.md`

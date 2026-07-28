@@ -442,7 +442,7 @@ export function InstallmentCommitmentsView({
           <div className="flex rounded-lg border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <button
               className={cn(
-                "flex h-10 flex-1 items-center justify-center gap-2 rounded-md text-sm font-semibold",
+              "flex h-10 flex-1 cursor-pointer items-center justify-center gap-2 rounded-md text-sm font-semibold",
                 tab === "purchases"
                   ? "bg-blue-50 text-blue-700 dark:bg-blue-950/45 dark:text-blue-200"
                   : "text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800",
@@ -455,7 +455,7 @@ export function InstallmentCommitmentsView({
             </button>
             <button
               className={cn(
-                "flex h-10 flex-1 items-center justify-center gap-2 rounded-md text-sm font-semibold",
+              "flex h-10 flex-1 cursor-pointer items-center justify-center gap-2 rounded-md text-sm font-semibold",
                 tab === "timeline"
                   ? "bg-blue-50 text-blue-700 dark:bg-blue-950/45 dark:text-blue-200"
                   : "text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800",

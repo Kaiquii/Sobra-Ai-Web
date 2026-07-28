@@ -215,7 +215,7 @@ function IncomeActions({
     return (
       <button
         aria-label={`Criar ${source}`}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-400"
+        className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-400"
         onClick={() =>
           onOpen(getShortcut({ action: "create", amount, month, source, year }))
         }
@@ -231,7 +231,7 @@ function IncomeActions({
     <>
       <button
         aria-label={`Editar ${source}`}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-blue-500 hover:bg-blue-500/10 hover:text-blue-400"
+        className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-blue-500 hover:bg-blue-500/10 hover:text-blue-400"
         onClick={() =>
           onOpen(getShortcut({ action: "edit", amount, month, source, year }))
         }
@@ -242,7 +242,7 @@ function IncomeActions({
       </button>
       <button
         aria-label={`Excluir ${source}`}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-red-400 hover:bg-red-500/10 hover:text-red-300"
+        className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-red-400 hover:bg-red-500/10 hover:text-red-300"
         onClick={() =>
           onOpen(getShortcut({ action: "delete", amount, month, source, year }))
         }
@@ -391,7 +391,7 @@ export function MonthlySummaryView() {
               year={year}
             />
             <button
-              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 text-xs font-semibold text-blue-700 hover:bg-blue-100 dark:border-blue-900/70 dark:bg-blue-950/45 dark:text-blue-300 dark:hover:bg-blue-950"
+              className="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 text-xs font-semibold text-blue-700 hover:bg-blue-100 dark:border-blue-900/70 dark:bg-blue-950/45 dark:text-blue-300 dark:hover:bg-blue-950"
               onClick={() => void openExpenseDialog()}
               type="button"
             >

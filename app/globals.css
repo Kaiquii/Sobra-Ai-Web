@@ -27,6 +27,16 @@ body {
   scrollbar-width: thin;
 }
 
+@layer base {
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
 * {
   box-sizing: border-box;
 }

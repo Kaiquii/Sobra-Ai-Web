@@ -285,7 +285,7 @@ export function RegisterForm() {
 
             <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:justify-between">
               <button
-                className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-950 disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-100"
+                className="inline-flex cursor-pointer items-center justify-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-950 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-400 dark:hover:text-slate-100"
                 disabled={isLoading}
                 onClick={handleChangeEmail}
                 type="button"
@@ -294,7 +294,7 @@ export function RegisterForm() {
                 Alterar e-mail
               </button>
               <button
-                className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-600 disabled:opacity-60 dark:text-emerald-300 dark:hover:text-emerald-200"
+                className="inline-flex cursor-pointer items-center justify-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-600 disabled:cursor-not-allowed disabled:opacity-60 dark:text-emerald-300 dark:hover:text-emerald-200"
                 disabled={isLoading || resendCountdown > 0}
                 onClick={() => {
                   void requestCode();

@@ -254,7 +254,7 @@ function ExpenseCard({
         >
           <button
             aria-label={`Visualizar ${expense.description}`}
-            className="inline-flex h-6 w-6 items-center justify-center rounded-full text-slate-500 hover:bg-slate-500/10 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-slate-500 hover:bg-slate-500/10 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             onClick={() => onView(expense)}
             title="Visualizar"
             type="button"
@@ -263,7 +263,7 @@ function ExpenseCard({
           </button>
           <button
             aria-label={`Editar ${expense.description}`}
-            className="inline-flex h-6 w-6 items-center justify-center rounded-full text-blue-500 hover:bg-blue-500/10 hover:text-blue-400"
+            className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-blue-500 hover:bg-blue-500/10 hover:text-blue-400"
             onClick={() => onEdit(expense)}
             title="Editar"
             type="button"
@@ -272,7 +272,7 @@ function ExpenseCard({
           </button>
           <button
             aria-label={`Excluir ${expense.description}`}
-            className="inline-flex h-6 w-6 items-center justify-center rounded-full text-red-400 hover:bg-red-500/10 hover:text-red-300"
+            className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-red-400 hover:bg-red-500/10 hover:text-red-300"
             onClick={() => onDelete(expense)}
             title="Excluir"
             type="button"
@@ -514,7 +514,7 @@ export function ExpensesView() {
 
       <button
         aria-label="Nova despesa"
-        className="fixed bottom-6 right-6 z-20 inline-flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-950/25 hover:bg-blue-700 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400 sm:hidden"
+        className="fixed bottom-6 right-6 z-20 inline-flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-950/25 hover:bg-blue-700 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400 sm:hidden"
         onClick={openCreateDialog}
         type="button"
       >

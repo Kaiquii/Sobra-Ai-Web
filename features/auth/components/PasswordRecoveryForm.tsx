@@ -200,7 +200,7 @@ export function PasswordRecoveryForm() {
             </Button>
 
             <button
-              className="mx-auto inline-flex w-full items-center justify-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-600 disabled:opacity-60 dark:text-emerald-300 dark:hover:text-emerald-200"
+              className="mx-auto inline-flex w-full cursor-pointer items-center justify-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-600 disabled:cursor-not-allowed disabled:opacity-60 dark:text-emerald-300 dark:hover:text-emerald-200"
               disabled={isLoading || resendCountdown > 0}
               onClick={() => {
                 void sendCode();

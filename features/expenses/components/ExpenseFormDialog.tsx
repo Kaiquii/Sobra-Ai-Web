@@ -443,7 +443,7 @@ function ExpenseFormDialogContent({
               </div>
 
               <button
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-800"
+                className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-800"
                 onClick={() => setIsAddingCategory((current) => !current)}
                 type="button"
               >
@@ -460,7 +460,7 @@ function ExpenseFormDialogContent({
                   value={newCategoryName}
                 />
                 <button
-                  className="inline-flex h-11 items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400"
+                  className="inline-flex h-11 cursor-pointer items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400"
                   disabled={isSubmitting}
                   onClick={handleCreateCategory}
                   type="button"
@@ -528,7 +528,7 @@ function ExpenseFormDialogContent({
 
           <div className="mt-5 flex shrink-0 justify-end gap-6">
             <button
-              className="text-sm font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-500"
+              className="cursor-pointer text-sm font-semibold text-blue-600 hover:text-blue-500 disabled:cursor-not-allowed dark:text-blue-500"
               disabled={isSubmitting}
               onClick={onClose}
               type="button"
@@ -537,7 +537,7 @@ function ExpenseFormDialogContent({
             </button>
             <button
               className={cn(
-                "inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-500 disabled:opacity-60 dark:text-blue-500",
+                "inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-500 disabled:cursor-not-allowed disabled:opacity-60 dark:text-blue-500",
               )}
               disabled={isSubmitting}
               type="submit"

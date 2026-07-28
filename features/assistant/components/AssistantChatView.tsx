@@ -128,7 +128,7 @@ function ConversationButton({
       )}
     >
       <button
-        className="min-w-0 flex-1 text-left"
+        className="min-w-0 flex-1 cursor-pointer text-left"
         onClick={() => onSelect(conversation.id)}
         type="button"
       >
@@ -141,7 +141,7 @@ function ConversationButton({
       </button>
       <button
         aria-label="Excluir conversa"
-        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/35 dark:hover:text-red-300"
+        className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/35 dark:hover:text-red-300"
         onClick={() => onDelete(conversation)}
         title="Excluir conversa"
         type="button"
@@ -406,7 +406,7 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
                 <button
                   aria-expanded={isMobileHistoryOpen}
                   aria-label="Abrir histórico"
-                  className="inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-800 sm:hidden"
+                  className="inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-800 sm:hidden"
                   onClick={() => setIsMobileHistoryOpen((isOpen) => !isOpen)}
                   title="Histórico"
                   type="button"
@@ -424,7 +424,7 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
                 </button>
                 <button
                   aria-label="Fechar assistente"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+                  className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                   onClick={onClose}
                   title="Fechar"
                   type="button"

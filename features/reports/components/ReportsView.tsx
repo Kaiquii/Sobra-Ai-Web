@@ -387,7 +387,7 @@ function IncomeExpenseChart({
                 return (
                   <button
                     className={cn(
-                      "flex h-full min-w-12 flex-col items-center justify-end gap-2 rounded-xl px-2 py-1 hover:bg-slate-50 dark:hover:bg-slate-950/60 sm:min-w-14",
+                        "flex h-full min-w-12 cursor-pointer flex-col items-center justify-end gap-2 rounded-xl px-2 py-1 hover:bg-slate-50 dark:hover:bg-slate-950/60 sm:min-w-14",
                       isSelected && "bg-slate-50 dark:bg-slate-950/70",
                     )}
                     key={item.month}

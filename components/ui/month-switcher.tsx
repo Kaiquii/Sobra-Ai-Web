@@ -65,7 +65,7 @@ export function MonthSwitcher({
     >
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1">
         <button
-          className="inline-flex h-8 items-center justify-start gap-0.5 rounded-full px-1.5 text-left text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50"
+          className="inline-flex h-8 cursor-pointer items-center justify-start gap-0.5 rounded-full px-1.5 text-left text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50"
           onClick={() => onChange(previousMonth)}
           type="button"
         >
@@ -83,7 +83,7 @@ export function MonthSwitcher({
         </div>
 
         <button
-          className="inline-flex h-8 items-center justify-end gap-0.5 rounded-full px-1.5 text-right text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50"
+          className="inline-flex h-8 cursor-pointer items-center justify-end gap-0.5 rounded-full px-1.5 text-right text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50"
           onClick={() => onChange(nextMonth)}
           type="button"
         >
