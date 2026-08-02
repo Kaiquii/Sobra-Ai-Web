@@ -6,6 +6,7 @@ import {
   CalendarDays,
   CircleDollarSign,
   CreditCard,
+  Download,
   PieChart,
   RefreshCcw,
   TrendingDown,
@@ -25,6 +26,7 @@ import {
   type MonthReference,
 } from "@/components/ui/month-switcher";
 import { MonthComparisonSection } from "@/features/reports/components/MonthComparisonSection";
+import { ReportExportDialog } from "@/features/reports/components/ReportExportDialog";
 import { useMonthComparisonStore } from "@/features/reports/store/useMonthComparisonStore";
 import { useReportsStore } from "@/features/reports/store/useReportsStore";
 import type {
@@ -447,6 +449,7 @@ export function ReportsView() {
     month,
   );
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
   const categories = useReportsStore((state) => state.categories);
   const chartData = useReportsStore((state) => state.chartData);
@@ -507,23 +510,34 @@ export function ReportsView() {
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
         <MonthSwitcher
-          className="border-transparent bg-transparent shadow-none dark:border-transparent dark:bg-transparent"
+          className="border-transparent bg-transparent shadow-none dark:border-transparent dark:bg-transparent sm:mx-auto"
           month={month}
           onChange={handleSelectedDateChange}
           year={year}
         />
-        <Link
-          className={buttonClassName({
-            className: "h-9 px-3 text-xs sm:text-sm",
-            variant: "secondary",
-          })}
-          href={`/relatorios/compromissos-parcelados?month=${month}&year=${year}`}
-        >
-          <CreditCard aria-hidden="true" size={16} />
-          Compromissos Parcelados
-        </Link>
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:justify-end">
+          <Link
+            className={buttonClassName({
+              className:
+                "h-11 min-w-0 whitespace-normal px-2 text-center text-xs leading-tight sm:h-9 sm:px-3 sm:text-sm",
+              variant: "secondary",
+            })}
+            href={`/relatorios/compromissos-parcelados?month=${month}&year=${year}`}
+          >
+            <CreditCard aria-hidden="true" size={16} />
+            Compromissos Parcelados
+          </Link>
+          <Button
+            className="h-11 min-w-0 whitespace-normal px-2 text-center text-xs leading-tight sm:h-9 sm:px-3 sm:text-sm"
+            onClick={() => setIsExportDialogOpen(true)}
+            variant="secondary"
+          >
+            <Download aria-hidden="true" size={16} />
+            Exportar relatório
+          </Button>
+        </div>
       </div>
 
       {isLoading ? <ReportsSkeleton /> : null}
@@ -635,6 +649,13 @@ export function ReportsView() {
           </div>
         </>
       ) : null}
+
+      <ReportExportDialog
+        initialMonth={month}
+        initialYear={year}
+        isOpen={isExportDialogOpen}
+        onClose={() => setIsExportDialogOpen(false)}
+      />
     </section>
   );
 }

@@ -78,6 +78,20 @@ function getParcelValue(parcel: InstallmentParcel | null | undefined, fallback: 
   return parcel?.valor ?? fallback;
 }
 
+function getMonthIndex(month: number, year: number) {
+  return year * 12 + month;
+}
+
+function isPurchaseRelevantFrom(
+  purchase: InstallmentPurchase,
+  reference: MonthReference,
+) {
+  return (
+    getMonthIndex(purchase.ultimo_mes, purchase.ultimo_ano) >=
+    getMonthIndex(reference.month, reference.year)
+  );
+}
+
 type SummaryCardProps = {
   description: string;
   icon: React.ReactNode;
@@ -132,11 +146,11 @@ function EmptyState() {
         <WalletCards aria-hidden="true" size={24} />
       </div>
       <h2 className="mt-4 text-lg font-semibold text-slate-950 dark:text-slate-50">
-        Nenhum compromisso parcelado.
+        Nenhum compromisso a partir deste mês.
       </h2>
       <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-        Quando houver compras parceladas, elas aparecerão aqui com parcelas
-        restantes e linha do tempo.
+        Volte para um mês anterior para consultar compras parceladas já
+        encerradas.
       </p>
     </div>
   );
@@ -312,8 +326,40 @@ export function InstallmentCommitmentsView({
     [data],
   );
 
+  const visiblePurchases = useMemo(
+    () =>
+      data?.compras.filter((purchase) =>
+        isPurchaseRelevantFrom(purchase, selectedDate),
+      ) ?? [],
+    [data, selectedDate],
+  );
+
+  const visibleSummary = useMemo(
+    () =>
+      visiblePurchases.reduce(
+        (summary, purchase) => ({
+          parcelas_pagas: summary.parcelas_pagas + purchase.parcelas_pagas,
+          parcelas_restantes:
+            summary.parcelas_restantes + purchase.parcelas_restantes,
+          total_compras: summary.total_compras + 1,
+          total_original: summary.total_original + purchase.total_original,
+          total_pago: summary.total_pago + purchase.total_pago,
+          total_restante: summary.total_restante + purchase.total_restante,
+        }),
+        {
+          parcelas_pagas: 0,
+          parcelas_restantes: 0,
+          total_compras: 0,
+          total_original: 0,
+          total_pago: 0,
+          total_restante: 0,
+        },
+      ),
+    [visiblePurchases],
+  );
+
   const heavyMonth = data?.resumo.mes_mais_pesado ?? null;
-  const hasPurchases = (data?.resumo.total_compras ?? 0) > 0;
+  const hasPurchases = visiblePurchases.length > 0;
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
@@ -410,22 +456,22 @@ export function InstallmentCommitmentsView({
         <>
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <SummaryCard
-              description={`${data.resumo.total_compras} compra(s) agrupada(s).`}
+              description={`${visibleSummary.total_compras} compra(s) agrupada(s).`}
               icon={<CreditCard aria-hidden="true" size={22} />}
               label="Total parcelado"
-              value={formatMoney(data.resumo.total_original)}
+              value={formatMoney(visibleSummary.total_original)}
             />
             <SummaryCard
-              description={`${data.resumo.parcelas_pagas} parcela(s) já consideradas.`}
+              description={`${visibleSummary.parcelas_pagas} parcela(s) já consideradas.`}
               icon={<ReceiptText aria-hidden="true" size={22} />}
               label="Total pago"
-              value={formatMoney(data.resumo.total_pago)}
+              value={formatMoney(visibleSummary.total_pago)}
             />
             <SummaryCard
-              description={`${data.resumo.parcelas_restantes} parcela(s) em aberto.`}
+              description={`${visibleSummary.parcelas_restantes} parcela(s) em aberto.`}
               icon={<WalletCards aria-hidden="true" size={22} />}
               label="Falta pagar"
-              value={formatMoney(data.resumo.total_restante)}
+              value={formatMoney(visibleSummary.total_restante)}
             />
             <SummaryCard
               description={
@@ -470,7 +516,7 @@ export function InstallmentCommitmentsView({
 
           {tab === "purchases" ? (
             <div className="grid gap-3 lg:grid-cols-2">
-              {data.compras.map((purchase) => (
+              {visiblePurchases.map((purchase) => (
                 <PurchaseCard key={purchase.serie_id} purchase={purchase} />
               ))}
             </div>

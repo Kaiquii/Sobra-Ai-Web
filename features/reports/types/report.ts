@@ -1,5 +1,32 @@
 export type ReportRange = "ONE_MONTH" | "SIX_MONTHS" | "ONE_YEAR";
 
+export type ReportExportFormat = "csv" | "pdf" | "xlsx";
+
+export type ReportExportType =
+  | "categories"
+  | "expenses"
+  | "full_report"
+  | "incomes"
+  | "installment_commitments"
+  | "month_comparison"
+  | "summary";
+
+export type ReportExportParams = {
+  compare_month?: number;
+  compare_year?: number;
+  format: ReportExportFormat;
+  include_current_month_as_paid?: boolean;
+  month: number;
+  months?: number;
+  type: ReportExportType;
+  year: number;
+};
+
+export type ReportExportResult = {
+  blob: Blob;
+  filename: string;
+};
+
 export type ReportSummary = {
   adiantamento: number;
   month: number;
