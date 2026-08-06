@@ -11,6 +11,7 @@ type ConfirmationDialogProps = {
   confirmLabel?: string;
   description: string;
   children?: ReactNode;
+  isSubmitting?: boolean;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -23,6 +24,7 @@ export function ConfirmationDialog({
   children,
   confirmLabel = "Confirmar",
   description,
+  isSubmitting = false,
   isOpen,
   onClose,
   onConfirm,
@@ -66,7 +68,7 @@ export function ConfirmationDialog({
         </div>
 
         <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-          <Button onClick={onClose} type="button" variant="secondary">
+          <Button disabled={isSubmitting} onClick={onClose} type="button" variant="secondary">
             {cancelLabel}
           </Button>
           <Button
@@ -75,6 +77,7 @@ export function ConfirmationDialog({
                 ? "bg-red-600 text-white shadow-sm shadow-red-600/20 hover:bg-red-700 focus-visible:ring-red-300 dark:bg-red-500 dark:text-white dark:hover:bg-red-400"
                 : undefined
             }
+            disabled={isSubmitting}
             onClick={onConfirm}
             type="button"
           >

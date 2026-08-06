@@ -6,10 +6,12 @@ import type {
   CreateExpenseRequest,
   Expense,
   ExpenseMutationResponse,
+  ExpensePaymentStatus,
   ExpenseResponse,
   ExpensesResponse,
   UpdateCategoryRequest,
   UpdateExpenseRequest,
+  PaymentStatusMutationResponse,
 } from "@/features/expenses/types/expense";
 
 function normalizeExpenseResponse(data: Expense | ExpenseResponse) {
@@ -74,9 +76,13 @@ export const expensesApi = {
     return normalizeExpenseResponse(response.data);
   },
 
-  async getExpenses(month: number, year: number) {
+  async getExpenses(
+    month: number,
+    year: number,
+    paymentStatus?: ExpensePaymentStatus,
+  ) {
     const response = await apiClient.get<ExpensesResponse>("/api/expenses/", {
-      params: { month, year },
+      params: { month, payment_status: paymentStatus, year },
     });
 
     return response.data;
@@ -86,6 +92,15 @@ export const expensesApi = {
     const response = await apiClient.patch<ExpenseMutationResponse>(
       `/api/expenses/${id}`,
       data,
+    );
+
+    return response.data;
+  },
+
+  async updatePaymentStatus(id: number, isPaid: boolean) {
+    const response = await apiClient.patch<PaymentStatusMutationResponse>(
+      `/api/expenses/${id}/payment-status`,
+      { is_paid: isPaid },
     );
 
     return response.data;

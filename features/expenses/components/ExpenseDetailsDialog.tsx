@@ -2,6 +2,7 @@
 
 import {
   CalendarDays,
+  CheckCircle2,
   FileText,
   ListFilter,
   ReceiptText,
@@ -38,6 +39,26 @@ function formatExpenseFullDate(date: string) {
   }
 
   return `${day}/${month}/${year}`;
+}
+
+function formatPaidAt(date: string | null) {
+  if (!date) {
+    return "Data não informada.";
+  }
+
+  const paidAt = new Date(date);
+
+  if (Number.isNaN(paidAt.getTime())) {
+    return "Data não informada.";
+  }
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(paidAt);
 }
 
 function getPaymentSourceLabel(source: string) {
@@ -191,6 +212,15 @@ export function ExpenseDetailsDialog({
               value={formatExpenseFullDate(expense.date)}
             />
             <DetailItem icon={ReceiptText} label="Tipo" value={expense.type} />
+
+            {expense.is_paid ? (
+              <DetailItem
+                className="border-t border-emerald-200 bg-emerald-50/60 dark:border-emerald-950/70 dark:bg-emerald-950/20 sm:col-span-2"
+                icon={CheckCircle2}
+                label="Status de pagamento"
+                value={`Paga em ${formatPaidAt(expense.paid_at)}`}
+              />
+            ) : null}
 
             {installmentDetails ? (
               <div className="border-t border-blue-200 bg-blue-50/70 p-4 dark:border-blue-950/70 dark:bg-blue-950/25 sm:col-span-2">

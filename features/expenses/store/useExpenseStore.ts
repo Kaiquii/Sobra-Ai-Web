@@ -8,6 +8,7 @@ import type {
   CreateCategoryRequest,
   CreateExpenseRequest,
   Expense,
+  ExpensePaymentStatus,
   UpdateCategoryRequest,
   UpdateExpenseRequest,
 } from "@/features/expenses/types/expense";
@@ -19,6 +20,7 @@ type ExpenseState = {
   expenses: Expense[];
   isLoading: boolean;
   isSubmitting: boolean;
+  paymentStatusUpdatingId: number | null;
   message: string | null;
   selectedExpense: Expense | null;
   total: number;
@@ -29,8 +31,17 @@ type ExpenseState = {
   deleteExpense: (id: number, deleteFuture: boolean) => Promise<void>;
   loadCategories: () => Promise<void>;
   loadExpense: (id: number) => Promise<Expense | null>;
-  loadExpenses: (month: number, year: number) => Promise<void>;
-  loadInitialData: (month: number, year: number) => Promise<void>;
+  loadExpenses: (
+    month: number,
+    year: number,
+    paymentStatus?: ExpensePaymentStatus,
+  ) => Promise<void>;
+  loadInitialData: (
+    month: number,
+    year: number,
+    paymentStatus?: ExpensePaymentStatus,
+  ) => Promise<void>;
+  updatePaymentStatus: (id: number, isPaid: boolean) => Promise<void>;
   updateCategory: (id: number, data: UpdateCategoryRequest) => Promise<void>;
   updateExpense: (id: number, data: UpdateExpenseRequest) => Promise<void>;
 };
@@ -41,6 +52,7 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
   expenses: [],
   isLoading: false,
   isSubmitting: false,
+  paymentStatusUpdatingId: null,
   message: null,
   selectedExpense: null,
   total: 0,
@@ -137,11 +149,11 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
     }
   },
 
-  loadExpenses: async (month, year) => {
+  loadExpenses: async (month, year, paymentStatus) => {
     set({ error: null, isLoading: true });
 
     try {
-      const response = await expensesApi.getExpenses(month, year);
+      const response = await expensesApi.getExpenses(month, year, paymentStatus);
       set({
         expenses: response.expenses,
         isLoading: false,
@@ -152,13 +164,13 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
     }
   },
 
-  loadInitialData: async (month, year) => {
+  loadInitialData: async (month, year, paymentStatus) => {
     set({ error: null, isLoading: true });
 
     try {
       const [categoriesResponse, expensesResponse] = await Promise.all([
         expensesApi.getCategories(),
-        expensesApi.getExpenses(month, year),
+        expensesApi.getExpenses(month, year, paymentStatus),
       ]);
 
       set({
@@ -202,6 +214,29 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
       set({ isSubmitting: false, message: response.message });
     } catch (error) {
       set({ error: getApiErrorMessage(error), isSubmitting: false, message: null });
+      throw error;
+    }
+  },
+
+  updatePaymentStatus: async (id, isPaid) => {
+    set({ error: null, message: null, paymentStatusUpdatingId: id });
+
+    try {
+      const response = await expensesApi.updatePaymentStatus(id, isPaid);
+
+      set((state) => ({
+        expenses: state.expenses.map((expense) =>
+          expense.id === id ? { ...expense, ...response.expense } : expense,
+        ),
+        message: response.message,
+        paymentStatusUpdatingId: null,
+      }));
+    } catch (error) {
+      set({
+        error: getApiErrorMessage(error),
+        message: null,
+        paymentStatusUpdatingId: null,
+      });
       throw error;
     }
   },

@@ -22,6 +22,8 @@ export type Expense = {
   month?: number;
   notes?: string | null;
   payment_source: PaymentSource | string;
+  is_paid: boolean;
+  paid_at: string | null;
   type: ExpenseType | string;
   user_id?: number;
   year?: number;
@@ -49,6 +51,13 @@ export type CategoryMutationResponse = {
 };
 
 export type ExpenseMutationResponse = {
+  message: string;
+};
+
+export type ExpensePaymentStatus = "paid" | "pending";
+
+export type PaymentStatusMutationResponse = {
+  expense: Pick<Expense, "id" | "is_paid" | "paid_at">;
   message: string;
 };
 

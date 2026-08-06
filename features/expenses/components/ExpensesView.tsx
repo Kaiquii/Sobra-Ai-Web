@@ -2,7 +2,9 @@
 
 import {
   CalendarDays,
+  Check,
   CheckCircle2,
+  Circle,
   Eye,
   FileText,
   ListFilter,
@@ -17,6 +19,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { DropdownSelect } from "@/components/ui/dropdown-select";
 import {
   getCurrentMonthReference,
@@ -32,11 +35,13 @@ import { useExpenseStore } from "@/features/expenses/store/useExpenseStore";
 import type {
   Category,
   Expense,
+  ExpensePaymentStatus,
   ExpenseTypeFilter,
 } from "@/features/expenses/types/expense";
 import { formatMoney } from "@/lib/formatters";
 
 type PaymentSourceFilter = "Adiantamento" | "Renda Extra" | "Salario" | "Todas";
+type PaymentStatusFilter = "Pagas" | "Pendentes" | "Todas";
 
 const typeFilters: ExpenseTypeFilter[] = ["Todas", "Parceladas", "\u00danicas", "Fixas"];
 const paymentSourceFilters: PaymentSourceFilter[] = [
@@ -45,6 +50,7 @@ const paymentSourceFilters: PaymentSourceFilter[] = [
   "Adiantamento",
   "Renda Extra",
 ];
+const paymentStatusFilters: PaymentStatusFilter[] = ["Todas", "Pendentes", "Pagas"];
 
 const typeFilterOptions = typeFilters.map((filter) => ({
   label: filter,
@@ -59,6 +65,11 @@ const paymentSourceFilterOptions = paymentSourceFilters.map((source) => ({
         ? "Sal\u00e1rio"
         : source,
   value: source,
+}));
+
+const paymentStatusFilterOptions = paymentStatusFilters.map((status) => ({
+  label: status === "Todas" ? "Todos status" : status,
+  value: status,
 }));
 
 function normalizeText(value: string) {
@@ -140,6 +151,28 @@ function matchesCategoryFilter(expense: Expense, selectedCategoryId: string) {
   return expense.category_id === Number(selectedCategoryId);
 }
 
+function matchesPaymentStatusFilter(expense: Expense, filter: PaymentStatusFilter) {
+  if (filter === "Todas") {
+    return true;
+  }
+
+  return filter === "Pagas" ? expense.is_paid : !expense.is_paid;
+}
+
+function getPaymentStatusApiValue(
+  filter: PaymentStatusFilter,
+): ExpensePaymentStatus | undefined {
+  if (filter === "Pagas") {
+    return "paid";
+  }
+
+  if (filter === "Pendentes") {
+    return "pending";
+  }
+
+  return undefined;
+}
+
 function getCategoryName(expense: Expense, categoriesById: Map<number, string>) {
   if (expense.category) {
     return expense.category;
@@ -196,7 +229,9 @@ type ExpenseCardProps = {
   expense: Expense;
   onDelete: (expense: Expense) => void;
   onEdit: (expense: Expense) => void;
+  onTogglePaid: (expense: Expense) => void;
   onView: (expense: Expense) => void;
+  isPaymentStatusUpdating: boolean;
 };
 
 function ExpenseCard({
@@ -204,14 +239,20 @@ function ExpenseCard({
   expense,
   onDelete,
   onEdit,
+  onTogglePaid,
   onView,
+  isPaymentStatusUpdating,
 }: ExpenseCardProps) {
   const installmentLabel = getInstallmentLabel(expense);
   const notes = expense.notes?.trim();
 
   return (
     <article
-      className="grid gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 shadow-sm hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/85 dark:hover:border-blue-900/70 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:px-4 sm:py-3"
+      className={`grid gap-2.5 rounded-lg border bg-white px-3 py-2.5 shadow-sm hover:shadow-md dark:bg-slate-900/85 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:px-4 sm:py-3 ${
+        expense.is_paid
+          ? "border-emerald-200 hover:border-emerald-300 dark:border-emerald-900/70 dark:hover:border-emerald-800"
+          : "border-slate-200 hover:border-blue-200 dark:border-slate-800 dark:hover:border-blue-900/70"
+      }`}
       onDoubleClick={() => onView(expense)}
     >
       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/55 dark:text-blue-300">
@@ -252,6 +293,27 @@ function ExpenseCard({
           className="flex items-center gap-0.5"
           onDoubleClick={(event) => event.stopPropagation()}
         >
+          <button
+            aria-label={`${expense.is_paid ? "Desmarcar" : "Marcar"} ${expense.description} como paga`}
+            className={
+              expense.is_paid
+                ? "inline-flex h-6 cursor-pointer items-center justify-center gap-1 rounded-full bg-emerald-100 px-2 text-emerald-700 hover:bg-emerald-200 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-emerald-950/60 dark:text-emerald-300 dark:hover:bg-emerald-950"
+                : "inline-flex h-6 cursor-pointer items-center justify-center gap-1 rounded-full px-2 text-slate-500 hover:bg-emerald-500/10 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-400 dark:hover:text-emerald-300"
+            }
+            disabled={isPaymentStatusUpdating}
+            onClick={() => onTogglePaid(expense)}
+            title={expense.is_paid ? "Desmarcar como paga" : "Marcar como paga"}
+            type="button"
+          >
+            {expense.is_paid ? (
+              <Check aria-hidden="true" size={16} strokeWidth={2.8} />
+            ) : (
+              <Circle aria-hidden="true" size={16} strokeWidth={2.2} />
+            )}
+            <span className="sr-only sm:not-sr-only sm:text-[11px] sm:font-semibold">
+              {expense.is_paid ? "Paga" : "Pagar"}
+            </span>
+          </button>
           <button
             aria-label={`Visualizar ${expense.description}`}
             className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-slate-500 hover:bg-slate-500/10 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
@@ -314,8 +376,11 @@ export function ExpensesView() {
   const [detailsTarget, setDetailsTarget] = useState<Expense | null>(null);
   const [formExpense, setFormExpense] = useState<Expense | null>(null);
   const [formMode, setFormMode] = useState<ExpenseFormMode | null>(null);
+  const [paymentStatusTarget, setPaymentStatusTarget] = useState<Expense | null>(null);
   const [paymentSourceFilter, setPaymentSourceFilter] =
     useState<PaymentSourceFilter>("Todas");
+  const [paymentStatusFilter, setPaymentStatusFilter] =
+    useState<PaymentStatusFilter>("Todas");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("Todas");
   const [typeFilter, setTypeFilter] = useState<ExpenseTypeFilter>("Todas");
@@ -327,10 +392,14 @@ export function ExpensesView() {
   const isLoading = useExpenseStore((state) => state.isLoading);
   const loadInitialData = useExpenseStore((state) => state.loadInitialData);
   const message = useExpenseStore((state) => state.message);
+  const paymentStatusUpdatingId = useExpenseStore(
+    (state) => state.paymentStatusUpdatingId,
+  );
+  const updatePaymentStatus = useExpenseStore((state) => state.updatePaymentStatus);
 
   useEffect(() => {
-    void loadInitialData(month, year);
-  }, [loadInitialData, month, year]);
+    void loadInitialData(month, year, getPaymentStatusApiValue(paymentStatusFilter));
+  }, [loadInitialData, month, paymentStatusFilter, year]);
 
   useEffect(() => {
     if (!message) {
@@ -354,15 +423,34 @@ export function ExpensesView() {
         paymentSourceFilter,
       );
       const matchesCategory = matchesCategoryFilter(expense, selectedCategoryId);
+      const matchesPaymentStatus = matchesPaymentStatusFilter(
+        expense,
+        paymentStatusFilter,
+      );
 
-      return matchesSearch && matchesType && matchesPaymentSource && matchesCategory;
+      return (
+        matchesSearch &&
+        matchesType &&
+        matchesPaymentSource &&
+        matchesCategory &&
+        matchesPaymentStatus
+      );
     });
-  }, [expenses, paymentSourceFilter, searchQuery, selectedCategoryId, typeFilter]);
+  }, [
+    expenses,
+    paymentSourceFilter,
+    paymentStatusFilter,
+    searchQuery,
+    selectedCategoryId,
+    typeFilter,
+  ]);
 
   const totalAmount = filteredExpenses.reduce(
     (total, expense) => total + expense.amount,
     0,
   );
+  const isPaymentStatusConfirming =
+    paymentStatusTarget?.id === paymentStatusUpdatingId;
 
   function openCreateDialog() {
     setFormExpense(null);
@@ -382,14 +470,31 @@ export function ExpensesView() {
   function refreshExpenses() {
     closeFormDialog();
     setDeleteTarget(null);
-    void loadInitialData(month, year);
+    void loadInitialData(month, year, getPaymentStatusApiValue(paymentStatusFilter));
+  }
+
+  function togglePaymentStatus(expense: Expense) {
+    setPaymentStatusTarget(expense);
+  }
+
+  function confirmPaymentStatusChange() {
+    if (!paymentStatusTarget) {
+      return;
+    }
+
+    void updatePaymentStatus(
+      paymentStatusTarget.id,
+      !paymentStatusTarget.is_paid,
+    )
+      .then(() => setPaymentStatusTarget(null))
+      .catch(() => {});
   }
 
   return (
     <>
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-4">
         <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[11rem_13rem_14rem_minmax(14rem,1fr)_auto] lg:items-center">
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)_minmax(0,1.15fr)_minmax(0,1.05fr)_minmax(0,0.95fr)_auto] xl:items-center">
             <DropdownSelect
               ariaLabel="Filtrar por tipo"
               icon={ReceiptText}
@@ -421,6 +526,15 @@ export function ExpensesView() {
               value={selectedCategoryId}
             />
 
+            <DropdownSelect
+              ariaLabel="Filtrar por status de pagamento"
+              className="sm:col-span-2 lg:col-span-1"
+              icon={CheckCircle2}
+              onChange={setPaymentStatusFilter}
+              options={paymentStatusFilterOptions}
+              value={paymentStatusFilter}
+            />
+
             <div className="relative sm:col-span-2 lg:col-span-1">
               <Search
                 aria-hidden="true"
@@ -436,7 +550,7 @@ export function ExpensesView() {
             </div>
 
             <Button
-              className="hidden rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400 sm:col-span-2 sm:inline-flex lg:col-span-1"
+              className="hidden rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400 sm:col-span-2 sm:inline-flex lg:col-span-1 lg:w-32"
               onClick={openCreateDialog}
               size="sm"
               type="button"
@@ -505,7 +619,9 @@ export function ExpensesView() {
                 key={expense.id}
                 onDelete={setDeleteTarget}
                 onEdit={openEditDialog}
+                onTogglePaid={togglePaymentStatus}
                 onView={setDetailsTarget}
+                isPaymentStatusUpdating={paymentStatusUpdatingId === expense.id}
               />
             ))}
           </div>
@@ -537,6 +653,24 @@ export function ExpensesView() {
           </div>
         </div>
       ) : null}
+
+      <ConfirmationDialog
+        confirmLabel={paymentStatusTarget?.is_paid ? "Sim, desmarcar" : "Sim, marcar"}
+        description={
+          paymentStatusTarget?.is_paid
+            ? `A despesa “${paymentStatusTarget.description}” voltará a aparecer como pendente.`
+            : `A despesa “${paymentStatusTarget?.description ?? ""}” será marcada como paga.`
+        }
+        isOpen={Boolean(paymentStatusTarget)}
+        isSubmitting={isPaymentStatusConfirming}
+        onClose={() => setPaymentStatusTarget(null)}
+        onConfirm={confirmPaymentStatusChange}
+        title={
+          paymentStatusTarget?.is_paid
+            ? "Desmarcar como paga?"
+            : "Marcar como paga?"
+        }
+      />
 
       <ExpenseFormDialog
         expense={formExpense}
