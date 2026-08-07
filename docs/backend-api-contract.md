@@ -28,6 +28,7 @@ Este documento registra regras de comportamento entre o front-end e o back-end s
 
 - Rendas e despesas sao carregadas e filtradas pelo periodo selecionado na interface.
 - Fontes de pagamento aceitas incluem salario, adiantamento e renda extra, considerando variacoes de acentuacao retornadas pelo back-end.
+- Uma despesa pode distribuir seu valor entre uma ou mais fontes de pagamento. Quando a lista de divisoes estiver disponivel, ela prevalece sobre a fonte unica de compatibilidade; o total da despesa continua sendo unico e nao deve ser duplicado no front-end.
 - Despesas unicas, parceladas e fixas tem regras distintas para atualizacao e exclusao de recorrencias futuras.
 - Categorias sao gerenciadas separadamente e usadas para classificacao local na interface.
 - Observacoes de despesas sao opcionais e limitadas a 500 caracteres.

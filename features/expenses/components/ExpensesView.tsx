@@ -134,13 +134,16 @@ function matchesPaymentSourceFilter(expense: Expense, filter: PaymentSourceFilte
     return true;
   }
 
-  const source = normalizeText(expense.payment_source);
+  const sources = (expense.payment_splits?.length
+    ? expense.payment_splits.map((split) => split.payment_source)
+    : [expense.payment_source]
+  ).map(normalizeText);
 
   if (filter === "Salario") {
-    return source === "salario";
+    return sources.includes("salario");
   }
 
-  return source === normalizeText(filter);
+  return sources.includes(normalizeText(filter));
 }
 
 function matchesCategoryFilter(expense: Expense, selectedCategoryId: string) {
@@ -210,6 +213,14 @@ function getPaymentSourceLabel(source: string) {
   return "Sal\u00e1rio";
 }
 
+function getExpensePaymentSources(expense: Expense) {
+  const sources = expense.payment_splits?.length
+    ? expense.payment_splits.map((split) => split.payment_source)
+    : [expense.payment_source];
+
+  return sources.map(getPaymentSourceLabel);
+}
+
 function getInstallmentLabel(expense: Expense) {
   if (normalizeText(expense.type) !== "parcelada") {
     return null;
@@ -245,6 +256,7 @@ function ExpenseCard({
 }: ExpenseCardProps) {
   const installmentLabel = getInstallmentLabel(expense);
   const notes = expense.notes?.trim();
+  const paymentSources = getExpensePaymentSources(expense);
 
   return (
     <article
@@ -349,7 +361,9 @@ function ExpenseCard({
           </strong>
           <p className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300 sm:text-sm">
             <WalletCards aria-hidden="true" className="text-blue-500" size={14} />
-            {getPaymentSourceLabel(expense.payment_source)}
+            {paymentSources.length === 1
+              ? paymentSources[0]
+              : `${paymentSources.length} origens`}
           </p>
         </div>
       </div>

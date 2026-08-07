@@ -1,9 +1,18 @@
 "use client";
 
-import { ListFilter, Loader2, Plus, ReceiptText, Save, WalletCards } from "lucide-react";
+import {
+  ListFilter,
+  Loader2,
+  Plus,
+  ReceiptText,
+  Save,
+  Trash2,
+  WalletCards,
+} from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { DatePicker } from "@/components/ui/date-picker";
 import { DropdownSelect } from "@/components/ui/dropdown-select";
@@ -20,7 +29,7 @@ import type {
   PaymentSource,
   UpdateExpenseRequest,
 } from "@/features/expenses/types/expense";
-import { formatAmountInput, parseAmountInput } from "@/lib/formatters";
+import { formatAmountInput, formatMoney, parseAmountInput } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 
 export type ExpenseFormMode = "create" | "edit";
@@ -44,6 +53,11 @@ type ExpenseDraft = {
   paymentSource: PaymentSource;
   type: ExpenseType;
   updateFuture: boolean;
+};
+
+type PaymentSplitDraft = {
+  amount: string;
+  paymentSource: PaymentSource;
 };
 
 const NOTES_MAX_LENGTH = 500;
@@ -161,10 +175,23 @@ function buildEditDraft(
     description: expense.description,
     installments: expense.installments || 1,
     notes: expense.notes ?? "",
-    paymentSource: normalizePaymentSource(expense.payment_source),
+    paymentSource:
+      getExpensePaymentSplits(expense)[0]?.paymentSource ??
+      normalizePaymentSource(expense.payment_source),
     type: normalizeType(expense.type),
     updateFuture: false,
   };
+}
+
+function getExpensePaymentSplits(expense: Expense): PaymentSplitDraft[] {
+  const splits = expense.payment_splits?.length
+    ? expense.payment_splits
+    : [{ amount: expense.amount, payment_source: expense.payment_source }];
+
+  return splits.map((split) => ({
+    amount: formatAmountInput(split.amount),
+    paymentSource: normalizePaymentSource(split.payment_source),
+  }));
 }
 
 function getUpdateFuture(type: ExpenseType, updateFuture: boolean) {
@@ -225,8 +252,14 @@ function ExpenseFormDialogContent({
   );
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [isFixedUpdateDialogOpen, setIsFixedUpdateDialogOpen] = useState(false);
+  const [isSplitPayment, setIsSplitPayment] = useState(() =>
+    Boolean(expense && getExpensePaymentSplits(expense).length > 1),
+  );
   const [localError, setLocalError] = useState<string | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [paymentSplits, setPaymentSplits] = useState<PaymentSplitDraft[]>(() =>
+    expense ? getExpensePaymentSplits(expense) : [],
+  );
 
   useEffect(() => {
     if (mode !== "edit" || !expense) {
@@ -238,6 +271,9 @@ function ExpenseFormDialogContent({
     void loadExpense(expense.id).then((loadedExpense) => {
       if (isMounted && loadedExpense) {
         setDraft(buildEditDraft(loadedExpense, categories, month, year));
+        const splits = getExpensePaymentSplits(loadedExpense);
+        setIsSplitPayment(splits.length > 1);
+        setPaymentSplits(splits);
       }
     });
 
@@ -253,6 +289,25 @@ function ExpenseFormDialogContent({
     draft.type === "Parcelada"
       ? "Atualizar parcelas futuras?"
       : "Atualizar despesas futuras?";
+  const splitTotal = paymentSplits.reduce((total, split) => {
+    const splitAmount = parseAmountInput(split.amount);
+    return total + (Number.isFinite(splitAmount) ? splitAmount : 0);
+  }, 0);
+  const hasValidSplitAmounts = paymentSplits.every((split) => {
+    const splitAmount = parseAmountInput(split.amount);
+    return Number.isFinite(splitAmount) && splitAmount > 0;
+  });
+  const hasUniqueSplitSources =
+    new Set(paymentSplits.map((split) => normalizePaymentSource(split.paymentSource))).size ===
+    paymentSplits.length;
+  const expenseAmount = parseAmountInput(draft.amount);
+  const displayedExpenseAmount = Number.isFinite(expenseAmount) ? expenseAmount : 0;
+  const isDistributionValid =
+    paymentSplits.length >= 2 &&
+    hasValidSplitAmounts &&
+    hasUniqueSplitSources &&
+    Number.isFinite(expenseAmount) &&
+    Math.abs(splitTotal - displayedExpenseAmount) < 0.005;
 
   const categoryOptions = useMemo(
     () =>
@@ -267,6 +322,65 @@ function ExpenseFormDialogContent({
 
   function updateDraft(nextDraft: Partial<ExpenseDraft>) {
     setDraft((current) => ({ ...current, ...nextDraft }));
+  }
+
+  function toggleSplitPayment(nextValue: boolean) {
+    setIsSplitPayment(nextValue);
+
+    if (nextValue) {
+      setPaymentSplits([
+        {
+          amount: draft.amount,
+          paymentSource: draft.paymentSource,
+        },
+      ]);
+      return;
+    }
+
+    const firstSplit = paymentSplits[0];
+    if (firstSplit) {
+      updateDraft({ paymentSource: firstSplit.paymentSource });
+    }
+  }
+
+  function updatePaymentSplit(index: number, nextSplit: Partial<PaymentSplitDraft>) {
+    setPaymentSplits((current) =>
+      current.map((split, splitIndex) =>
+        splitIndex === index ? { ...split, ...nextSplit } : split,
+      ),
+    );
+  }
+
+  function addPaymentSplit() {
+    const nextSource = paymentSources.find(
+      (source) =>
+        !paymentSplits.some(
+          (split) => normalizePaymentSource(split.paymentSource) === source,
+        ),
+    );
+
+    if (nextSource) {
+      setPaymentSplits((current) => [
+        ...current,
+        { amount: "", paymentSource: nextSource },
+      ]);
+    }
+  }
+
+  function removePaymentSplit(index: number) {
+    const nextSplits = paymentSplits.filter((_, splitIndex) => splitIndex !== index);
+
+    if (nextSplits.length <= 1) {
+      const remainingSplit = nextSplits[0];
+      setIsSplitPayment(false);
+      setPaymentSplits(nextSplits);
+      if (remainingSplit) {
+        updateDraft({ paymentSource: remainingSplit.paymentSource });
+      }
+      return;
+    }
+
+    setPaymentSplits(nextSplits);
   }
 
   async function handleCreateCategory() {
@@ -307,6 +421,11 @@ function ExpenseFormDialogContent({
       return;
     }
 
+    if (isSplitPayment && !isDistributionValid) {
+      setLocalError("Distribua o valor total entre origens diferentes antes de salvar.");
+      return;
+    }
+
     if (draft.notes.length > NOTES_MAX_LENGTH) {
       setLocalError("Observa\u00e7\u00f5es devem ter no m\u00e1ximo 500 caracteres.");
       return;
@@ -322,28 +441,44 @@ function ExpenseFormDialogContent({
       const notes = draft.notes.trim();
 
       if (mode === "create") {
-        const payload: CreateExpenseRequest = {
+        const basePayload = {
           amount,
           category_id: selectedCategoryId,
           date: toApiDate(draft.date),
           description: draft.description.trim(),
           installments: draft.type === "Parcelada" ? draft.installments : 1,
           notes,
-          payment_source: draft.paymentSource,
           type: draft.type,
         };
+        const payload: CreateExpenseRequest = isSplitPayment
+          ? {
+              ...basePayload,
+              payment_splits: paymentSplits.map((split) => ({
+                amount: parseAmountInput(split.amount),
+                payment_source: split.paymentSource,
+              })),
+            }
+          : { ...basePayload, payment_source: draft.paymentSource };
 
         await createExpense(payload);
       } else if (expense) {
-        const payload: UpdateExpenseRequest = {
+        const basePayload = {
           amount,
           category_id: selectedCategoryId,
           date: toApiDate(draft.date),
           description: draft.description.trim(),
           notes,
-          payment_source: draft.paymentSource,
           update_future: getUpdateFuture(draft.type, draft.updateFuture),
         };
+        const payload: UpdateExpenseRequest = isSplitPayment
+          ? {
+              ...basePayload,
+              payment_splits: paymentSplits.map((split) => ({
+                amount: parseAmountInput(split.amount),
+                payment_source: split.paymentSource,
+              })),
+            }
+          : { ...basePayload, payment_source: draft.paymentSource };
 
         await updateExpense(expense.id, payload);
       }
@@ -471,17 +606,133 @@ function ExpenseFormDialogContent({
             ) : null}
 
             <div className="grid gap-4 sm:grid-cols-3">
-              <div className="space-y-2">
-                <Label htmlFor="expense-source">Origem</Label>
-                <DropdownSelect
-                  ariaLabel="Selecionar origem"
-                  id="expense-source"
-                  icon={WalletCards}
-                  onChange={(value) => updateDraft({ paymentSource: value })}
-                  options={paymentSourceOptions}
-                  triggerClassName={dropdownTriggerClassName}
-                  value={draft.paymentSource}
-                />
+              <div className={isSplitPayment ? "space-y-3 sm:col-span-3" : "space-y-2"}>
+                <Label htmlFor="expense-source">Origem do pagamento</Label>
+
+                {!isSplitPayment ? (
+                  <div className="space-y-2">
+                    <DropdownSelect
+                      ariaLabel="Selecionar origem"
+                      id="expense-source"
+                      icon={WalletCards}
+                      onChange={(value) => updateDraft({ paymentSource: value })}
+                      options={paymentSourceOptions}
+                      triggerClassName={dropdownTriggerClassName}
+                      value={draft.paymentSource}
+                    />
+                    <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-600 dark:text-blue-300 dark:hover:text-blue-200">
+                      <input
+                        checked={isSplitPayment}
+                        className="h-4 w-4 rounded border-slate-400 accent-blue-600"
+                        onChange={(event) => toggleSplitPayment(event.target.checked)}
+                        type="checkbox"
+                      />
+                      Dividir pagamento
+                    </label>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3 dark:border-blue-950/70 dark:bg-blue-950/20">
+                    <label className="mb-3 inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-600 dark:text-blue-300 dark:hover:text-blue-200">
+                      <input
+                        checked={isSplitPayment}
+                        className="h-4 w-4 rounded border-slate-400 accent-blue-600"
+                        onChange={(event) => toggleSplitPayment(event.target.checked)}
+                        type="checkbox"
+                      />
+                      Pagamento dividido
+                    </label>
+                    <div className="hidden grid-cols-[minmax(0,1fr)_minmax(8rem,0.7fr)_auto] gap-3 px-1 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 sm:grid">
+                      <span>Origem</span>
+                      <span>Valor</span>
+                      <span className="sr-only">Remover</span>
+                    </div>
+
+                    <div className="space-y-2">
+                      {paymentSplits.map((split, index) => {
+                        const selectedSources = paymentSplits
+                          .filter((_, splitIndex) => splitIndex !== index)
+                          .map((item) => normalizePaymentSource(item.paymentSource));
+                        const options = paymentSourceOptions.filter(
+                          (option) =>
+                            option.value === split.paymentSource ||
+                            !selectedSources.includes(normalizePaymentSource(option.value)),
+                        );
+
+                        return (
+                          <div
+                            className="grid gap-2 rounded-lg border border-slate-200 bg-white p-2.5 dark:border-slate-800 dark:bg-slate-900 sm:grid-cols-[minmax(0,1fr)_minmax(8rem,0.7fr)_auto] sm:items-end"
+                            key={split.paymentSource}
+                          >
+                            <div className="space-y-1.5">
+                              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 sm:hidden">
+                                Origem
+                              </span>
+                              <DropdownSelect
+                                ariaLabel={`Selecionar origem ${index + 1}`}
+                                icon={WalletCards}
+                                onChange={(value) => updatePaymentSplit(index, { paymentSource: value })}
+                                options={options}
+                                triggerClassName={dropdownTriggerClassName}
+                                value={split.paymentSource}
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 sm:hidden">
+                                Valor
+                              </span>
+                              <Input
+                                inputMode="decimal"
+                                onChange={(event) => updatePaymentSplit(index, { amount: event.target.value })}
+                                placeholder="0,00"
+                                value={split.amount}
+                              />
+                            </div>
+                            <Button
+                              aria-label={`Remover ${split.paymentSource}`}
+                              className="justify-self-end rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-300 dark:hover:bg-red-950/40"
+                              onClick={() => removePaymentSplit(index)}
+                              size="icon"
+                              title="Remover origem"
+                              type="button"
+                              variant="ghost"
+                            >
+                              <Trash2 aria-hidden="true" size={17} />
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {paymentSplits.length < paymentSources.length ? (
+                      <Button
+                        className="mt-3 h-9 border-blue-200 text-blue-700 hover:bg-blue-100 dark:border-blue-900/80 dark:text-blue-300 dark:hover:bg-blue-950/50"
+                        onClick={addPaymentSplit}
+                        size="sm"
+                        type="button"
+                        variant="secondary"
+                      >
+                        <Plus aria-hidden="true" size={15} />
+                        Adicionar origem
+                      </Button>
+                    ) : null}
+
+                    <p
+                      className={cn(
+                        "mt-3 text-sm font-semibold tabular-nums",
+                        isDistributionValid
+                          ? "text-emerald-700 dark:text-emerald-300"
+                          : "text-amber-700 dark:text-amber-300",
+                      )}
+                    >
+                      Total distribuído: {formatMoney(splitTotal)} de {formatMoney(displayedExpenseAmount)}
+                    </p>
+                    {!hasUniqueSplitSources ? (
+                      <p className="mt-1 text-xs font-medium text-red-600 dark:text-red-300">
+                        Escolha uma origem diferente em cada linha.
+                      </p>
+                    ) : null}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -539,7 +790,7 @@ function ExpenseFormDialogContent({
               className={cn(
                 "inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-500 disabled:cursor-not-allowed disabled:opacity-60 dark:text-blue-500",
               )}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (isSplitPayment && !isDistributionValid)}
               type="submit"
             >
               {isSubmitting ? (

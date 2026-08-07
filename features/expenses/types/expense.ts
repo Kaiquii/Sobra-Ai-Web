@@ -4,6 +4,12 @@ export type ExpenseTypeFilter = "Fixas" | "Parceladas" | "Todas" | "\u00danicas"
 
 export type PaymentSource = "Adiantamento" | "Renda Extra" | "Salario" | "Sal\u00e1rio";
 
+export type PaymentSplit = {
+  amount: number;
+  expense_id?: number;
+  payment_source: PaymentSource | string;
+};
+
 export type Category = {
   id: number;
   name: string;
@@ -22,6 +28,7 @@ export type Expense = {
   month?: number;
   notes?: string | null;
   payment_source: PaymentSource | string;
+  payment_splits?: PaymentSplit[];
   is_paid: boolean;
   paid_at: string | null;
   type: ExpenseType | string;
@@ -69,16 +76,31 @@ export type UpdateCategoryRequest = {
   name: string;
 };
 
-export type CreateExpenseRequest = {
+type ExpenseRequestBase = {
   amount: number;
   category_id: number;
   date: string;
   description: string;
   installments: number;
   notes?: string;
-  payment_source: PaymentSource;
   type: ExpenseType;
 };
+
+type ExpensePaymentSourceRequest = {
+  payment_source: PaymentSource;
+  payment_splits?: never;
+};
+
+type ExpensePaymentSplitsRequest = {
+  payment_source?: never;
+  payment_splits: Array<{
+    amount: number;
+    payment_source: PaymentSource;
+  }>;
+};
+
+export type CreateExpenseRequest = ExpenseRequestBase &
+  (ExpensePaymentSourceRequest | ExpensePaymentSplitsRequest);
 
 export type UpdateExpenseRequest = {
   amount: number;
@@ -86,6 +108,5 @@ export type UpdateExpenseRequest = {
   date: string;
   description: string;
   notes?: string;
-  payment_source: PaymentSource;
   update_future: boolean | null;
-};
+} & (ExpensePaymentSourceRequest | ExpensePaymentSplitsRequest);

@@ -13,7 +13,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { useLockBodyScroll } from "@/components/ui/use-lock-body-scroll";
-import type { Expense } from "@/features/expenses/types/expense";
+import type { Expense, PaymentSplit } from "@/features/expenses/types/expense";
 import { formatMoney } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 
@@ -75,6 +75,12 @@ function getPaymentSourceLabel(source: string) {
   return "Salário";
 }
 
+function getExpensePaymentSplits(expense: Expense) {
+  return expense.payment_splits?.length
+    ? expense.payment_splits
+    : [{ amount: expense.amount, payment_source: expense.payment_source }];
+}
+
 function getInstallmentDetails(expense: Expense) {
   if (normalizeText(expense.type) !== "parcelada") {
     return null;
@@ -123,6 +129,36 @@ function DetailItem({
   );
 }
 
+function PaymentSplitsDetailItem({ splits }: { splits: PaymentSplit[] }) {
+  return (
+    <div className="flex min-w-0 items-start gap-3 border-t border-slate-200 px-4 py-3 dark:border-slate-800 sm:col-span-2">
+      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 dark:border-blue-900/70 dark:bg-blue-950/60 dark:text-blue-400">
+        <WalletCards aria-hidden="true" size={16} />
+      </span>
+      <dl className="min-w-0 flex-1">
+        <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          Distribuição do pagamento
+        </dt>
+        <dd className="mt-1.5 flex flex-wrap gap-1.5">
+          {splits.map((split) => (
+            <span
+              className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              key={split.payment_source}
+            >
+              <span className="truncate">
+                {getPaymentSourceLabel(split.payment_source)}
+              </span>
+              <span className="shrink-0 border-l border-slate-300 pl-1.5 font-semibold tabular-nums text-slate-950 dark:border-slate-600 dark:text-slate-50">
+                {formatMoney(split.amount)}
+              </span>
+            </span>
+          ))}
+        </dd>
+      </dl>
+    </div>
+  );
+}
+
 export function ExpenseDetailsDialog({
   categoryName,
   expense,
@@ -136,6 +172,7 @@ export function ExpenseDetailsDialog({
 
   const notes = expense.notes?.trim();
   const installmentDetails = getInstallmentDetails(expense);
+  const paymentSplits = getExpensePaymentSplits(expense);
 
   return (
     <div
@@ -202,8 +239,12 @@ export function ExpenseDetailsDialog({
             <DetailItem
               className="border-b border-slate-200 dark:border-slate-800"
               icon={WalletCards}
-              label="Origem"
-              value={getPaymentSourceLabel(expense.payment_source)}
+              label={paymentSplits.length > 1 ? "Origens" : "Origem"}
+              value={
+                paymentSplits.length > 1
+                  ? `${paymentSplits.length} fontes de pagamento`
+                  : getPaymentSourceLabel(paymentSplits[0]?.payment_source ?? "")
+              }
             />
             <DetailItem
               className="border-b border-slate-200 dark:border-slate-800 sm:border-r sm:border-b-0"
@@ -212,6 +253,10 @@ export function ExpenseDetailsDialog({
               value={formatExpenseFullDate(expense.date)}
             />
             <DetailItem icon={ReceiptText} label="Tipo" value={expense.type} />
+
+            {paymentSplits.length > 1 ? (
+              <PaymentSplitsDetailItem splits={paymentSplits} />
+            ) : null}
 
             {expense.is_paid ? (
               <DetailItem
