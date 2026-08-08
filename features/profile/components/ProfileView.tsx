@@ -4,6 +4,7 @@ import {
   Camera,
   ChevronRight,
   CircleDollarSign,
+  Diamond,
   HelpCircle,
   LogOut,
   Pencil,
@@ -36,6 +37,15 @@ function getRoleInfo(role: string | undefined) {
         "bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300",
       icon: <Star aria-hidden="true" size={15} strokeWidth={2.25} />,
       label: "Administrador",
+    };
+  }
+
+  if (role === "premium") {
+    return {
+      className:
+        "bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300",
+      icon: <Diamond aria-hidden="true" size={15} strokeWidth={2.25} />,
+      label: "Premium",
     };
   }
 

@@ -2,6 +2,7 @@
 
 import {
   ChevronDown,
+  Diamond,
   Home,
   LogOut,
   Mail,
@@ -63,8 +64,11 @@ export function Header({ onOpenSidebar }: HeaderProps) {
   const userName = user?.name ?? "Usuário";
   const userEmail = user?.email ?? "E-mail não informado.";
   const isAdmin = user?.role === "admin";
+  const isPremium = user?.role === "premium";
   const userRoleLabel = isAdmin
     ? "Administrador"
+    : isPremium
+      ? "Premium"
     : user?.role === "user"
       ? "Usuário"
       : user?.role || "Perfil não informado";
@@ -271,11 +275,21 @@ export function Header({ onOpenSidebar }: HeaderProps) {
                           className={
                             isAdmin
                               ? "mt-0.5 inline-flex max-w-full items-center gap-1 truncate text-sm font-semibold text-amber-600 dark:text-amber-300"
-                              : "mt-0.5 block truncate text-sm font-semibold text-slate-700 dark:text-slate-200"
+                              : isPremium
+                                ? "mt-0.5 inline-flex max-w-full items-center gap-1 truncate text-sm font-semibold text-violet-700 dark:text-violet-300"
+                                : "mt-0.5 block truncate text-sm font-semibold text-slate-700 dark:text-slate-200"
                           }
                         >
                           {isAdmin ? (
                             <Star
+                              aria-hidden="true"
+                              className="shrink-0"
+                              size={14}
+                              strokeWidth={2.4}
+                            />
+                          ) : null}
+                          {isPremium ? (
+                            <Diamond
                               aria-hidden="true"
                               className="shrink-0"
                               size={14}
