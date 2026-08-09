@@ -45,18 +45,20 @@ export type RegisterRequest = {
   password: string;
 };
 
-export type RequestRegisterCodeRequest = {
+type TurnstileProtectedRequest = {
   email: string;
+  protection_provider: "turnstile";
+  turnstile_token: string;
 };
+
+export type RequestRegisterCodeRequest = TurnstileProtectedRequest;
 
 export type RegisterResponse = {
   message: string;
   user_id: number;
 };
 
-export type ForgotPasswordRequest = {
-  email: string;
-};
+export type ForgotPasswordRequest = TurnstileProtectedRequest;
 
 export type MessageResponse = {
   message: string;

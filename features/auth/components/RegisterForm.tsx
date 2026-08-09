@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, KeyRound, Mail, RotateCcw, UserRound } from "luc
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -18,10 +18,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import {
+  TurnstileChallenge,
+  type TurnstileChallengeHandle,
+} from "@/components/ui/turnstile-challenge";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { getApiErrorStatus } from "@/lib/api-errors";
 
 type RegisterStep = "code" | "details";
+
+const turnstileErrorMessage =
+  "Não foi possível validar a segurança. Tente novamente.";
 
 function maskEmail(email: string) {
   const [localPart, domain] = email.split("@");
@@ -58,6 +65,8 @@ export function RegisterForm() {
   const [password, setPassword] = useState("");
   const [resendCountdown, setResendCountdown] = useState(0);
   const [step, setStep] = useState<RegisterStep>("details");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileChallengeHandle>(null);
 
   useEffect(() => {
     if (!resendCountdown) {
@@ -73,13 +82,23 @@ export function RegisterForm() {
 
   async function requestCode() {
     const trimmedEmail = email.trim();
+    const token = turnstileToken;
+
+    if (!token) {
+      setLocalError(turnstileErrorMessage);
+      return;
+    }
 
     try {
       clearFeedback();
       setIsEmailRegistered(false);
       setLocalError(null);
       setEmail(trimmedEmail);
-      await requestRegisterCode({ email: trimmedEmail });
+      await requestRegisterCode({
+        email: trimmedEmail,
+        protection_provider: "turnstile",
+        turnstile_token: token,
+      });
       setCode("");
       setResendCountdown(60);
       setStep("code");
@@ -93,6 +112,13 @@ export function RegisterForm() {
       if (status === 429) {
         setResendCountdown(60);
       }
+
+      if (status === 403) {
+        setLocalError(turnstileErrorMessage);
+      }
+    } finally {
+      setTurnstileToken(null);
+      turnstileRef.current?.reset();
     }
   }
 
@@ -127,6 +153,7 @@ export function RegisterForm() {
     setIsEmailRegistered(false);
     setLocalError(null);
     setResendCountdown(0);
+    setTurnstileToken(null);
     setStep("details");
   }
 
@@ -212,6 +239,15 @@ export function RegisterForm() {
               />
             </div>
 
+            <TurnstileChallenge
+              onError={() => {
+                setTurnstileToken(null);
+                setLocalError(turnstileErrorMessage);
+              }}
+              onTokenChange={setTurnstileToken}
+              ref={turnstileRef}
+            />
+
             {error || localError ? <Alert variant="error">{localError ?? error}</Alert> : null}
 
             {isEmailRegistered ? (
@@ -225,7 +261,7 @@ export function RegisterForm() {
 
             <Button
               className="h-10 w-full rounded-xl"
-              disabled={isLoading || resendCountdown > 0}
+              disabled={isLoading || resendCountdown > 0 || !turnstileToken}
               type="submit"
             >
               {isLoading
@@ -239,6 +275,15 @@ export function RegisterForm() {
         ) : (
           <form className="space-y-4" onSubmit={handleRegister}>
             {message ? <Alert variant="success">{message}</Alert> : null}
+
+            <TurnstileChallenge
+              onError={() => {
+                setTurnstileToken(null);
+                setLocalError(turnstileErrorMessage);
+              }}
+              onTokenChange={setTurnstileToken}
+              ref={turnstileRef}
+            />
 
             <div className="space-y-2">
               <Label htmlFor="register-code">Código de confirmação</Label>
@@ -295,7 +340,7 @@ export function RegisterForm() {
               </button>
               <button
                 className="inline-flex cursor-pointer items-center justify-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-600 disabled:cursor-not-allowed disabled:opacity-60 dark:text-emerald-300 dark:hover:text-emerald-200"
-                disabled={isLoading || resendCountdown > 0}
+                disabled={isLoading || resendCountdown > 0 || !turnstileToken}
                 onClick={() => {
                   void requestCode();
                 }}

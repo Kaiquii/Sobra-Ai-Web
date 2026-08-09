@@ -3,7 +3,7 @@
 import { ArrowRight, KeyRound, Mail, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import type { FormEvent } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonClassName } from "@/components/ui/button";
@@ -17,10 +17,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import {
+  TurnstileChallenge,
+  type TurnstileChallengeHandle,
+} from "@/components/ui/turnstile-challenge";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { getApiErrorStatus } from "@/lib/api-errors";
 
 type RecoveryStep = "email" | "reset" | "done";
+
+const turnstileErrorMessage =
+  "Não foi possível validar a segurança. Tente novamente.";
 
 function normalizeCode(value: string) {
   return value.replace(/\D/g, "").slice(0, 6);
@@ -35,6 +42,8 @@ export function PasswordRecoveryForm() {
   const [newPassword, setNewPassword] = useState("");
   const [resendCountdown, setResendCountdown] = useState(0);
   const [step, setStep] = useState<RecoveryStep>("email");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileChallengeHandle>(null);
 
   useEffect(() => {
     if (!resendCountdown) {
@@ -50,12 +59,22 @@ export function PasswordRecoveryForm() {
 
   async function sendCode() {
     const trimmedEmail = email.trim();
+    const token = turnstileToken;
+
+    if (!token) {
+      setLocalError(turnstileErrorMessage);
+      return;
+    }
 
     try {
       clearFeedback();
       setLocalError(null);
       setEmail(trimmedEmail);
-      await forgotPassword({ email: trimmedEmail });
+      await forgotPassword({
+        email: trimmedEmail,
+        protection_provider: "turnstile",
+        turnstile_token: token,
+      });
       setCode("");
       setResendCountdown(60);
       setStep("reset");
@@ -63,6 +82,13 @@ export function PasswordRecoveryForm() {
       if (getApiErrorStatus(requestError) === 429) {
         setResendCountdown(60);
       }
+
+      if (getApiErrorStatus(requestError) === 403) {
+        setLocalError(turnstileErrorMessage);
+      }
+    } finally {
+      setTurnstileToken(null);
+      turnstileRef.current?.reset();
     }
   }
 
@@ -125,11 +151,20 @@ export function PasswordRecoveryForm() {
               </div>
             </div>
 
+            <TurnstileChallenge
+              onError={() => {
+                setTurnstileToken(null);
+                setLocalError(turnstileErrorMessage);
+              }}
+              onTokenChange={setTurnstileToken}
+              ref={turnstileRef}
+            />
+
             {error || localError ? <Alert variant="error">{localError ?? error}</Alert> : null}
 
             <Button
               className="h-10 w-full rounded-xl"
-              disabled={isLoading || resendCountdown > 0}
+              disabled={isLoading || resendCountdown > 0 || !turnstileToken}
               type="submit"
             >
               {isLoading
@@ -145,6 +180,15 @@ export function PasswordRecoveryForm() {
         {step === "reset" ? (
           <form className="space-y-4" onSubmit={handleResetPassword}>
             {message ? <Alert variant="success">{message}</Alert> : null}
+
+            <TurnstileChallenge
+              onError={() => {
+                setTurnstileToken(null);
+                setLocalError(turnstileErrorMessage);
+              }}
+              onTokenChange={setTurnstileToken}
+              ref={turnstileRef}
+            />
 
             <div className="space-y-2">
               <Label htmlFor="code">Código</Label>
@@ -201,7 +245,7 @@ export function PasswordRecoveryForm() {
 
             <button
               className="mx-auto inline-flex w-full cursor-pointer items-center justify-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-600 disabled:cursor-not-allowed disabled:opacity-60 dark:text-emerald-300 dark:hover:text-emerald-200"
-              disabled={isLoading || resendCountdown > 0}
+              disabled={isLoading || resendCountdown > 0 || !turnstileToken}
               onClick={() => {
                 void sendCode();
               }}
