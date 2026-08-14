@@ -507,7 +507,7 @@ function ExpenseFormDialogContent({
             {mode === "create" ? "Nova despesa" : "Editar despesa"}
           </h2>
 
-          <div className="mt-5 min-h-0 space-y-4 overflow-y-auto pr-1">
+          <div className="mt-4 min-h-0 space-y-3 overflow-y-auto pr-1">
             {error || localError ? (
               <Alert variant="error">{localError ?? error}</Alert>
             ) : null}
@@ -777,7 +777,7 @@ function ExpenseFormDialogContent({
             ) : null}
           </div>
 
-          <div className="mt-5 flex shrink-0 justify-end gap-6">
+          <div className="mt-4 flex shrink-0 justify-end gap-6">
             <button
               className="cursor-pointer text-sm font-semibold text-blue-600 hover:text-blue-500 disabled:cursor-not-allowed dark:text-blue-500"
               disabled={isSubmitting}
