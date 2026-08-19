@@ -31,15 +31,15 @@ export function AuthShell({ children, description, title }: AuthShellProps) {
   return (
     <main className="min-h-svh overflow-x-hidden bg-slate-100 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
       <div className="mx-auto grid min-h-svh w-full max-w-6xl items-center gap-4 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(350px,400px)] lg:px-8">
-        <section className="relative flex min-h-0 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-2xl shadow-slate-200/70 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/25 sm:p-6 lg:h-[calc(100svh-32px)] lg:max-h-[760px] lg:min-h-[560px]">
+        <section className="relative flex min-h-0 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-2xl shadow-slate-200/70 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/25 sm:p-6 lg:h-[calc(100svh-32px)] lg:max-h-190 lg:min-h-140">
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(16,185,129,0.12),transparent_30%),linear-gradient(180deg,rgba(59,130,246,0.08),transparent_48%)] dark:bg-[linear-gradient(120deg,rgba(16,185,129,0.13),transparent_30%),linear-gradient(180deg,rgba(15,23,42,0.08),transparent_48%)]" />
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.12)_1px,transparent_1px)] bg-[size:32px_32px] opacity-40 dark:opacity-20" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.12)_1px,transparent_1px)] bg-size-[32px_32px] opacity-40 dark:opacity-20" />
 
           <div className="relative flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 shadow-lg shadow-slate-300/50 dark:border-slate-800 dark:shadow-black/30">
                 <Image
-                  alt="SobraAí"
+                  alt="SobraAi"
                   className="h-full w-full object-cover"
                   height={56}
                   priority
@@ -50,7 +50,7 @@ export function AuthShell({ children, description, title }: AuthShellProps) {
 
               <div>
                 <p className="text-xl font-semibold leading-6 text-slate-950 dark:text-slate-50">
-                  SobraAí
+                  SobraAi
                 </p>
                 <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
                   Painel web
@@ -107,7 +107,7 @@ export function AuthShell({ children, description, title }: AuthShellProps) {
           </div>
         </section>
 
-        <section className="flex min-h-0 items-center justify-center pb-4 lg:h-[calc(100svh-32px)] lg:max-h-[760px] lg:pb-0">
+        <section className="flex min-h-0 items-center justify-center pb-4 lg:h-[calc(100svh-32px)] lg:max-h-190 lg:pb-0">
           <div className="w-full max-w-md">{children}</div>
         </section>
       </div>

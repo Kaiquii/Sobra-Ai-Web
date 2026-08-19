@@ -1,6 +1,6 @@
-# SobraAí Web
+# SobraAi Web
 
-Aplicação web do SobraAí, criada com Next.js, React, TypeScript, Tailwind CSS, Zustand e Axios.
+Aplicação web do SobraAi, criada com Next.js, React, TypeScript, Tailwind CSS, Zustand e Axios.
 
 O projeto consome uma API externa para autenticação, despesas, rendas, categorias e relatórios financeiros.
 
