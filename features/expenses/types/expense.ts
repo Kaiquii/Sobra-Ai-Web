@@ -18,12 +18,14 @@ export type Category = {
 
 export type Expense = {
   amount: number;
+  advanced_at?: string | null;
   category?: string;
   category_id?: number;
   current_installment: number | null;
   date: string;
   description: string;
   id: number;
+  is_advanced: boolean;
   installments: number;
   month?: number;
   notes?: string | null;
@@ -67,6 +69,13 @@ export type PaymentStatusMutationResponse = {
   expense: Pick<Expense, "id" | "is_paid" | "paid_at">;
   message: string;
 };
+
+export type AdvanceStatusMutationResponse = {
+  expense: Pick<Expense, "advanced_at" | "id" | "is_advanced" | "is_paid" | "paid_at">;
+  message: string;
+};
+
+export type ExpensePeriodMode = "effective";
 
 export type CreateCategoryRequest = {
   name: string;

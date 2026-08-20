@@ -1,11 +1,13 @@
 "use client";
 
 import {
+  CalendarClock,
   CalendarDays,
   Check,
   CheckCircle2,
   Circle,
   Eye,
+  FastForward,
   FileText,
   ListFilter,
   Pencil,
@@ -13,6 +15,7 @@ import {
   ReceiptText,
   Search,
   Trash2,
+  Undo2,
   WalletCards,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -26,6 +29,7 @@ import {
   MonthSwitcher,
 } from "@/components/ui/month-switcher";
 import { ExpenseDeleteDialog } from "@/features/expenses/components/ExpenseDeleteDialog";
+import { ExpenseAdvanceDialog } from "@/features/expenses/components/ExpenseAdvanceDialog";
 import { ExpenseDetailsDialog } from "@/features/expenses/components/ExpenseDetailsDialog";
 import {
   ExpenseFormDialog,
@@ -199,6 +203,27 @@ function formatExpenseDate(date: string) {
   return `${day}/${month}`;
 }
 
+function formatExpenseFullDate(date: string) {
+  const inputDate = date.includes("T") ? date.split("T")[0] : date;
+  const [year, month, day] = inputDate.split("-");
+
+  if (!year || !month || !day) {
+    return "--/--/----";
+  }
+
+  return `${day}/${month}/${year}`;
+}
+
+function getExpenseMonthReference(expense: Expense) {
+  const [year, month] = expense.date.split("T")[0]?.split("-").map(Number) ?? [];
+
+  if (!year || !month) {
+    return null;
+  }
+
+  return { month, year };
+}
+
 function getPaymentSourceLabel(source: string) {
   const normalized = normalizeText(source);
 
@@ -238,7 +263,11 @@ function getCategoriesMap(categories: Category[]) {
 type ExpenseCardProps = {
   categoryName: string;
   expense: Expense;
+  isAdvanceStatusUpdating: boolean;
+  isHighlighted?: boolean;
   onDelete: (expense: Expense) => void;
+  onAdvance: (expense: Expense) => void;
+  onUndoAdvance: (expense: Expense) => void;
   onEdit: (expense: Expense) => void;
   onTogglePaid: (expense: Expense) => void;
   onView: (expense: Expense) => void;
@@ -248,7 +277,11 @@ type ExpenseCardProps = {
 function ExpenseCard({
   categoryName,
   expense,
+  isAdvanceStatusUpdating,
+  isHighlighted = false,
   onDelete,
+  onAdvance,
+  onUndoAdvance,
   onEdit,
   onTogglePaid,
   onView,
@@ -257,6 +290,7 @@ function ExpenseCard({
   const installmentLabel = getInstallmentLabel(expense);
   const notes = expense.notes?.trim();
   const paymentSources = getExpensePaymentSources(expense);
+  const canAdvance = ["unica", "parcelada"].includes(normalizeText(expense.type));
 
   return (
     <article
@@ -264,7 +298,8 @@ function ExpenseCard({
         expense.is_paid
           ? "border-emerald-200 hover:border-emerald-300 dark:border-emerald-900/70 dark:hover:border-emerald-800"
           : "border-slate-200 hover:border-blue-200 dark:border-slate-800 dark:hover:border-blue-900/70"
-      }`}
+      } ${isHighlighted ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-100 dark:ring-amber-300 dark:ring-offset-slate-950" : ""}`}
+      id={`expense-${expense.id}`}
       onDoubleClick={() => onView(expense)}
     >
       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/55 dark:text-blue-300">
@@ -288,6 +323,11 @@ function ExpenseCard({
             </span>
           ) : null}
           <span>• {formatExpenseDate(expense.date)}</span>
+          {expense.is_advanced && expense.advanced_at ? (
+            <span className="rounded bg-amber-50 px-1.5 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
+              Adiantada para {formatExpenseFullDate(expense.advanced_at)}
+            </span>
+          ) : null}
         </div>
         {notes ? (
           <p
@@ -326,6 +366,24 @@ function ExpenseCard({
               {expense.is_paid ? "Paga" : "Pagar"}
             </span>
           </button>
+          {canAdvance ? (
+            <button
+              aria-label={`${expense.is_advanced ? "Desfazer adiantamento de" : "Adiantar"} ${expense.description}`}
+              className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-amber-600 hover:bg-amber-500/10 hover:text-amber-700 disabled:cursor-not-allowed disabled:opacity-60 dark:text-amber-300 dark:hover:text-amber-200"
+              disabled={isAdvanceStatusUpdating}
+              onClick={() =>
+                expense.is_advanced ? onUndoAdvance(expense) : onAdvance(expense)
+              }
+              title={expense.is_advanced ? "Desfazer adiantamento" : "Adiantar"}
+              type="button"
+            >
+              {expense.is_advanced ? (
+                <Undo2 aria-hidden="true" size={16} strokeWidth={2.4} />
+              ) : (
+                <FastForward aria-hidden="true" size={16} strokeWidth={2.4} />
+              )}
+            </button>
+          ) : null}
           <button
             aria-label={`Visualizar ${expense.description}`}
             className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-slate-500 hover:bg-slate-500/10 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
@@ -387,10 +445,13 @@ function ExpensesSkeleton() {
 export function ExpensesView() {
   const [{ month, year }, setSelectedDate] = useState(getCurrentMonthReference);
   const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
+  const [advanceTarget, setAdvanceTarget] = useState<Expense | null>(null);
   const [detailsTarget, setDetailsTarget] = useState<Expense | null>(null);
   const [formExpense, setFormExpense] = useState<Expense | null>(null);
   const [formMode, setFormMode] = useState<ExpenseFormMode | null>(null);
+  const [highlightedExpenseId, setHighlightedExpenseId] = useState<number | null>(null);
   const [paymentStatusTarget, setPaymentStatusTarget] = useState<Expense | null>(null);
+  const [undoAdvanceTarget, setUndoAdvanceTarget] = useState<Expense | null>(null);
   const [paymentSourceFilter, setPaymentSourceFilter] =
     useState<PaymentSourceFilter>("Todas");
   const [paymentStatusFilter, setPaymentStatusFilter] =
@@ -400,7 +461,11 @@ export function ExpensesView() {
   const [typeFilter, setTypeFilter] = useState<ExpenseTypeFilter>("Todas");
 
   const categories = useExpenseStore((state) => state.categories);
+  const advancedExpenses = useExpenseStore((state) => state.advancedExpenses);
   const clearFeedback = useExpenseStore((state) => state.clearFeedback);
+  const advanceStatusUpdatingId = useExpenseStore(
+    (state) => state.advanceStatusUpdatingId,
+  );
   const error = useExpenseStore((state) => state.error);
   const expenses = useExpenseStore((state) => state.expenses);
   const isLoading = useExpenseStore((state) => state.isLoading);
@@ -410,6 +475,7 @@ export function ExpensesView() {
     (state) => state.paymentStatusUpdatingId,
   );
   const updatePaymentStatus = useExpenseStore((state) => state.updatePaymentStatus);
+  const updateAdvanceStatus = useExpenseStore((state) => state.updateAdvanceStatus);
 
   useEffect(() => {
     void loadInitialData(month, year, getPaymentStatusApiValue(paymentStatusFilter));
@@ -426,6 +492,22 @@ export function ExpensesView() {
 
     return () => window.clearTimeout(timeoutId);
   }, [clearFeedback, message]);
+
+  useEffect(() => {
+    if (!highlightedExpenseId || isLoading || !expenses.some((expense) => expense.id === highlightedExpenseId)) {
+      return;
+    }
+
+    document
+      .getElementById(`expense-${highlightedExpenseId}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    const timeoutId = window.setTimeout(() => {
+      setHighlightedExpenseId(null);
+    }, 3000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [expenses, highlightedExpenseId, isLoading]);
 
   const categoriesById = useMemo(() => getCategoriesMap(categories), [categories]);
   const filteredExpenses = useMemo(() => {
@@ -458,6 +540,36 @@ export function ExpensesView() {
     selectedCategoryId,
     typeFilter,
   ]);
+  const filteredAdvancedExpenses = useMemo(() => {
+    return advancedExpenses.filter((expense) => {
+      const matchesSearch = matchesSearchFilter(expense, searchQuery);
+      const matchesType = matchesTypeFilter(expense, typeFilter);
+      const matchesPaymentSource = matchesPaymentSourceFilter(
+        expense,
+        paymentSourceFilter,
+      );
+      const matchesCategory = matchesCategoryFilter(expense, selectedCategoryId);
+      const matchesPaymentStatus = matchesPaymentStatusFilter(
+        expense,
+        paymentStatusFilter,
+      );
+
+      return (
+        matchesSearch &&
+        matchesType &&
+        matchesPaymentSource &&
+        matchesCategory &&
+        matchesPaymentStatus
+      );
+    });
+  }, [
+    advancedExpenses,
+    paymentSourceFilter,
+    paymentStatusFilter,
+    searchQuery,
+    selectedCategoryId,
+    typeFilter,
+  ]);
 
   const totalAmount = filteredExpenses.reduce(
     (total, expense) => total + expense.amount,
@@ -465,6 +577,9 @@ export function ExpensesView() {
   );
   const isPaymentStatusConfirming =
     paymentStatusTarget?.id === paymentStatusUpdatingId;
+  const isAdvanceStatusSubmitting =
+    advanceTarget?.id === advanceStatusUpdatingId ||
+    undoAdvanceTarget?.id === advanceStatusUpdatingId;
 
   function openCreateDialog() {
     setFormExpense(null);
@@ -487,8 +602,28 @@ export function ExpensesView() {
     void loadInitialData(month, year, getPaymentStatusApiValue(paymentStatusFilter));
   }
 
+  function refreshExpenseList() {
+    void loadInitialData(month, year, getPaymentStatusApiValue(paymentStatusFilter));
+  }
+
   function togglePaymentStatus(expense: Expense) {
     setPaymentStatusTarget(expense);
+  }
+
+  function goToScheduledExpense(expense: Expense) {
+    const scheduledMonth = getExpenseMonthReference(expense);
+
+    if (!scheduledMonth) {
+      return;
+    }
+
+    setHighlightedExpenseId(expense.id);
+    setPaymentSourceFilter("Todas");
+    setPaymentStatusFilter("Todas");
+    setSearchQuery("");
+    setSelectedCategoryId("Todas");
+    setTypeFilter("Todas");
+    setSelectedDate(scheduledMonth);
   }
 
   function confirmPaymentStatusChange() {
@@ -501,6 +636,32 @@ export function ExpensesView() {
       !paymentStatusTarget.is_paid,
     )
       .then(() => setPaymentStatusTarget(null))
+      .catch(() => {});
+  }
+
+  function confirmAdvance(advancedAt: string) {
+    if (!advanceTarget) {
+      return;
+    }
+
+    void updateAdvanceStatus(advanceTarget.id, true, advancedAt)
+      .then(() => {
+        setAdvanceTarget(null);
+        refreshExpenseList();
+      })
+      .catch(() => {});
+  }
+
+  function confirmUndoAdvance() {
+    if (!undoAdvanceTarget) {
+      return;
+    }
+
+    void updateAdvanceStatus(undoAdvanceTarget.id, false)
+      .then(() => {
+        setUndoAdvanceTarget(null);
+        refreshExpenseList();
+      })
       .catch(() => {});
   }
 
@@ -608,9 +769,53 @@ export function ExpensesView() {
 
         {error ? <Alert variant="error">{error}</Alert> : null}
 
+        {!isLoading && filteredAdvancedExpenses.length ? (
+          <section className="overflow-hidden rounded-xl border border-amber-200/80 bg-white shadow-sm dark:border-amber-900/70 dark:bg-slate-900">
+            <div className="flex items-start gap-3 px-4 py-3 dark:bg-amber-950/10">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
+                <CalendarClock aria-hidden="true" size={16} />
+              </span>
+              <div className="min-w-0">
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  Impactam o planejamento deste mês
+                </h2>
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                  {filteredAdvancedExpenses.length === 1
+                    ? "Uma despesa prevista para outro mês foi adiantada."
+                    : `${filteredAdvancedExpenses.length} despesas previstas para outros meses foram adiantadas.`}
+                </p>
+              </div>
+            </div>
+
+            <div className="divide-y divide-slate-200 dark:divide-slate-800">
+              {filteredAdvancedExpenses.map((expense) => (
+                <button
+                  aria-label={`Ir para a despesa ${expense.description} no mês previsto`}
+                  className="flex w-full cursor-pointer flex-col gap-1.5 px-4 py-3 text-left hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400 dark:hover:bg-slate-800/50 sm:flex-row sm:items-center sm:justify-between"
+                  key={expense.id}
+                  onClick={() => goToScheduledExpense(expense)}
+                  type="button"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
+                      {expense.description}
+                    </p>
+                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                      Prevista para {formatExpenseFullDate(expense.date)} · Considerada em {formatExpenseFullDate(expense.advanced_at ?? "")}
+                    </p>
+                  </div>
+                  <strong className="shrink-0 text-sm font-semibold text-red-600 dark:text-red-300">
+                    - {formatMoney(expense.amount)}
+                  </strong>
+                </button>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
         {isLoading ? <ExpensesSkeleton /> : null}
 
-        {!isLoading && !filteredExpenses.length ? (
+        {!isLoading && !filteredExpenses.length && !filteredAdvancedExpenses.length ? (
           <div className="rounded-[1.35rem] border border-slate-200 bg-white px-6 py-10 text-center dark:border-slate-800 dark:bg-slate-900">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300">
               <ReceiptText aria-hidden="true" size={28} />
@@ -630,10 +835,14 @@ export function ExpensesView() {
               <ExpenseCard
                 categoryName={getCategoryName(expense, categoriesById)}
                 expense={expense}
+                isAdvanceStatusUpdating={advanceStatusUpdatingId === expense.id}
+                isHighlighted={highlightedExpenseId === expense.id}
                 key={expense.id}
+                onAdvance={setAdvanceTarget}
                 onDelete={setDeleteTarget}
                 onEdit={openEditDialog}
                 onTogglePaid={togglePaymentStatus}
+                onUndoAdvance={setUndoAdvanceTarget}
                 onView={setDetailsTarget}
                 isPaymentStatusUpdating={paymentStatusUpdatingId === expense.id}
               />
@@ -684,6 +893,24 @@ export function ExpensesView() {
             ? "Desmarcar como paga?"
             : "Marcar como paga?"
         }
+      />
+
+      <ConfirmationDialog
+        confirmLabel="Sim, desfazer"
+        description={`A despesa “${undoAdvanceTarget?.description ?? ""}” voltará a impactar o planejamento na data prevista (${undoAdvanceTarget ? formatExpenseFullDate(undoAdvanceTarget.date) : ""}). O status de pagamento não será alterado.`}
+        isOpen={Boolean(undoAdvanceTarget)}
+        isSubmitting={isAdvanceStatusSubmitting}
+        onClose={() => setUndoAdvanceTarget(null)}
+        onConfirm={confirmUndoAdvance}
+        title="Desfazer adiantamento?"
+      />
+
+      <ExpenseAdvanceDialog
+        expense={advanceTarget}
+        isSubmitting={isAdvanceStatusSubmitting}
+        key={advanceTarget?.id ?? "empty-advance-dialog"}
+        onClose={() => setAdvanceTarget(null)}
+        onConfirm={confirmAdvance}
       />
 
       <ExpenseFormDialog

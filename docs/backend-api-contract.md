@@ -30,6 +30,9 @@ Este documento registra regras de comportamento entre o front-end e o back-end s
 - Fontes de pagamento aceitas incluem salario, adiantamento e renda extra, considerando variacoes de acentuacao retornadas pelo back-end.
 - Uma despesa pode distribuir seu valor entre uma ou mais fontes de pagamento. Quando a lista de divisoes estiver disponivel, ela prevalece sobre a fonte unica de compatibilidade; o total da despesa continua sendo unico e nao deve ser duplicado no front-end.
 - Despesas unicas, parceladas e fixas tem regras distintas para atualizacao e exclusao de recorrencias futuras.
+- Despesas unicas e parcelas podem ser adiantadas no planejamento financeiro sem serem marcadas como pagas. O adiantamento preserva a data prevista e o status de pagamento, mas faz a despesa impactar o periodo financeiro da nova data.
+- A agenda de despesas usa a data prevista original. Visões de planejamento usam o periodo financeiro efetivo, que considera adiantamentos e desfazimentos.
+- Despesas fixas nao podem ser adiantadas. Em despesas parceladas, o adiantamento se aplica somente a parcela selecionada.
 - Categorias sao gerenciadas separadamente e usadas para classificacao local na interface.
 - Observacoes de despesas sao opcionais e limitadas a 500 caracteres.
 

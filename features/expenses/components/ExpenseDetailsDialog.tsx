@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CalendarClock,
   CalendarDays,
   CheckCircle2,
   FileText,
@@ -182,7 +183,7 @@ export function ExpenseDetailsDialog({
       role="dialog"
     >
       <div
-        className="my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-xl overflow-y-auto rounded-2xl border border-slate-200 border-t-4 border-t-blue-600 bg-white shadow-2xl shadow-slate-950/20 dark:border-slate-800 dark:border-t-blue-500 dark:bg-slate-900 sm:max-h-[calc(100dvh-3rem)]"
+        className="my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-xl overflow-y-auto rounded-2xl border border-slate-200 border-t-4 border-t-blue-600 bg-white shadow-2xl shadow-slate-950/20 dark:border-slate-800 dark:border-t-blue-500 dark:bg-slate-900"
       >
         <div className="p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
@@ -249,10 +250,19 @@ export function ExpenseDetailsDialog({
             <DetailItem
               className="border-b border-slate-200 dark:border-slate-800 sm:border-r sm:border-b-0"
               icon={CalendarDays}
-              label="Data de pagamento"
+              label="Data prevista"
               value={formatExpenseFullDate(expense.date)}
             />
             <DetailItem icon={ReceiptText} label="Tipo" value={expense.type} />
+
+            {expense.is_advanced && expense.advanced_at ? (
+              <DetailItem
+                className="border-t border-amber-200 bg-amber-50/60 dark:border-amber-950/70 dark:bg-amber-950/20 sm:col-span-2"
+                icon={CalendarClock}
+                label="Considerada no planejamento"
+                value={formatExpenseFullDate(expense.advanced_at)}
+              />
+            ) : null}
 
             {paymentSplits.length > 1 ? (
               <PaymentSplitsDetailItem splits={paymentSplits} />
