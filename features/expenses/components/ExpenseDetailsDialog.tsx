@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CalendarClock,
   CalendarDays,
   CheckCircle2,
   FileText,
@@ -178,30 +179,34 @@ export function ExpenseDetailsDialog({
     <div
       aria-labelledby="expense-details-title"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/75 px-3 py-3 backdrop-blur-sm sm:px-4 sm:py-6"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-slate-950/75 px-3 py-3 backdrop-blur-sm sm:px-4 sm:py-6"
       role="dialog"
     >
       <div
-        className="my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-xl overflow-y-auto rounded-2xl border border-slate-200 border-t-4 border-t-blue-600 bg-white shadow-2xl shadow-slate-950/20 dark:border-slate-800 dark:border-t-blue-500 dark:bg-slate-900 sm:max-h-[calc(100dvh-3rem)]"
+        className="my-auto flex max-h-[calc(100dvh-1.5rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-slate-200 border-t-4 border-t-blue-600 bg-white shadow-2xl shadow-slate-950/20 dark:border-slate-800 dark:border-t-blue-500 dark:bg-slate-900 sm:max-h-[calc(100dvh-3rem)]"
       >
-        <div className="p-5 sm:p-6">
+        <div className="shrink-0 border-b border-dashed border-slate-200 px-5 py-3 dark:border-slate-700 sm:px-6">
           <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
-                <ReceiptText aria-hidden="true" size={15} />
-                Detalhes da despesa
-              </p>
-              <h2
-                className="mt-2 wrap-break-word text-2xl font-semibold tracking-normal text-slate-950 dark:text-white sm:text-3xl"
-                id="expense-details-title"
-              >
-                {expense.description}
-              </h2>
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-900/70 dark:bg-blue-950/60 dark:text-blue-400">
+                <ReceiptText aria-hidden="true" size={16} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold leading-none uppercase tracking-wide text-blue-600 dark:text-blue-400">
+                  Detalhes da despesa
+                </p>
+                <h2
+                  className="mt-1.5 wrap-break-word text-2xl leading-tight font-semibold tracking-normal text-slate-950 dark:text-white sm:text-3xl"
+                  id="expense-details-title"
+                >
+                  {expense.description}
+                </h2>
+              </div>
             </div>
 
             <Button
               aria-label="Fechar detalhes da despesa"
-              className="-mr-1 -mt-1 shrink-0 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50"
+              className="-mr-1 mt-0.5 shrink-0 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50"
               onClick={onClose}
               size="icon"
               title="Fechar"
@@ -210,8 +215,10 @@ export function ExpenseDetailsDialog({
               <X aria-hidden="true" size={20} />
             </Button>
           </div>
+        </div>
 
-          <div className="mt-5 flex items-center justify-between gap-5 border-y border-dashed border-slate-200 py-4 dark:border-slate-700">
+        <div className="min-h-0 overflow-y-auto px-5 pb-5 sm:px-6 sm:pb-6">
+          <div className="flex items-center justify-between gap-5 border-b border-dashed border-slate-200 py-4 dark:border-slate-700">
             <div className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 Valor da despesa
@@ -249,10 +256,19 @@ export function ExpenseDetailsDialog({
             <DetailItem
               className="border-b border-slate-200 dark:border-slate-800 sm:border-r sm:border-b-0"
               icon={CalendarDays}
-              label="Data de pagamento"
+              label="Data prevista"
               value={formatExpenseFullDate(expense.date)}
             />
             <DetailItem icon={ReceiptText} label="Tipo" value={expense.type} />
+
+            {expense.is_advanced && expense.advanced_at ? (
+              <DetailItem
+                className="border-t border-amber-200 bg-amber-50/60 dark:border-amber-950/70 dark:bg-amber-950/20 sm:col-span-2"
+                icon={CalendarClock}
+                label="Considerada no planejamento"
+                value={formatExpenseFullDate(expense.advanced_at)}
+              />
+            ) : null}
 
             {paymentSplits.length > 1 ? (
               <PaymentSplitsDetailItem splits={paymentSplits} />
@@ -314,7 +330,7 @@ export function ExpenseDetailsDialog({
           </div>
 
           <div className="mt-2 max-w-full overflow-hidden rounded-xl border border-dashed border-slate-300 bg-slate-50/40 px-4 py-3.5 dark:border-slate-700 dark:bg-slate-950/30">
-            <p className="max-h-40 overflow-y-auto whitespace-pre-wrap text-sm leading-6 text-slate-600 wrap-anywhere dark:text-slate-300">
+            <p className="max-h-28 overflow-y-auto whitespace-pre-wrap text-sm leading-6 text-slate-600 wrap-anywhere dark:text-slate-300">
               {notes || "Nenhuma observação informada."}
             </p>
           </div>

@@ -9,8 +9,8 @@ const policySections = [
   {
     title: "1. Quem somos",
     paragraphs: [
-      "O SobraAí é um aplicativo de controle financeiro pessoal disponível no front-end web e no aplicativo Android, com dados processados pelo back-end do projeto.",
-      "Esta Política de Privacidade explica quais informações podem ser tratadas ao usar o site, o aplicativo Android, as APIs e os recursos relacionados ao SobraAí.",
+      "O SobraAi é um aplicativo de controle financeiro pessoal disponível no front-end web e no aplicativo Android, com dados processados pelo back-end do projeto.",
+      "Esta Política de Privacidade explica quais informações podem ser tratadas ao usar o site, o aplicativo Android, as APIs e os recursos relacionados ao SobraAi.",
     ],
   },
   {
@@ -26,10 +26,10 @@ const policySections = [
   {
     title: "3. Permissões e recursos do Android",
     paragraphs: [
-      "O aplicativo Android usa acesso à internet para se comunicar com a API do SobraAí e sincronizar dados da conta.",
+      "O aplicativo Android usa acesso à internet para se comunicar com a API do SobraAi e sincronizar dados da conta.",
       "A permissão de microfone pode ser solicitada para entrada por voz no assistente. Na versão atual, o recurso usa o reconhecimento de fala do próprio Android; o aplicativo recebe a transcrição e preenche o campo de mensagem para o usuário revisar antes de enviar.",
       "Quando o usuário escolhe uma foto de perfil no Android, o aplicativo lê a imagem selecionada, envia o arquivo ao back-end e exibe a foto usando cache de imagem do próprio app.",
-      "A biometria, quando ativada, é validada pelo sistema do dispositivo. O SobraAí não recebe, armazena nem transmite impressão digital, rosto ou outro dado biométrico; o app mantém apenas a preferência local de uso da biometria para aquele e-mail.",
+      "A biometria, quando ativada, é validada pelo sistema do dispositivo. O SobraAi não recebe, armazena nem transmite impressão digital, rosto ou outro dado biométrico; o app mantém apenas a preferência local de uso da biometria para aquele e-mail.",
       "Como o Android pode fazer backup ou transferência de dados de aplicativos conforme as configurações do aparelho e da conta do usuário, informações locais do app podem ser incluídas nesses mecanismos do sistema operacional.",
     ],
   },
@@ -104,13 +104,13 @@ export function PrivacyPolicyView() {
             <div className="min-w-0">
               <p className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
                 <ShieldCheck aria-hidden="true" size={17} strokeWidth={2.25} />
-                SobraAí
+                SobraAi
               </p>
               <h1 className="mt-3 text-3xl font-semibold tracking-normal text-slate-950 dark:text-slate-50">
                 Política de Privacidade
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Esta página descreve como o SobraAí trata dados no front-end web, no
+                Esta página descreve como o SobraAi trata dados no front-end web, no
                 back-end e no aplicativo Android.
               </p>
               <p className="mt-3 text-sm font-medium text-slate-500 dark:text-slate-400">

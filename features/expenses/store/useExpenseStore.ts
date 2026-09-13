@@ -9,17 +9,27 @@ import type {
   CreateExpenseRequest,
   Expense,
   ExpensePaymentStatus,
+  ExpensePeriodMode,
   UpdateCategoryRequest,
   UpdateExpenseRequest,
 } from "@/features/expenses/types/expense";
 import { getApiErrorMessage } from "@/lib/api-errors";
 
+function isDateInMonth(date: string | null | undefined, month: number, year: number) {
+  const dateValue = date?.split("T")[0];
+  const monthPrefix = `${year}-${String(month).padStart(2, "0")}-`;
+
+  return dateValue?.startsWith(monthPrefix) ?? false;
+}
+
 type ExpenseState = {
+  advancedExpenses: Expense[];
   categories: Category[];
   error: string | null;
   expenses: Expense[];
   isLoading: boolean;
   isSubmitting: boolean;
+  advanceStatusUpdatingId: number | null;
   paymentStatusUpdatingId: number | null;
   message: string | null;
   selectedExpense: Expense | null;
@@ -27,6 +37,11 @@ type ExpenseState = {
   clearFeedback: () => void;
   createCategory: (data: CreateCategoryRequest) => Promise<Category | null>;
   createExpense: (data: CreateExpenseRequest) => Promise<void>;
+  updateAdvanceStatus: (
+    id: number,
+    isAdvanced: boolean,
+    advancedAt?: string,
+  ) => Promise<void>;
   deleteCategory: (id: number) => Promise<void>;
   deleteExpense: (id: number, deleteFuture: boolean) => Promise<void>;
   loadCategories: () => Promise<void>;
@@ -35,11 +50,13 @@ type ExpenseState = {
     month: number,
     year: number,
     paymentStatus?: ExpensePaymentStatus,
+    periodMode?: ExpensePeriodMode,
   ) => Promise<void>;
   loadInitialData: (
     month: number,
     year: number,
     paymentStatus?: ExpensePaymentStatus,
+    periodMode?: ExpensePeriodMode,
   ) => Promise<void>;
   updatePaymentStatus: (id: number, isPaid: boolean) => Promise<void>;
   updateCategory: (id: number, data: UpdateCategoryRequest) => Promise<void>;
@@ -47,11 +64,13 @@ type ExpenseState = {
 };
 
 export const useExpenseStore = create<ExpenseState>((set) => ({
+  advancedExpenses: [],
   categories: [],
   error: null,
   expenses: [],
   isLoading: false,
   isSubmitting: false,
+  advanceStatusUpdatingId: null,
   paymentStatusUpdatingId: null,
   message: null,
   selectedExpense: null,
@@ -149,11 +168,11 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
     }
   },
 
-  loadExpenses: async (month, year, paymentStatus) => {
+  loadExpenses: async (month, year, paymentStatus, periodMode) => {
     set({ error: null, isLoading: true });
 
     try {
-      const response = await expensesApi.getExpenses(month, year, paymentStatus);
+      const response = await expensesApi.getExpenses(month, year, paymentStatus, periodMode);
       set({
         expenses: response.expenses,
         isLoading: false,
@@ -164,16 +183,22 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
     }
   },
 
-  loadInitialData: async (month, year, paymentStatus) => {
+  loadInitialData: async (month, year, paymentStatus, periodMode) => {
     set({ error: null, isLoading: true });
 
     try {
-      const [categoriesResponse, expensesResponse] = await Promise.all([
+      const [categoriesResponse, expensesResponse, effectiveExpensesResponse] = await Promise.all([
         expensesApi.getCategories(),
-        expensesApi.getExpenses(month, year, paymentStatus),
+        expensesApi.getExpenses(month, year, paymentStatus, periodMode),
+        expensesApi.getExpenses(month, year, paymentStatus, "effective"),
       ]);
 
       set({
+        advancedExpenses: effectiveExpensesResponse.expenses.filter(
+          (expense) =>
+            expense.is_advanced &&
+            isDateInMonth(expense.advanced_at, month, year),
+        ),
         categories: categoriesResponse.categories,
         expenses: expensesResponse.expenses,
         isLoading: false,
@@ -214,6 +239,33 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
       set({ isSubmitting: false, message: response.message });
     } catch (error) {
       set({ error: getApiErrorMessage(error), isSubmitting: false, message: null });
+      throw error;
+    }
+  },
+
+  updateAdvanceStatus: async (id, isAdvanced, advancedAt) => {
+    set({ advanceStatusUpdatingId: id, error: null, message: null });
+
+    try {
+      const response = await expensesApi.updateAdvanceStatus(id, isAdvanced, advancedAt);
+
+      set((state) => ({
+        advanceStatusUpdatingId: null,
+        expenses: state.expenses.map((expense) =>
+          expense.id === id ? { ...expense, ...response.expense } : expense,
+        ),
+        message: response.message,
+        selectedExpense:
+          state.selectedExpense?.id === id
+            ? { ...state.selectedExpense, ...response.expense }
+            : state.selectedExpense,
+      }));
+    } catch (error) {
+      set({
+        advanceStatusUpdatingId: null,
+        error: getApiErrorMessage(error),
+        message: null,
+      });
       throw error;
     }
   },

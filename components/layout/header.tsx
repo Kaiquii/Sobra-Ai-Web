@@ -44,7 +44,7 @@ function getCurrentPageTitle(pathname: string) {
     .filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))
     .sort((first, second) => second.href.length - first.href.length)[0];
 
-  return match?.label ?? "SobraAí";
+  return match?.label ?? "SobraAi";
 }
 
 export function Header({ onOpenSidebar }: HeaderProps) {
@@ -135,9 +135,9 @@ export function Header({ onOpenSidebar }: HeaderProps) {
               <h1 className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50 sm:text-base">
                 {currentPageTitle}
               </h1>
-              {currentPageTitle !== "SobraAí" ? (
+              {currentPageTitle !== "SobraAi" ? (
                 <p className="hidden truncate text-xs text-slate-500 dark:text-slate-400 sm:block">
-                  SobraAí
+                  SobraAi
                 </p>
               ) : null}
             </div>

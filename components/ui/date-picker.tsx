@@ -11,6 +11,7 @@ type DatePickerProps = {
   ariaLabel?: string;
   className?: string;
   id?: string;
+  maxDate?: string;
   onChange: (value: string) => void;
   value: string;
 };
@@ -78,6 +79,7 @@ export function DatePicker({
   ariaLabel = "Selecionar data",
   className,
   id,
+  maxDate,
   onChange,
   value,
 }: DatePickerProps) {
@@ -88,6 +90,10 @@ export function DatePicker({
   const pickerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const selectedDate = useMemo(() => parseDateInputValue(value), [value]);
+  const maximumDate = useMemo(
+    () => (maxDate ? parseDateInputValue(maxDate) : null),
+    [maxDate],
+  );
   const calendarDays = useMemo(() => getCalendarDays(visibleMonth), [visibleMonth]);
   const today = useMemo(() => new Date(), []);
 
@@ -172,12 +178,21 @@ export function DatePicker({
   }
 
   function selectDate(date: Date) {
+    if (maximumDate && date > maximumDate) {
+      return;
+    }
+
     onChange(toDateInputValue(date));
     setIsOpen(false);
   }
 
   function selectToday() {
     const currentDate = new Date();
+
+    if (maximumDate && currentDate > maximumDate) {
+      return;
+    }
+
     onChange(toDateInputValue(currentDate));
     setVisibleMonth(currentDate);
     setIsOpen(false);
@@ -252,20 +267,24 @@ export function DatePicker({
               const isOutsideMonth = date.getMonth() !== visibleMonth.getMonth();
               const isSelected = isSameDay(date, selectedDate);
               const isToday = isSameDay(date, today);
+              const isUnavailable = Boolean(maximumDate && date > maximumDate);
 
               return (
                 <button
                   className={cn(
                       "flex h-9 cursor-pointer items-center justify-center rounded-lg text-sm font-semibold",
-                    isSelected
+                    isSelected && !isUnavailable
                       ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20 dark:bg-blue-500 dark:text-slate-950"
                       : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800",
                     isOutsideMonth && !isSelected && "text-slate-400 dark:text-slate-600",
+                    isUnavailable &&
+                      "cursor-not-allowed text-slate-300 hover:bg-transparent dark:text-slate-700 dark:hover:bg-transparent",
                     isToday &&
                       !isSelected &&
                       "ring-1 ring-blue-300 dark:ring-blue-700",
                   )}
                   key={dateValue}
+                  disabled={isUnavailable}
                   onClick={() => selectDate(date)}
                   type="button"
                 >
@@ -277,7 +296,8 @@ export function DatePicker({
 
           <div className="mt-3 flex justify-end">
             <button
-              className="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40"
+              className="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-blue-400 dark:hover:bg-blue-950/40"
+              disabled={Boolean(maximumDate && today > maximumDate)}
               onClick={selectToday}
               type="button"
             >

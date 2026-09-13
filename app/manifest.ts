@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "SobraAí",
-    short_name: "SobraAí",
+    name: "SobraAi",
+    short_name: "SobraAi",
     description: "Controle financeiro pessoal",
     start_url: "/",
     scope: "/",

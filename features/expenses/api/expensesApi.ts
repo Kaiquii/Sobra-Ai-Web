@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api";
 import type {
+  AdvanceStatusMutationResponse,
   CategoriesResponse,
   CategoryMutationResponse,
   CreateCategoryRequest,
@@ -7,6 +8,7 @@ import type {
   Expense,
   ExpenseMutationResponse,
   ExpensePaymentStatus,
+  ExpensePeriodMode,
   ExpenseResponse,
   ExpensesResponse,
   UpdateCategoryRequest,
@@ -27,6 +29,17 @@ function normalizeExpenseResponse(data: Expense | ExpenseResponse) {
 }
 
 export const expensesApi = {
+  async updateAdvanceStatus(id: number, isAdvanced: boolean, advancedAt?: string) {
+    const response = await apiClient.patch<AdvanceStatusMutationResponse>(
+      `/api/expenses/${id}/advance-status`,
+      isAdvanced
+        ? { advanced_at: advancedAt, is_advanced: true }
+        : { is_advanced: false },
+    );
+
+    return response.data;
+  },
+
   async createCategory(data: CreateCategoryRequest) {
     const response = await apiClient.post<CategoryMutationResponse>(
       "/api/categories/",
@@ -80,9 +93,15 @@ export const expensesApi = {
     month: number,
     year: number,
     paymentStatus?: ExpensePaymentStatus,
+    periodMode?: ExpensePeriodMode,
   ) {
     const response = await apiClient.get<ExpensesResponse>("/api/expenses/", {
-      params: { month, payment_status: paymentStatus, year },
+      params: {
+        month,
+        payment_status: paymentStatus,
+        period_mode: periodMode,
+        year,
+      },
     });
 
     return response.data;

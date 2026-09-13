@@ -52,7 +52,7 @@ export function HomeOverview() {
 
           <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-950 shadow-sm dark:border-slate-800 sm:h-28 sm:w-28">
             <Image
-              alt="SobraAí"
+              alt="SobraAi"
               className="h-full w-full object-cover"
               height={112}
               priority
