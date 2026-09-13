@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "ai:check": "node scripts/ai-harness.mjs check",
+    "ai:check:quick": "node scripts/ai-harness.mjs check --quick",
+    "ai:context": "node scripts/ai-harness.mjs context",
+    "ai:doctor": "node scripts/ai-harness.mjs doctor",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

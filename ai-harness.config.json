@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "SobraAi Web",
+    "architecture": "Next.js App Router com features por domínio"
+  },
+  "context": {
+    "requiredFiles": [
+      "AGENTS.md",
+      "rules.md",
+      "docs/ai-guidelines.md",
+      "docs/project-architecture.md",
+      "docs/backend-api-contract.md"
+    ],
+    "sourceRoots": [
+      "app",
+      "components",
+      "features",
+      "lib",
+      "store"
+    ],
+    "ignoredDirectories": [
+      ".git",
+      ".next",
+      "coverage",
+      "node_modules",
+      "out"
+    ],
+    "maxSourceFiles": 400
+  },
+  "guardrails": {
+    "protectedFiles": [
+      ".env",
+      ".env.local",
+      ".env.development.local",
+      ".env.test.local",
+      ".env.production.local"
+    ],
+    "allowEnvironmentTemplate": ".env.example",
+    "forbidApiRoutesInMarkdown": true
+  },
+  "checks": {
+    "quick": [
+      "lint"
+    ],
+    "full": [
+      "lint",
+      "build"
+    ]
+  }
+}

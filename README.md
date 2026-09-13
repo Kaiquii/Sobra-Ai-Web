@@ -60,6 +60,34 @@ Rode o lint:
 npm run lint
 ```
 
+## Harness de IA
+
+O projeto possui um harness local para dar contexto consistente a assistentes de IA e validar alterações sem acessar segredos.
+
+Gere o contexto seguro do projeto:
+
+```bash
+npm run ai:context
+```
+
+Verifique a configuração do harness e as proteções do repositório:
+
+```bash
+npm run ai:doctor
+```
+
+Antes de concluir uma alteração, rode as verificações completas:
+
+```bash
+npm run ai:check
+```
+
+Durante o desenvolvimento, a verificação rápida executa apenas as etapas leves:
+
+```bash
+npm run ai:check:quick
+```
+
 ## Deploy
 
 ### Netlify
