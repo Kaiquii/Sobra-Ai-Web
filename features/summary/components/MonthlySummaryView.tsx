@@ -359,20 +359,20 @@ export function MonthlySummaryView() {
     <>
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-4">
         <div className="flex flex-col gap-2.5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-semibold leading-tight text-emerald-700 dark:text-emerald-300">
               Visão Mensal
             </p>
-            <div className="mt-0.5 flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-semibold leading-tight capitalize text-slate-950 dark:text-slate-50">
+            <div className="mt-0.5 flex min-w-0 items-center gap-2">
+              <h1 className="shrink-0 whitespace-nowrap text-xl font-semibold leading-tight capitalize text-slate-950 dark:text-slate-50 sm:text-2xl">
                 {monthLabel}
               </h1>
               {spentPercentage !== null ? (
-                <span className="inline-flex h-7 items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-2.5 text-xs font-semibold text-blue-700 dark:border-blue-900/70 dark:bg-blue-950/45 dark:text-blue-300">
-                  <span>Gasto: {spentPercentage}%</span>
+                <span className="inline-flex h-7 min-w-0 items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2 text-xs font-semibold text-blue-700 dark:border-blue-900/70 dark:bg-blue-950/45 dark:text-blue-300 sm:gap-2 sm:px-2.5">
+                  <span className="shrink-0 whitespace-nowrap">Gasto: {spentPercentage}%</span>
                   <span
                     aria-hidden="true"
-                    className="h-1 w-16 overflow-hidden rounded-full bg-blue-100 dark:bg-blue-950"
+                    className="h-1 w-16 min-w-0 shrink overflow-hidden rounded-full bg-blue-100 dark:bg-blue-950"
                   >
                     <span
                       className="block h-full rounded-full bg-blue-500 dark:bg-blue-400"

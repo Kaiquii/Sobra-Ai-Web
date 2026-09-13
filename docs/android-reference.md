@@ -10,6 +10,8 @@ O web é a versão para navegador do SobraAí Android. A identidade e os fluxos 
 
 ### Paridade obrigatória no celular
 
+Exceção: a tela de login mantém o layout web anterior à adaptação Android, tanto no celular quanto no desktop. Não simplificar ou adaptar esse layout. `LoginShell` preserva essa composição separadamente do `AuthShell` usado em cadastro e recuperação de senha; autenticação e destino após entrar continuam inalterados.
+
 A versão mobile do site deve reproduzir a interface e os fluxos do Android, não apenas lembrar suas cores. Antes de alterar uma tela, consultar sua implementação Android e comparar hierarquia, ordem dos campos, navegação, controles e comportamento de abertura. Desktop pode ter uma composição própria; celular não deve herdar um modal desktop reduzido.
 
 - Celular abre diretamente no Início após autenticar. A tela Home de escolha de áreas é exclusiva do desktop; acesso direto a ela no celular também deve seguir para o Início.

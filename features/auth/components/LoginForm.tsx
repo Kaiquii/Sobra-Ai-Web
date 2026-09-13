@@ -84,7 +84,7 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="w-full rounded-lg border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <Card className="w-full rounded-3xl border-emerald-500/20 bg-white/95 shadow-2xl shadow-slate-200/70 ring-1 ring-emerald-500/10 dark:border-emerald-400/15 dark:bg-slate-950/90 dark:shadow-black/25 dark:ring-emerald-400/10">
       <CardHeader className="p-5 pb-3 sm:p-6 sm:pb-3">
         <CardTitle className="text-2xl">Entrar</CardTitle>
         <CardDescription className="leading-6">
