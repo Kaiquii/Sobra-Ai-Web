@@ -11,6 +11,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand: #1877f2;
+  --color-brand-hover: #1064d3;
 }
 
 .dark {
@@ -22,9 +24,20 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 0;
   scrollbar-color: #64748b #0f172a;
   scrollbar-width: thin;
+}
+
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]), textarea {
+    font-size: 16px;
+  }
+  [role="dialog"] {
+    overscroll-behavior: contain;
+  }
 }
 
 @layer base {

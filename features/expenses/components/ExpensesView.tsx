@@ -36,6 +36,7 @@ import {
   type ExpenseFormMode,
 } from "@/features/expenses/components/ExpenseFormDialog";
 import { useExpenseStore } from "@/features/expenses/store/useExpenseStore";
+import { useExpenseComposerStore } from "@/features/expenses/store/useExpenseComposerStore";
 import type {
   Category,
   Expense,
@@ -294,7 +295,7 @@ function ExpenseCard({
 
   return (
     <article
-      className={`grid gap-2.5 rounded-lg border bg-white px-3 py-2.5 shadow-sm hover:shadow-md dark:bg-slate-900/85 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:px-4 sm:py-3 ${
+      className={`grid grid-cols-[auto_minmax(0,1fr)_auto] gap-x-2.5 gap-y-2 rounded-lg border bg-white px-3 py-3 shadow-sm hover:shadow-md dark:bg-slate-900/85 sm:items-center sm:px-4 ${
         expense.is_paid
           ? "border-emerald-200 hover:border-emerald-300 dark:border-emerald-900/70 dark:hover:border-emerald-800"
           : "border-slate-200 hover:border-blue-200 dark:border-slate-800 dark:hover:border-blue-900/70"
@@ -302,11 +303,11 @@ function ExpenseCard({
       id={`expense-${expense.id}`}
       onDoubleClick={() => onView(expense)}
     >
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/55 dark:text-blue-300">
+      <div className="row-start-1 flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/55 dark:text-blue-300 sm:row-span-2">
         <ReceiptText aria-hidden="true" size={19} />
       </div>
 
-      <div className="min-w-0">
+      <div className="col-start-2 row-start-1 min-w-0 sm:row-span-2">
         <h2 className="truncate text-sm font-semibold text-slate-950 dark:text-white sm:text-base">
           {expense.description}
         </h2>
@@ -340,9 +341,9 @@ function ExpenseCard({
         ) : null}
       </div>
 
-      <div className="flex items-end justify-between gap-2 sm:flex-col sm:items-end">
+      <div className="contents">
         <div
-          className="flex items-center gap-0.5"
+          className="col-span-3 row-start-2 flex items-center justify-end gap-1 border-t border-slate-100 pt-1 dark:border-slate-800 sm:col-span-1 sm:col-start-3 sm:row-start-1 sm:border-0 sm:pt-0 [&_button]:min-h-11 [&_button]:min-w-11 sm:[&_button]:min-h-7 sm:[&_button]:min-w-7"
           onDoubleClick={(event) => event.stopPropagation()}
         >
           <button
@@ -413,8 +414,8 @@ function ExpenseCard({
           </button>
         </div>
 
-        <div className="flex flex-col items-end gap-1.5 text-right">
-          <strong className="text-base font-semibold text-red-600 dark:text-red-200 sm:text-lg">
+        <div className="col-start-3 row-start-1 flex max-w-32 flex-col items-end gap-1.5 text-right sm:row-start-2 sm:max-w-none">
+          <strong className="wrap-anywhere text-sm font-semibold tabular-nums text-red-600 dark:text-red-200 sm:text-lg">
             - {formatMoney(expense.amount)}
           </strong>
           <p className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300 sm:text-sm">
@@ -443,6 +444,9 @@ function ExpensesSkeleton() {
 }
 
 export function ExpensesView() {
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const isComposerOpen = useExpenseComposerStore((state) => state.isOpen);
+  const closeComposer = useExpenseComposerStore((state) => state.close);
   const [{ month, year }, setSelectedDate] = useState(getCurrentMonthReference);
   const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
   const [advanceTarget, setAdvanceTarget] = useState<Expense | null>(null);
@@ -592,6 +596,7 @@ export function ExpensesView() {
   }
 
   function closeFormDialog() {
+    closeComposer();
     setFormExpense(null);
     setFormMode(null);
   }
@@ -668,8 +673,31 @@ export function ExpensesView() {
   return (
     <>
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)_minmax(0,1.15fr)_minmax(0,1.05fr)_minmax(0,0.95fr)_auto] xl:items-center">
+        <div className="space-y-3 sm:hidden">
+          <div className="flex items-center gap-2">
+            <div className="relative min-w-0 flex-1">
+              <Search aria-hidden="true" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input aria-label="Buscar despesa" placeholder="Buscar despesa..." value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 outline-none focus:ring-2 focus:ring-blue-400 dark:border-slate-800 dark:bg-slate-900" />
+            </div>
+            <Button aria-label="Filtros de despesas" aria-expanded={isMobileFiltersOpen} aria-controls="mobile-expense-filters" onClick={() => setIsMobileFiltersOpen((open) => !open)} variant="secondary" size="iconLg">
+              <ListFilter aria-hidden="true" size={22} />
+            </Button>
+          </div>
+          <div aria-label="Tipo de despesa" className="grid grid-cols-4 gap-1.5">
+            {typeFilters.map((type) => (
+              <button key={type} type="button" aria-pressed={typeFilter === type} onClick={() => setTypeFilter(type)} className={`h-11 min-w-0 cursor-pointer rounded-full px-1 text-xs font-semibold ${typeFilter === type ? "bg-blue-600 text-white" : "bg-slate-200/70 text-slate-600 dark:bg-slate-800 dark:text-slate-300"}`}>{type}</button>
+            ))}
+          </div>
+          {isMobileFiltersOpen ? (
+            <div id="mobile-expense-filters" className="grid grid-cols-2 gap-2">
+              <DropdownSelect ariaLabel="Origem da despesa" icon={WalletCards} value={paymentSourceFilter} onChange={setPaymentSourceFilter} options={paymentSourceFilterOptions} />
+              <DropdownSelect ariaLabel="Status de pagamento" icon={CheckCircle2} value={paymentStatusFilter} onChange={setPaymentStatusFilter} options={paymentStatusFilterOptions} />
+              <DropdownSelect ariaLabel="Categoria da despesa" className="col-span-2" icon={ListFilter} value={selectedCategoryId} onChange={setSelectedCategoryId} options={[{label:"Todas categorias",value:"Todas"},...categories.map((category)=>({label:category.name,value:String(category.id)}))]} />
+            </div>
+          ) : null}
+        </div>
+        <div className="hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:block">
+          <div className="grid grid-cols-2 gap-2 lg:grid-cols-3 xl:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)_minmax(0,1.15fr)_minmax(0,1.05fr)_minmax(0,0.95fr)_auto] xl:items-center">
             <DropdownSelect
               ariaLabel="Filtrar por tipo"
               icon={ReceiptText}
@@ -688,7 +716,7 @@ export function ExpensesView() {
 
             <DropdownSelect
               ariaLabel="Filtrar por categoria"
-              className="sm:col-span-2 lg:col-span-1"
+              className="min-w-0 lg:col-span-1"
               icon={ListFilter}
               onChange={setSelectedCategoryId}
               options={[
@@ -703,14 +731,14 @@ export function ExpensesView() {
 
             <DropdownSelect
               ariaLabel="Filtrar por status de pagamento"
-              className="sm:col-span-2 lg:col-span-1"
+              className="min-w-0 lg:col-span-1"
               icon={CheckCircle2}
               onChange={setPaymentStatusFilter}
               options={paymentStatusFilterOptions}
               value={paymentStatusFilter}
             />
 
-            <div className="relative sm:col-span-2 lg:col-span-1">
+            <div className="relative col-span-2 lg:col-span-1">
               <Search
                 aria-hidden="true"
                 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -745,13 +773,13 @@ export function ExpensesView() {
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-wrap items-center justify-between gap-3 py-1 sm:rounded-2xl sm:border sm:border-slate-200 sm:bg-white sm:px-5 sm:py-4 sm:shadow-sm sm:dark:border-slate-800 sm:dark:bg-slate-900">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300">
+            <div className="hidden h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300 sm:flex">
               <FileText aria-hidden="true" size={22} />
             </div>
             <div>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              <p className="hidden text-xs font-medium text-slate-500 dark:text-slate-400 sm:block">
                 Exibindo
               </p>
               <strong className="text-base font-semibold text-slate-950 dark:text-slate-50">
@@ -853,7 +881,7 @@ export function ExpensesView() {
 
       <button
         aria-label="Nova despesa"
-        className="fixed bottom-6 right-6 z-20 inline-flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-950/25 hover:bg-blue-700 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400 sm:hidden"
+        className="hidden"
         onClick={openCreateDialog}
         type="button"
       >
@@ -914,8 +942,8 @@ export function ExpensesView() {
       />
 
       <ExpenseFormDialog
-        expense={formExpense}
-        mode={formMode}
+        expense={isComposerOpen ? null : formExpense}
+        mode={isComposerOpen ? "create" : formMode}
         month={month}
         onClose={closeFormDialog}
         onSuccess={refreshExpenses}

@@ -62,8 +62,8 @@ export function ExpenseDeleteDialog({
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 px-4 py-6 backdrop-blur-sm"
       role="dialog"
     >
-      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-950/15 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
-        <h2 className="text-3xl font-semibold tracking-normal text-slate-950 dark:text-white">
+      <div className="max-h-[calc(100dvh-3rem)] w-full max-w-md overflow-y-auto rounded-lg border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <h2 className="text-xl font-semibold tracking-normal text-slate-950 dark:text-white">
           Excluir despesa
         </h2>
 

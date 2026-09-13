@@ -3,11 +3,13 @@
 import {
   ListFilter,
   Loader2,
+  Minus,
   Plus,
   ReceiptText,
   Save,
   Trash2,
   WalletCards,
+  X,
 } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
@@ -19,6 +21,7 @@ import { DropdownSelect } from "@/components/ui/dropdown-select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { useLockBodyScroll } from "@/components/ui/use-lock-body-scroll";
 import { useExpenseStore } from "@/features/expenses/store/useExpenseStore";
 import type {
@@ -495,44 +498,47 @@ function ExpenseFormDialogContent({
   return (
     <>
       <div
+        aria-labelledby="expense-form-title"
         aria-modal="true"
-        className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-slate-950/75 px-3 py-3 backdrop-blur-sm sm:px-4"
+        className="fixed inset-0 z-50 flex items-end justify-center overflow-hidden bg-slate-950/75 backdrop-blur-sm sm:items-center sm:px-4 sm:py-3"
         role="dialog"
       >
         <form
-          className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-950/15 dark:border-slate-800 dark:bg-slate-900 sm:max-h-[calc(100dvh-2rem)] sm:p-6"
+          className="flex h-dvh w-full flex-col bg-white pt-[env(safe-area-inset-top)] dark:bg-slate-950 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:max-w-2xl sm:rounded-lg sm:border sm:border-slate-200 sm:p-6 sm:shadow-xl sm:dark:border-slate-800 sm:dark:bg-slate-900"
           onSubmit={handleSubmit}
         >
-          <h2 className="shrink-0 text-2xl font-semibold tracking-normal text-slate-950 dark:text-white sm:text-3xl">
-            {mode === "create" ? "Nova despesa" : "Editar despesa"}
-          </h2>
+          <div className="grid h-14 shrink-0 grid-cols-[48px_1fr_48px] items-center px-2 sm:h-auto sm:grid-cols-[1fr_auto] sm:px-0">
+            <Button aria-label="Fechar despesa" className="sm:col-start-2 sm:row-start-1" disabled={isSubmitting} onClick={onClose} size="icon" type="button" variant="ghost">
+              <X aria-hidden="true" size={24} />
+            </Button>
+            <h2 id="expense-form-title" className="text-center text-lg font-bold text-slate-950 dark:text-white sm:col-start-1 sm:row-start-1 sm:text-left sm:text-2xl">
+              {mode === "create" ? "Nova Despesa" : "Editar Despesa"}
+            </h2>
+          </div>
 
-          <div className="mt-4 min-h-0 space-y-3 overflow-y-auto pr-1">
+          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-6 pb-6 pt-4 sm:mt-4 sm:space-y-3 sm:px-0 sm:py-0 sm:pr-1">
             {error || localError ? (
               <Alert variant="error">{localError ?? error}</Alert>
             ) : null}
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="expense-amount">Valor</Label>
+              <div className="space-y-2 pb-3 text-center sm:pb-0 sm:text-left">
+                <Label htmlFor="expense-amount">Valor da Despesa</Label>
+                <div className="flex min-w-0 items-center justify-center gap-2 sm:block">
+                <span aria-hidden="true" className="text-2xl font-bold text-slate-500 sm:hidden">R$</span>
                 <Input
-                  autoFocus
+                  className="max-sm:h-16 max-sm:w-auto max-sm:min-w-0 max-sm:max-w-[calc(100%-3rem)] max-sm:border-0 max-sm:bg-transparent max-sm:px-0 max-sm:text-center max-sm:text-4xl! max-sm:font-bold max-sm:shadow-none max-sm:dark:bg-transparent"
+                  size={Math.max(4, draft.amount.length)}
                   id="expense-amount"
                   inputMode="decimal"
                   onChange={(event) => updateDraft({ amount: event.target.value })}
-                  placeholder="Ex: 150,75"
+                  placeholder="0,00"
                   value={draft.amount}
                 />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="expense-date">Data de pagamento</Label>
-                <DatePicker
-                  id="expense-date"
-                  onChange={(date) => updateDraft({ date })}
-                  value={draft.date}
-                />
-              </div>
+
             </div>
 
             <div className="space-y-2">
@@ -545,24 +551,9 @@ function ExpenseFormDialogContent({
               />
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="expense-notes">Observações</Label>
-                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                  {draft.notes.length} / {NOTES_MAX_LENGTH}
-                </span>
-              </div>
-              <Textarea
-                className="min-h-20"
-                id="expense-notes"
-                maxLength={NOTES_MAX_LENGTH}
-                onChange={(event) => updateDraft({ notes: event.target.value })}
-                placeholder="Ex: Divisão do valor, motivo ou lembrete."
-                value={draft.notes}
-              />
-            </div>
 
-            <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
               <div className="space-y-2">
                 <Label htmlFor="expense-category">Categoria</Label>
                 <DropdownSelect
@@ -578,12 +569,14 @@ function ExpenseFormDialogContent({
               </div>
 
               <button
-                className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-800"
+                aria-label="Criar categoria"
+                title="Criar categoria"
+                className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-800"
                 onClick={() => setIsAddingCategory((current) => !current)}
                 type="button"
               >
                 <Plus aria-hidden="true" size={16} />
-                Categoria
+                <span className="hidden sm:inline">Categoria</span>
               </button>
             </div>
 
@@ -736,8 +729,25 @@ function ExpenseFormDialogContent({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="expense-type">Tipo</Label>
+                <Label htmlFor="expense-date">Data de pagamento</Label>
+                <DatePicker
+                  id="expense-date"
+                  onChange={(date) => updateDraft({ date })}
+                  value={draft.date}
+                />
+              </div>
+
+              <div className={cn("space-y-2", mode === "edit" && "max-sm:hidden")}>
+                <Label htmlFor="expense-type">Tipo de pagamento</Label>
+                <div className="grid grid-cols-3 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-900 sm:hidden" role="group" aria-label="Tipo da despesa">
+                  {expenseTypes.map((type) => (
+                    <button key={type} type="button" disabled={mode === "edit"} aria-pressed={draft.type === type} onClick={() => updateDraft({ type, installments: 1 })} className={cn("h-12 min-w-0 cursor-pointer px-1 text-sm font-semibold disabled:cursor-not-allowed", draft.type === type ? "bg-blue-500/15 text-blue-600 dark:text-blue-400" : "text-slate-600 dark:text-slate-300")}>
+                      {type}
+                    </button>
+                  ))}
+                </div>
                 <DropdownSelect
+                  className="hidden sm:block"
                   ariaLabel="Selecionar tipo"
                   id="expense-type"
                   disabled={mode === "edit"}
@@ -749,9 +759,15 @@ function ExpenseFormDialogContent({
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className={cn("space-y-2", (!showInstallments || mode === "edit") && "max-sm:hidden")}>
                 <Label htmlFor="expense-installments">Parcelas</Label>
+                <div className="flex h-14 items-center justify-between rounded-xl bg-slate-100 px-2 dark:bg-slate-900 sm:hidden">
+                  <Button aria-label="Diminuir parcelas" disabled={mode === "edit" || draft.installments <= 1} onClick={() => updateDraft({ installments: draft.installments - 1 })} size="icon" variant="ghost" type="button"><Minus aria-hidden="true" size={22} /></Button>
+                  <output aria-label="Número de parcelas" className="font-semibold tabular-nums">{draft.installments}x</output>
+                  <Button aria-label="Aumentar parcelas" disabled={mode === "edit"} onClick={() => updateDraft({ installments: draft.installments + 1 })} size="icon" variant="ghost" type="button"><Plus aria-hidden="true" size={22} /></Button>
+                </div>
                 <Input
+                  className="hidden sm:block"
                   disabled={!showInstallments || mode === "edit"}
                   id="expense-installments"
                   min={1}
@@ -764,22 +780,41 @@ function ExpenseFormDialogContent({
               </div>
             </div>
 
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="expense-notes">Observações</Label>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  {draft.notes.length} / {NOTES_MAX_LENGTH}
+                </span>
+              </div>
+              <Textarea
+                className="min-h-20"
+                id="expense-notes"
+                maxLength={NOTES_MAX_LENGTH}
+                onChange={(event) => updateDraft({ notes: event.target.value })}
+                placeholder="Ex: Divisão do valor, motivo ou lembrete."
+                value={draft.notes}
+              />
+            </div>
+
             {showUpdateFuture ? (
-              <label className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-300">
+              <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-300">
                 <input
+                  aria-label={updateFutureLabel}
                   checked={draft.updateFuture}
-                  className="h-5 w-5 rounded border-slate-400 bg-transparent accent-blue-600"
+                  className="hidden h-5 w-5 rounded border-slate-400 bg-transparent accent-blue-600 sm:block"
                   onChange={(event) => updateDraft({ updateFuture: event.target.checked })}
                   type="checkbox"
                 />
-                {updateFutureLabel}
-              </label>
+                <span className="min-w-0 flex-1">{updateFutureLabel}</span>
+                <Switch ariaLabel={updateFutureLabel} className="sm:hidden" checked={draft.updateFuture} disabled={isSubmitting} onCheckedChange={(updateFuture) => updateDraft({ updateFuture })} />
+              </div>
             ) : null}
           </div>
 
-          <div className="mt-4 flex shrink-0 justify-end gap-6">
+          <div className="flex shrink-0 justify-end gap-6 px-6 pb-[max(16px,env(safe-area-inset-bottom))] pt-3 sm:mt-4 sm:p-0">
             <button
-              className="cursor-pointer text-sm font-semibold text-blue-600 hover:text-blue-500 disabled:cursor-not-allowed dark:text-blue-500"
+              className="hidden cursor-pointer text-sm font-semibold text-blue-600 hover:text-blue-500 disabled:cursor-not-allowed dark:text-blue-500 sm:block"
               disabled={isSubmitting}
               onClick={onClose}
               type="button"
@@ -788,7 +823,7 @@ function ExpenseFormDialogContent({
             </button>
             <button
               className={cn(
-                "inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-500 disabled:cursor-not-allowed disabled:opacity-60 dark:text-blue-500",
+                "inline-flex cursor-pointer items-center justify-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-500 disabled:cursor-not-allowed disabled:opacity-60 dark:text-blue-500 max-sm:h-13 max-sm:w-full max-sm:rounded-xl max-sm:bg-blue-600 max-sm:text-white max-sm:dark:text-white max-sm:hover:text-white max-sm:hover:bg-blue-700",
               )}
               disabled={isSubmitting || (isSplitPayment && !isDistributionValid)}
               type="submit"
@@ -798,7 +833,7 @@ function ExpenseFormDialogContent({
               ) : (
                 <Save aria-hidden="true" size={15} />
               )}
-              Salvar
+              {mode === "edit" ? "Salvar alterações" : "Salvar despesa"}
             </button>
           </div>
         </form>

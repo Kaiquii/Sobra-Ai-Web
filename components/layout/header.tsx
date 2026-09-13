@@ -2,6 +2,7 @@
 
 import {
   ChevronDown,
+  ArrowLeft,
   Diamond,
   Home,
   LogOut,
@@ -29,8 +30,9 @@ type HeaderProps = {
 };
 
 const extraRouteTitles = [
-  { href: "/home", label: "Home" },
-  { href: "/salario", label: "Salário" },
+  { href: "/home", label: "SobraAí" },
+  { href: "/inicio", label: "Visão Mensal" },
+  { href: "/salario", label: "Configurações de Renda" },
   { href: "/relatorios/compromissos-parcelados", label: "Compromissos Parcelados" },
   { href: "/perfil/ajuda", label: "Central de Ajuda" },
   { href: "/perfil/categorias", label: "Categorias" },
@@ -116,12 +118,12 @@ export function Header({ onOpenSidebar }: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-slate-100/95 px-4 py-2 text-slate-950 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:text-slate-50 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-3 py-2 text-slate-950 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:text-slate-50 sm:px-6 lg:px-8">
         <div className="flex w-full items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <Button
               aria-label="Abrir menu"
-              className="shrink-0 rounded-full border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"
+              className="max-sm:hidden shrink-0 rounded-full border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"
               onClick={onOpenSidebar}
               size="iconSm"
               title="Abrir menu"
@@ -131,13 +133,19 @@ export function Header({ onOpenSidebar }: HeaderProps) {
               <Menu aria-hidden="true" size={17} strokeWidth={2.25} />
             </Button>
 
+            {pathname !== "/home" && pathname !== "/inicio" ? (
+              <Button aria-label="Voltar" variant="ghost" size="icon" className="shrink-0 sm:hidden" onClick={() => router.push(pathname.startsWith("/perfil/") || pathname === "/salario" ? "/perfil" : pathname.startsWith("/relatorios/") ? "/relatorios" : "/inicio")}>
+                <ArrowLeft aria-hidden="true" size={22} />
+              </Button>
+            ) : null}
+
             <div className="min-w-0">
-              <h1 className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50 sm:text-base">
+              <h1 className="line-clamp-2 text-base font-bold leading-tight text-slate-950 dark:text-slate-50 sm:text-lg">
                 {currentPageTitle}
               </h1>
               {currentPageTitle !== "SobraAi" ? (
                 <p className="hidden truncate text-xs text-slate-500 dark:text-slate-400 sm:block">
-                  SobraAi
+                  SobraAí
                 </p>
               ) : null}
             </div>
@@ -146,7 +154,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
           <div className="flex items-center gap-1.5">
             <Button
               aria-label="Ir para home"
-              className="rounded-full border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"
+              className="max-sm:hidden h-11 w-11 shrink-0 rounded-full border-0 bg-transparent shadow-none dark:bg-transparent sm:h-8 sm:w-8"
               onClick={() => router.push("/home")}
               size="iconSm"
               title="Home"
@@ -157,7 +165,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
             </Button>
             <Button
               aria-label="Abrir assistente com IA"
-              className="rounded-full border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"
+              className="h-11 w-11 shrink-0 rounded-full border-0 bg-transparent text-brand shadow-none dark:bg-transparent dark:text-brand sm:h-8 sm:w-8"
               onClick={() => setIsAssistantDialogOpen(true)}
               size="iconSm"
               title="Assistente com IA"
@@ -167,10 +175,10 @@ export function Header({ onOpenSidebar }: HeaderProps) {
               <MessageCircle aria-hidden="true" size={16} strokeWidth={2.25} />
             </Button>
             <ThemeToggle
-              className="h-8 w-8 rounded-full border border-slate-300 bg-white p-0 dark:border-slate-700 dark:bg-slate-900"
+              className="h-11 w-11 shrink-0 rounded-full border-0 bg-transparent p-0 shadow-none dark:bg-transparent sm:h-8 sm:w-8"
               iconSize={16}
             />
-            <div className="relative" ref={userMenuRef}>
+            <div className="relative hidden sm:block" ref={userMenuRef}>
               <button
                 aria-expanded={isUserMenuOpen}
                 aria-haspopup="dialog"

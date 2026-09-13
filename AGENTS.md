@@ -17,6 +17,8 @@ As regras desses arquivos fazem parte do contrato do projeto. Nao fuja da arquit
 
 ## Harness de IA
 
+- Somente o usuário inicia o projeto. IAs não devem iniciar ou reiniciar servidores, nem executar `npm run dev`, `next dev`, `npm start` ou equivalentes, inclusive em outra porta ou em segundo plano. Para validação visual, usar o servidor iniciado pelo usuário; se não houver, solicitar que ele o inicie.
+
 - Execute `npm run ai:context` antes de analisar ou alterar o projeto.
 - Execute `npm run ai:doctor` ao modificar estrutura, configuração ou documentação.
 - Execute `npm run ai:check` antes de concluir alterações de código.

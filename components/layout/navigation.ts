@@ -1,7 +1,7 @@
 import {
   BarChart3,
   Home,
-  TrendingDown,
+  ReceiptText,
   UserRound,
 } from "lucide-react";
 
@@ -14,7 +14,7 @@ export const dashboardNavigation = [
   },
   {
     href: "/despesas",
-    icon: TrendingDown,
+    icon: ReceiptText,
     label: "Despesas",
     text: "Organize seus gastos.",
   },

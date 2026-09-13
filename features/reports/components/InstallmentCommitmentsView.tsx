@@ -107,7 +107,7 @@ function SummaryCard({ description, icon, label, value }: SummaryCardProps) {
           <p className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
             {label}
           </p>
-          <strong className="mt-2 block truncate text-xl font-semibold text-slate-950 dark:text-slate-50">
+          <strong className="mt-2 block wrap-anywhere text-lg font-semibold tabular-nums text-slate-950 dark:text-slate-50 sm:text-xl">
             {value}
           </strong>
           <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
@@ -115,7 +115,7 @@ function SummaryCard({ description, icon, label, value }: SummaryCardProps) {
           </p>
         </div>
 
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300">
+        <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300 sm:flex">
           {icon}
         </div>
       </div>
@@ -363,7 +363,7 @@ export function InstallmentCommitmentsView({
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
-      <div className="flex min-w-0 items-start justify-between gap-3">
+      <div className="hidden min-w-0 items-start justify-between gap-3 sm:flex">
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2">
             <Link
@@ -378,7 +378,7 @@ export function InstallmentCommitmentsView({
             >
               <ArrowLeft aria-hidden="true" size={16} />
             </Link>
-            <h1 className="truncate text-xl font-semibold text-slate-950 dark:text-slate-50 sm:text-2xl">
+            <h1 className="wrap-anywhere text-lg font-semibold text-slate-950 dark:text-slate-50 sm:text-2xl">
               Compromissos Parcelados
             </h1>
           </div>
@@ -454,7 +454,7 @@ export function InstallmentCommitmentsView({
 
       {!isLoading && data && hasPurchases ? (
         <>
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
             <SummaryCard
               description={`${visibleSummary.total_compras} compra(s) agrupada(s).`}
               icon={<CreditCard aria-hidden="true" size={22} />}

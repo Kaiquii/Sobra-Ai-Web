@@ -1,6 +1,7 @@
 "use client";
 
-import { X, WalletCards } from "lucide-react";
+import { X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -28,6 +29,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       <aside
         aria-hidden={!isOpen}
+        inert={!isOpen}
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex w-[min(320px,calc(100vw-32px))] flex-col border-r border-slate-200 bg-white text-slate-950 shadow-xl dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50",
           isOpen ? "translate-x-0" : "-translate-x-full",
@@ -35,12 +37,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       >
         <div className="flex items-center justify-between gap-3 border-b border-slate-200 p-4 dark:border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-600 text-white dark:bg-emerald-500 dark:text-slate-950">
-              <WalletCards className="h-5 w-5" />
-            </div>
+            <Image src="/logo_app.png" alt="" width={44} height={44} className="rounded-lg" />
             <div>
-              <p className="text-sm font-semibold">SobraAi</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Navegacao</p>
+              <p className="text-sm font-semibold">SobraAí</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Sua vida financeira</p>
             </div>
           </div>
 
@@ -60,7 +60,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         <nav className="flex flex-1 flex-col gap-2 p-4">
           {dashboardNavigation.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
             return (
               <Link

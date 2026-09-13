@@ -165,7 +165,7 @@ export function ProfileView() {
 
   return (
     <>
-      <section className="mx-auto flex w-full min-w-0 max-w-4xl flex-col gap-5 overflow-x-hidden px-3 sm:px-4 lg:px-0">
+      <section className="mx-auto flex w-full min-w-0 max-w-4xl flex-col gap-5">
         <article className="min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center gap-4 overflow-hidden">
@@ -195,7 +195,7 @@ export function ProfileView() {
               )}
 
               <div className="min-w-0 flex-1 overflow-hidden">
-                <h2 className="truncate text-2xl font-semibold text-slate-950 dark:text-slate-50">
+                <h2 className="wrap-anywhere text-xl font-semibold text-slate-950 dark:text-slate-50 sm:text-2xl">
                   {user?.name || "Usuário"}
                 </h2>
 

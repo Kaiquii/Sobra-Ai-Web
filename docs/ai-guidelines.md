@@ -10,6 +10,16 @@ Este arquivo define regras permanentes para qualquer IA ou pessoa que trabalhar 
 - Leia `docs/backend-api-contract.md` antes de implementar ou alterar chamadas de API.
 - Como este projeto usa Next.js 16, consulte a documentacao local em `node_modules/next/dist/docs/` antes de usar APIs, convencoes ou estruturas do Next.js.
 - Entenda a estrutura atual antes de criar arquivos, pastas, componentes ou stores.
+- Para alterações visuais, consulte `docs/android-reference.md` e o projeto Android indicado nele.
+
+## Execução local do projeto
+
+- Somente o usuário inicia o projeto e controla seu servidor local.
+- IAs não devem iniciar ou reiniciar servidores de desenvolvimento ou produção, inclusive para testes visuais, em outra porta ou em segundo plano.
+- Não executar `npm run dev`, `next dev`, `npm start` ou comandos equivalentes para subir o aplicativo.
+- Para conferir a interface, reutilizar o servidor já iniciado pelo usuário. Se não estiver disponível, pedir que ele o inicie e informar que a validação visual depende disso.
+- Não encerrar servidores do usuário sem solicitação explícita. Não deixar processos de prévia rodando após o trabalho.
+- Verificações finitas, como lint, checagem de tipos, build e comandos do harness que não iniciam servidores, continuam permitidas.
 
 ## Componentes visuais
 
