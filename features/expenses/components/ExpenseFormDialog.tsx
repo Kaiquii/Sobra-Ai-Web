@@ -538,7 +538,14 @@ function ExpenseFormDialogContent({
                 </div>
               </div>
 
-
+              <div className="hidden space-y-2 sm:block">
+                <Label htmlFor="expense-date">Data de pagamento</Label>
+                <DatePicker
+                  id="expense-date"
+                  onChange={(date) => updateDraft({ date })}
+                  value={draft.date}
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -728,10 +735,10 @@ function ExpenseFormDialogContent({
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="expense-date">Data de pagamento</Label>
+              <div className="space-y-2 sm:hidden">
+                <Label htmlFor="expense-date-mobile">Data de pagamento</Label>
                 <DatePicker
-                  id="expense-date"
+                  id="expense-date-mobile"
                   onChange={(date) => updateDraft({ date })}
                   value={draft.date}
                 />
