@@ -470,6 +470,7 @@ export function ExpensesView() {
   const advanceStatusUpdatingId = useExpenseStore(
     (state) => state.advanceStatusUpdatingId,
   );
+  const effectiveExpenses = useExpenseStore((state) => state.effectiveExpenses);
   const error = useExpenseStore((state) => state.error);
   const expenses = useExpenseStore((state) => state.expenses);
   const isLoading = useExpenseStore((state) => state.isLoading);
@@ -574,8 +575,38 @@ export function ExpensesView() {
     selectedCategoryId,
     typeFilter,
   ]);
+  const filteredEffectiveExpenses = useMemo(() => {
+    return effectiveExpenses.filter((expense) => {
+      const matchesSearch = matchesSearchFilter(expense, searchQuery);
+      const matchesType = matchesTypeFilter(expense, typeFilter);
+      const matchesPaymentSource = matchesPaymentSourceFilter(
+        expense,
+        paymentSourceFilter,
+      );
+      const matchesCategory = matchesCategoryFilter(expense, selectedCategoryId);
+      const matchesPaymentStatus = matchesPaymentStatusFilter(
+        expense,
+        paymentStatusFilter,
+      );
 
-  const totalAmount = filteredExpenses.reduce(
+      return (
+        matchesSearch &&
+        matchesType &&
+        matchesPaymentSource &&
+        matchesCategory &&
+        matchesPaymentStatus
+      );
+    });
+  }, [
+    effectiveExpenses,
+    paymentSourceFilter,
+    paymentStatusFilter,
+    searchQuery,
+    selectedCategoryId,
+    typeFilter,
+  ]);
+
+  const totalAmount = filteredEffectiveExpenses.reduce(
     (total, expense) => total + expense.amount,
     0,
   );

@@ -25,6 +25,7 @@ function isDateInMonth(date: string | null | undefined, month: number, year: num
 type ExpenseState = {
   advancedExpenses: Expense[];
   categories: Category[];
+  effectiveExpenses: Expense[];
   error: string | null;
   expenses: Expense[];
   isLoading: boolean;
@@ -66,6 +67,7 @@ type ExpenseState = {
 export const useExpenseStore = create<ExpenseState>((set) => ({
   advancedExpenses: [],
   categories: [],
+  effectiveExpenses: [],
   error: null,
   expenses: [],
   isLoading: false,
@@ -200,6 +202,7 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
             isDateInMonth(expense.advanced_at, month, year),
         ),
         categories: categoriesResponse.categories,
+        effectiveExpenses: effectiveExpensesResponse.expenses,
         expenses: expensesResponse.expenses,
         isLoading: false,
         total: expensesResponse.total,
@@ -278,6 +281,12 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
 
       set((state) => ({
         expenses: state.expenses.map((expense) =>
+          expense.id === id ? { ...expense, ...response.expense } : expense,
+        ),
+        effectiveExpenses: state.effectiveExpenses.map((expense) =>
+          expense.id === id ? { ...expense, ...response.expense } : expense,
+        ),
+        advancedExpenses: state.advancedExpenses.map((expense) =>
           expense.id === id ? { ...expense, ...response.expense } : expense,
         ),
         message: response.message,
