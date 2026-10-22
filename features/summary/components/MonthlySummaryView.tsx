@@ -41,6 +41,10 @@ import {
   type MonthlyExpensesData,
 } from "@/features/summary/components/MonthlyExpensesSection";
 import { cn } from "@/lib/utils";
+import {
+  getMonthlyLoadFeedback,
+  type MonthlyLoadState,
+} from "@/features/summary/utils/monthlyLoadState";
 
 const monthFormatter = new Intl.DateTimeFormat("pt-BR", {
   month: "long",
@@ -313,14 +317,19 @@ function SummarySkeleton() {
 export function MonthlySummaryView() {
   const [{ month, year }, setSelectedDate] = useState(getCurrentMonthReference);
   const hidden = useFinancialPrivacyStore((state) => state.valuesHidden);
-  const [error, setError] = useState<string | null>(null);
   const [expenseFormMode, setExpenseFormMode] =
     useState<ExpenseFormMode | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [incomeShortcut, setIncomeShortcut] = useState<IncomeShortcut | null>(
     null,
   );
   const [refreshKey, setRefreshKey] = useState(0);
+  const requestKey = `${year}-${month}-${refreshKey}`;
+  const [loadState, setLoadState] = useState<MonthlyLoadState>({
+    requestKey: "",
+    status: "loading",
+    error: null,
+  });
+  const { isLoading, error } = getMonthlyLoadFeedback(loadState, requestKey);
   const [overview, setOverview] = useState<{
     month: number;
     year: number;
@@ -338,8 +347,7 @@ export function MonthlySummaryView() {
 
     async function loadSummary() {
       try {
-        setError(null);
-        setIsLoading(true);
+        setLoadState({ requestKey, status: "loading", error: null });
         const mobile = window.matchMedia("(max-width: 639px)").matches;
         const [response, expensesData] = await Promise.all([
           summaryApi.getMonthlySummary(month, year),
@@ -356,16 +364,16 @@ export function MonthlySummaryView() {
 
         if (isMounted) {
           setOverview({ month, year, summary: response, expensesData });
+          setLoadState({ requestKey, status: "success", error: null });
         }
       } catch {
         if (isMounted) {
-          setError(
-            "Não foi possível atualizar a visão mensal. Tente novamente.",
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
+          setLoadState({
+            requestKey,
+            status: "error",
+            error:
+              "Não foi possível atualizar a visão mensal. Tente novamente.",
+          });
         }
       }
     }
@@ -375,7 +383,7 @@ export function MonthlySummaryView() {
     return () => {
       isMounted = false;
     };
-  }, [month, refreshKey, year]);
+  }, [month, requestKey, year]);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 639px)");

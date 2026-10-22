@@ -128,7 +128,7 @@ export function CompactExpenseCard({
         <p className="truncate text-xs leading-5 text-[#7A849E]">
           {categoryName}
         </p>
-        <div className="mt-2 flex min-w-0 items-center gap-1.5 overflow-x-auto">
+        <div className="scrollbar-none mt-2 flex min-w-0 items-center gap-1.5 overflow-x-auto">
           <Chip>{type}</Chip>
           {expense.is_paid ? <Chip color="#4CAF50">Paga</Chip> : null}
           {expense.is_advanced ? (

@@ -3,7 +3,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type Theme = "light" | "dark";
+import {
+  applyBrowserTheme,
+  getInitialTheme,
+  THEME_STORAGE_KEY,
+  type Theme,
+} from "@/lib/theme";
 
 type ThemeState = {
   theme: Theme;
@@ -11,32 +16,24 @@ type ThemeState = {
   toggleTheme: () => void;
 };
 
-function applyTheme(theme: Theme) {
-  if (typeof document === "undefined") {
-    return;
-  }
-
-  document.documentElement.classList.toggle("dark", theme === "dark");
-}
-
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
-      theme: "light",
+      theme: getInitialTheme(),
       setTheme: (theme) => {
-        applyTheme(theme);
+        applyBrowserTheme(theme);
         set({ theme });
       },
       toggleTheme: () =>
         set((state) => {
           const theme = state.theme === "dark" ? "light" : "dark";
-          applyTheme(theme);
+          applyBrowserTheme(theme);
 
           return { theme };
         }),
     }),
     {
-      name: "app-financeiro-theme",
+      name: THEME_STORAGE_KEY,
     },
   ),
 );

@@ -1,28 +1,42 @@
 "use client";
 
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { apiClient } from "@/lib/api";
 import { getApiErrorMessage } from "@/lib/api-errors";
 import { useThemeStore } from "@/store/useThemeStore";
+import { applyBrowserTheme } from "@/lib/theme";
 
 export function Providers({ children }: Readonly<{ children: React.ReactNode }>) {
   const theme = useThemeStore((state) => state.theme);
   const isProduction = process.env.NODE_ENV === "production";
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    const restoredTheme = useThemeStore.getState().theme;
-    document.documentElement.classList.toggle("dark", restoredTheme === "dark");
-    const color = restoredTheme === "dark" ? "#020617" : "#f8fafc";
-    document.documentElement.style.backgroundColor = color;
-    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
-      meta.setAttribute("content", color);
+    const syncTheme = () => applyBrowserTheme(useThemeStore.getState().theme);
+    const syncWhenVisible = () => {
+      if (document.visibilityState === "visible") syncTheme();
+    };
+    syncTheme();
+    const observer = new MutationObserver(syncTheme);
+    observer.observe(document.head, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["content", "media", "name"],
     });
-  }, [theme]);
+    window.addEventListener("pageshow", syncTheme);
+    document.addEventListener("visibilitychange", syncWhenVisible);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("pageshow", syncTheme);
+      document.removeEventListener("visibilitychange", syncWhenVisible);
+    };
+  }, [theme, pathname]);
 
   useEffect(() => {
     const canRegisterServiceWorker =

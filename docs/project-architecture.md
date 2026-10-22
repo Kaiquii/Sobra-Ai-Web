@@ -86,6 +86,8 @@ Este projeto deve manter uma arquitetura simples, previsivel e facil de evoluir.
 - A Home mantém os links com pré-carregamento e feedback durante a navegação. Preservar a tela atual enquanto a rota de destino fica pronta, sem adicionar um skeleton intermediário genérico.
 - O assistente é carregado sob demanda. Os formulários do resumo mensal ficam disponíveis junto da tela para abrir sem uma etapa adicional de carregamento.
 - Na visão mensal mobile, resumo e despesas são apresentados juntos. Atualizações no mesmo período preservam os cards e a lista até a resposta chegar, inclusive depois de salvar uma renda. Erros de atualização devem continuar visíveis.
+- O carregamento e o erro da visão mensal pertencem à requisição do período selecionado. Ao trocar de mês, considerar o novo período em carregamento imediatamente, antes da execução do efeito, sem mostrar o erro ou o estado concluído do período anterior.
+- `lib/theme.ts` centraliza as cores, a preferência inicial e a sincronização do tema com o navegador. Sem preferência salva, respeitar o tema do sistema. A cor das barras deve acompanhar o tema do app também após navegação e retorno do segundo plano.
 - O PWA abre diretamente na visão mensal. O acesso pelo navegador mantém a Home de escolha de áreas no desktop.
 - O service worker guarda somente arquivos estáticos versionados do build, com limite de entradas. Páginas, respostas de navegação e dados financeiros não entram nesse cache. O transporte nativo do service worker usa `fetch`; as chamadas da aplicação continuam com Axios.
 - Esse cache reduz downloads nas próximas aberturas, mas não elimina a dependência da rede para carregar o documento inicial e os dados.

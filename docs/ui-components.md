@@ -60,6 +60,10 @@ O componente ja cuida de:
 - `SelectionSheet` centraliza o painel inferior, bloqueio de rolagem, foco, fechamento pela área externa e tecla Esc. As listas de seleção suportam navegação pelo teclado e devolvem o foco ao gatilho ao fechar.
 - `CompactExpenseCard`, em `features/expenses/components`, centraliza a apresentação de despesa do Início: categoria, parcelas, pagamento, adiantamento, observações, valor privado e origem. Ações de detalhes continuam usando o diálogo compartilhado existente.
 
+## Faixas compactas com rolagem
+
+Usar a classe compartilhada `scrollbar-none` em faixas internas que precisam de rolagem por toque sem exibir a barra, como os indicadores do cartão compacto de despesa. Ela cobre tanto navegadores com `scrollbar-width` quanto os que usam o pseudo-elemento WebKit. Não ocultar globalmente as barras das páginas ou dos painéis.
+
 ## DatePicker
 
 O componente `components/ui/date-picker.tsx` e o seletor de data padrao do projeto.

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 import { Providers } from "@/app/providers";
+import { THEME_BOOTSTRAP_SCRIPT, THEME_COLORS } from "@/lib/theme";
 
 export const metadata: Metadata = {
   applicationName: "SobraAi",
@@ -21,7 +22,10 @@ export const viewport: Viewport = {
   interactiveWidget: "resizes-content",
   viewportFit: "cover",
   colorScheme: "light dark",
-  themeColor: "#f8fafc",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: THEME_COLORS.light },
+    { media: "(prefers-color-scheme: dark)", color: THEME_COLORS.dark },
+  ],
 };
 
 export default function RootLayout({
@@ -34,17 +38,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                var storedTheme = localStorage.getItem("app-financeiro-theme");
-                var parsedTheme = storedTheme ? JSON.parse(storedTheme) : null;
-                var theme = parsedTheme && parsedTheme.state ? parsedTheme.state.theme : "light";
-                document.documentElement.classList.toggle("dark", theme === "dark");
-                var color = theme === "dark" ? "#020617" : "#f8fafc";
-                document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) { meta.setAttribute("content", color); });
-                document.documentElement.style.backgroundColor = color;
-              } catch (error) {}
-            `,
+            __html: THEME_BOOTSTRAP_SCRIPT,
           }}
         />
       </head>
