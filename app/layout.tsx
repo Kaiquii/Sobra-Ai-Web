@@ -19,11 +19,9 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   interactiveWidget: "resizes-content",
+  viewportFit: "cover",
   colorScheme: "light dark",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
-    { media: "(prefers-color-scheme: dark)", color: "#020617" },
-  ],
+  themeColor: "#f8fafc",
 };
 
 export default function RootLayout({
@@ -42,6 +40,9 @@ export default function RootLayout({
                 var parsedTheme = storedTheme ? JSON.parse(storedTheme) : null;
                 var theme = parsedTheme && parsedTheme.state ? parsedTheme.state.theme : "light";
                 document.documentElement.classList.toggle("dark", theme === "dark");
+                var color = theme === "dark" ? "#020617" : "#f8fafc";
+                document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) { meta.setAttribute("content", color); });
+                document.documentElement.style.backgroundColor = color;
               } catch (error) {}
             `,
           }}

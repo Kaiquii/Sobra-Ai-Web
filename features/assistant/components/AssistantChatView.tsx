@@ -81,7 +81,10 @@ function getConversationDescription(conversation: AssistantConversation) {
     : date.toLocaleDateString("pt-BR");
 }
 
-function getConversationKey(conversation: AssistantConversation, index: number) {
+function getConversationKey(
+  conversation: AssistantConversation,
+  index: number,
+) {
   return `${conversation.id ?? "conversation"}-${index}`;
 }
 
@@ -202,7 +205,10 @@ function EmptyConversation() {
   );
 }
 
-export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProps) {
+export function AssistantChatDialog({
+  isOpen,
+  onClose,
+}: AssistantChatDialogProps) {
   useLockBodyScroll(isOpen);
 
   const activeConversationId = useAssistantStore(
@@ -211,24 +217,35 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
   const clearError = useAssistantStore((state) => state.clearError);
   const clearRetry = useAssistantStore((state) => state.clearRetry);
   const conversations = useAssistantStore((state) => state.conversations);
-  const deleteConversation = useAssistantStore((state) => state.deleteConversation);
+  const deleteConversation = useAssistantStore(
+    (state) => state.deleteConversation,
+  );
   const error = useAssistantStore((state) => state.error);
   const isLoadingConversations = useAssistantStore(
     (state) => state.isLoadingConversations,
   );
-  const isLoadingMessages = useAssistantStore((state) => state.isLoadingMessages);
+  const isLoadingMessages = useAssistantStore(
+    (state) => state.isLoadingMessages,
+  );
   const isSending = useAssistantStore((state) => state.isSending);
-  const loadConversations = useAssistantStore((state) => state.loadConversations);
+  const loadConversations = useAssistantStore(
+    (state) => state.loadConversations,
+  );
   const messages = useAssistantStore((state) => state.messages);
-  const retryAfterSeconds = useAssistantStore((state) => state.retryAfterSeconds);
+  const retryAfterSeconds = useAssistantStore(
+    (state) => state.retryAfterSeconds,
+  );
   const retryUntil = useAssistantStore((state) => state.retryUntil);
   const sendMessage = useAssistantStore((state) => state.sendMessage);
   const setActiveConversation = useAssistantStore(
     (state) => state.setActiveConversation,
   );
-  const startNewConversation = useAssistantStore((state) => state.startNewConversation);
+  const startNewConversation = useAssistantStore(
+    (state) => state.startNewConversation,
+  );
 
-  const [deleteTarget, setDeleteTarget] = useState<AssistantConversation | null>(null);
+  const [deleteTarget, setDeleteTarget] =
+    useState<AssistantConversation | null>(null);
   const [draft, setDraft] = useState("");
   const [isMobileHistoryOpen, setIsMobileHistoryOpen] = useState(false);
   const draftInputRef = useRef<HTMLTextAreaElement>(null);
@@ -245,7 +262,10 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
       return;
     }
 
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
   }, [isOpen, messages, isSending]);
 
   useEffect(() => {
@@ -328,12 +348,12 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
         className="fixed inset-0 z-50 flex items-stretch justify-stretch bg-slate-950/75 p-0 backdrop-blur-sm sm:items-center sm:justify-center sm:px-5 sm:py-4"
         role="dialog"
       >
-        <div className="relative flex h-dvh min-h-0 w-screen max-w-5xl flex-col overflow-hidden bg-white shadow-2xl shadow-slate-950/25 dark:bg-slate-900 sm:h-[82vh] sm:min-h-155 sm:w-[92vw] sm:max-h-205 sm:flex-row sm:rounded-2xl sm:border sm:border-slate-200 sm:dark:border-slate-800">
+        <div className="relative flex h-dvh min-h-0 w-screen max-w-5xl flex-col overflow-hidden bg-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] sm:pt-0 sm:pb-0 shadow-2xl shadow-slate-950/25 dark:bg-slate-900 sm:h-[82vh] sm:min-h-155 sm:w-[92vw] sm:max-h-205 sm:flex-row sm:rounded-2xl sm:border sm:border-slate-200 sm:dark:border-slate-800">
           <aside
             className={cn(
               "z-20 w-full shrink-0 flex-col overflow-hidden border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 sm:static sm:flex sm:h-auto sm:max-h-none sm:w-80 sm:border-b-0 sm:border-r sm:bg-slate-50 sm:dark:bg-slate-950/70",
               isMobileHistoryOpen
-                ? "absolute left-0 right-0 top-16 flex max-h-[54dvh]"
+                ? "absolute left-0 right-0 top-[calc(4rem+env(safe-area-inset-top))] flex max-h-[54dvh]"
                 : "hidden",
             )}
           >
@@ -360,7 +380,11 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
             <div className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
               {isLoadingConversations ? (
                 <div className="flex items-center gap-2 px-2 py-3 text-sm text-slate-500 dark:text-slate-400">
-                  <Loader2 aria-hidden="true" className="animate-spin" size={16} />
+                  <Loader2
+                    aria-hidden="true"
+                    className="animate-spin"
+                    size={16}
+                  />
                   Carregando conversas...
                 </div>
               ) : null}
@@ -388,7 +412,11 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
             <div className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-2 dark:border-slate-800 dark:bg-slate-900 sm:h-20 sm:py-3">
               <div className="flex min-w-0 items-center gap-3">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/45 dark:text-emerald-300 sm:h-10 sm:w-10">
-                  <MessageCircle aria-hidden="true" size={21} strokeWidth={2.25} />
+                  <MessageCircle
+                    aria-hidden="true"
+                    size={21}
+                    strokeWidth={2.25}
+                  />
                 </span>
                 <div className="min-w-0">
                   <h1 className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50 sm:text-base">
@@ -453,12 +481,18 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
             <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-4 sm:py-5">
               {isLoadingMessages ? (
                 <div className="flex h-full items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                  <Loader2 aria-hidden="true" className="animate-spin" size={17} />
+                  <Loader2
+                    aria-hidden="true"
+                    className="animate-spin"
+                    size={17}
+                  />
                   Carregando mensagens...
                 </div>
               ) : null}
 
-              {!isLoadingMessages && !messages.length ? <EmptyConversation /> : null}
+              {!isLoadingMessages && !messages.length ? (
+                <EmptyConversation />
+              ) : null}
 
               {!isLoadingMessages && messages.length ? (
                 <div className="flex flex-col gap-3">
@@ -514,7 +548,11 @@ export function AssistantChatDialog({ isOpen, onClose }: AssistantChatDialogProp
                   type="submit"
                 >
                   {isSending ? (
-                    <Loader2 aria-hidden="true" className="animate-spin" size={18} />
+                    <Loader2
+                      aria-hidden="true"
+                      className="animate-spin"
+                      size={18}
+                    />
                   ) : (
                     <Send aria-hidden="true" size={18} strokeWidth={2.25} />
                   )}

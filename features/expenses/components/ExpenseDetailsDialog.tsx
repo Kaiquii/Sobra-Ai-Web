@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useLockBodyScroll } from "@/components/ui/use-lock-body-scroll";
 import type { Expense, PaymentSplit } from "@/features/expenses/types/expense";
-import { formatMoney } from "@/lib/formatters";
+import { FinancialValue } from "@/components/ui/financial-value";
 import { cn } from "@/lib/utils";
 
 type ExpenseDetailsDialogProps = {
@@ -110,10 +110,7 @@ function DetailItem({
 }) {
   return (
     <div
-      className={cn(
-        "flex min-h-20 min-w-0 items-center gap-3 p-4",
-        className,
-      )}
+      className={cn("flex min-h-20 min-w-0 items-center gap-3 p-4", className)}
     >
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 dark:border-blue-900/70 dark:bg-blue-950/60 dark:text-blue-400">
         <Icon aria-hidden="true" size={17} />
@@ -150,7 +147,7 @@ function PaymentSplitsDetailItem({ splits }: { splits: PaymentSplit[] }) {
                 {getPaymentSourceLabel(split.payment_source)}
               </span>
               <span className="shrink-0 border-l border-slate-300 pl-1.5 font-semibold tabular-nums text-slate-950 dark:border-slate-600 dark:text-slate-50">
-                {formatMoney(split.amount)}
+                <FinancialValue value={split.amount} />
               </span>
             </span>
           ))}
@@ -182,9 +179,7 @@ export function ExpenseDetailsDialog({
       className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-slate-950/75 px-3 py-3 backdrop-blur-sm sm:px-4 sm:py-6"
       role="dialog"
     >
-      <div
-        className="my-auto flex max-h-[calc(100dvh-1.5rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-slate-200 border-t-4 border-t-blue-600 bg-white shadow-2xl shadow-slate-950/20 dark:border-slate-800 dark:border-t-blue-500 dark:bg-slate-900 sm:max-h-[calc(100dvh-3rem)]"
-      >
+      <div className="my-auto flex max-h-[calc(100dvh-1.5rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-slate-200 border-t-4 border-t-blue-600 bg-white shadow-2xl shadow-slate-950/20 dark:border-slate-800 dark:border-t-blue-500 dark:bg-slate-900 sm:max-h-[calc(100dvh-3rem)]">
         <div className="shrink-0 border-b border-dashed border-slate-200 px-5 py-3 dark:border-slate-700 sm:px-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
@@ -224,7 +219,7 @@ export function ExpenseDetailsDialog({
                 Valor da despesa
               </p>
               <strong className="mt-1 block wrap-break-word text-3xl font-semibold tabular-nums text-red-700 dark:text-red-300 sm:text-4xl">
-                - {formatMoney(expense.amount)}
+                <FinancialValue value={-expense.amount} />
               </strong>
             </div>
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-700 shadow-sm dark:border-red-950/80 dark:bg-red-950/40 dark:text-red-300">
@@ -250,7 +245,9 @@ export function ExpenseDetailsDialog({
               value={
                 paymentSplits.length > 1
                   ? `${paymentSplits.length} fontes de pagamento`
-                  : getPaymentSourceLabel(paymentSplits[0]?.payment_source ?? "")
+                  : getPaymentSourceLabel(
+                      paymentSplits[0]?.payment_source ?? "",
+                    )
               }
             />
             <DetailItem

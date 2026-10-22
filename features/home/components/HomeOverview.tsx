@@ -1,8 +1,8 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 
 import { dashboardNavigation } from "@/components/layout/navigation";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
@@ -11,24 +11,48 @@ const cardStyles = [
   {
     accent: "bg-emerald-500",
     icon: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
-    hover: "hover:border-emerald-300 hover:bg-emerald-50/70 dark:hover:border-emerald-800 dark:hover:bg-emerald-950/30",
+    hover:
+      "hover:border-emerald-300 hover:bg-emerald-50/70 dark:hover:border-emerald-800 dark:hover:bg-emerald-950/30",
   },
   {
     accent: "bg-rose-500",
     icon: "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300",
-    hover: "hover:border-rose-300 hover:bg-rose-50/70 dark:hover:border-rose-800 dark:hover:bg-rose-950/30",
+    hover:
+      "hover:border-rose-300 hover:bg-rose-50/70 dark:hover:border-rose-800 dark:hover:bg-rose-950/30",
   },
   {
     accent: "bg-sky-500",
     icon: "bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
-    hover: "hover:border-sky-300 hover:bg-sky-50/70 dark:hover:border-sky-800 dark:hover:bg-sky-950/30",
+    hover:
+      "hover:border-sky-300 hover:bg-sky-50/70 dark:hover:border-sky-800 dark:hover:bg-sky-950/30",
   },
   {
     accent: "bg-violet-500",
     icon: "bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
-    hover: "hover:border-violet-300 hover:bg-violet-50/70 dark:hover:border-violet-800 dark:hover:bg-violet-950/30",
+    hover:
+      "hover:border-violet-300 hover:bg-violet-50/70 dark:hover:border-violet-800 dark:hover:bg-violet-950/30",
   },
 ];
+
+function CardNavigationStatus() {
+  const { pending } = useLinkStatus();
+  return (
+    <>
+      <span role="status">{pending ? "Abrindo área..." : "Abrir área"}</span>
+      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 group-hover:bg-slate-950 group-hover:text-white dark:bg-slate-950 dark:text-slate-300 dark:group-hover:bg-slate-100 dark:group-hover:text-slate-950">
+        {pending ? (
+          <Loader2 aria-hidden="true" className="animate-spin" size={16} />
+        ) : (
+          <ArrowRight
+            aria-hidden="true"
+            size={16}
+            className="group-hover:translate-x-0.5"
+          />
+        )}
+      </span>
+    </>
+  );
+}
 
 export function HomeOverview() {
   const user = useAuthStore((state) => state.user);
@@ -42,11 +66,13 @@ export function HomeOverview() {
               Painel financeiro
             </p>
             <h1 className="mt-3 text-3xl font-semibold leading-tight text-slate-950 dark:text-slate-50 sm:text-4xl">
-              {user?.name ? `${user.name}, escolha uma área.` : "Escolha uma área."}
+              {user?.name
+                ? `${user.name}, escolha uma área.`
+                : "Escolha uma área."}
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300 sm:text-base">
-              Acesse rapidamente as principais áreas do app e mantenha sua rotina
-              financeira organizada.
+              Acesse rapidamente as principais áreas do app e mantenha sua
+              rotina financeira organizada.
             </p>
           </div>
 
@@ -81,13 +107,16 @@ export function HomeOverview() {
             return (
               <Link
                 className={`group flex min-h-52 flex-col justify-between overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm outline-none hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-emerald-400 dark:border-slate-800 dark:bg-slate-900 ${style.hover}`}
+                prefetch={true}
                 href={item.href}
                 key={item.href}
               >
                 <span className={`h-1 w-full ${style.accent}`} />
                 <div className="flex flex-1 flex-col justify-between p-5">
                   <div>
-                    <div className={`mb-7 flex h-12 w-12 items-center justify-center rounded-lg ${style.icon}`}>
+                    <div
+                      className={`mb-7 flex h-12 w-12 items-center justify-center rounded-lg ${style.icon}`}
+                    >
                       <Icon className="h-6 w-6" />
                     </div>
                     <h3 className="text-xl font-semibold text-slate-950 dark:text-slate-50">
@@ -99,10 +128,7 @@ export function HomeOverview() {
                   </div>
 
                   <div className="mt-8 flex items-center justify-between border-t border-slate-200 pt-4 text-sm font-semibold text-slate-700 dark:border-slate-800 dark:text-slate-200">
-                    <span>Abrir área</span>
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 group-hover:bg-slate-950 group-hover:text-white dark:bg-slate-950 dark:text-slate-300 dark:group-hover:bg-slate-100 dark:group-hover:text-slate-950">
-                      <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5" />
-                    </span>
+                    <CardNavigationStatus />
                   </div>
                 </div>
               </Link>

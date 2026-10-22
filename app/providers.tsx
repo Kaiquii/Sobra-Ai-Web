@@ -15,7 +15,13 @@ export function Providers({ children }: Readonly<{ children: React.ReactNode }>)
   const router = useRouter();
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
+    const restoredTheme = useThemeStore.getState().theme;
+    document.documentElement.classList.toggle("dark", restoredTheme === "dark");
+    const color = restoredTheme === "dark" ? "#020617" : "#f8fafc";
+    document.documentElement.style.backgroundColor = color;
+    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+      meta.setAttribute("content", color);
+    });
   }, [theme]);
 
   useEffect(() => {

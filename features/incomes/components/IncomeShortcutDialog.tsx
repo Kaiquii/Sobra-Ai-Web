@@ -114,10 +114,18 @@ function IncomeShortcutDialogContent({
   );
   const [applyFuture, setApplyFuture] = useState(getDefaultFuture(shortcut));
   const [localError, setLocalError] = useState<string | null>(null);
+  const [hasLoadedIncomes, setHasLoadedIncomes] = useState(false);
 
   useEffect(() => {
-    void loadIncomes();
-  }, [loadIncomes]);
+    if (shortcut.action === "create") return;
+    let active = true;
+    void loadIncomes().finally(() => {
+      if (active) setHasLoadedIncomes(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [loadIncomes, shortcut.action]);
 
   const selectedIncome = useMemo(
     () => findIncome(incomes, shortcut.source, shortcut.month, shortcut.year),
@@ -125,11 +133,16 @@ function IncomeShortcutDialogContent({
   );
 
   const isDelete = shortcut.action === "delete";
-  const needsExistingIncome = shortcut.action === "edit" || shortcut.action === "delete";
-  const missingIncome = !isLoading && needsExistingIncome && !selectedIncome;
+  const needsExistingIncome =
+    shortcut.action === "edit" || shortcut.action === "delete";
+  const waitingForIncome =
+    needsExistingIncome && (!hasLoadedIncomes || isLoading);
+  const missingIncome =
+    !waitingForIncome && needsExistingIncome && !selectedIncome;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (waitingForIncome) return;
     setLocalError(null);
     clearFeedback();
 
@@ -270,7 +283,7 @@ function IncomeShortcutDialogContent({
               isDelete &&
                 "bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:text-white dark:hover:bg-red-400",
             )}
-            disabled={isSubmitting || missingIncome}
+            disabled={isSubmitting || waitingForIncome || missingIncome}
             type="submit"
           >
             {isSubmitting ? (

@@ -43,19 +43,29 @@ import type {
   ExpensePaymentStatus,
   ExpenseTypeFilter,
 } from "@/features/expenses/types/expense";
+import { FinancialValue } from "@/components/ui/financial-value";
 import { formatMoney } from "@/lib/formatters";
 
 type PaymentSourceFilter = "Adiantamento" | "Renda Extra" | "Salario" | "Todas";
 type PaymentStatusFilter = "Pagas" | "Pendentes" | "Todas";
 
-const typeFilters: ExpenseTypeFilter[] = ["Todas", "Parceladas", "\u00danicas", "Fixas"];
+const typeFilters: ExpenseTypeFilter[] = [
+  "Todas",
+  "Parceladas",
+  "\u00danicas",
+  "Fixas",
+];
 const paymentSourceFilters: PaymentSourceFilter[] = [
   "Todas",
   "Salario",
   "Adiantamento",
   "Renda Extra",
 ];
-const paymentStatusFilters: PaymentStatusFilter[] = ["Todas", "Pendentes", "Pagas"];
+const paymentStatusFilters: PaymentStatusFilter[] = [
+  "Todas",
+  "Pendentes",
+  "Pagas",
+];
 
 const typeFilterOptions = typeFilters.map((filter) => ({
   label: filter,
@@ -134,14 +144,18 @@ function matchesTypeFilter(expense: Expense, filter: ExpenseTypeFilter) {
   return type === "unica";
 }
 
-function matchesPaymentSourceFilter(expense: Expense, filter: PaymentSourceFilter) {
+function matchesPaymentSourceFilter(
+  expense: Expense,
+  filter: PaymentSourceFilter,
+) {
   if (filter === "Todas") {
     return true;
   }
 
-  const sources = (expense.payment_splits?.length
-    ? expense.payment_splits.map((split) => split.payment_source)
-    : [expense.payment_source]
+  const sources = (
+    expense.payment_splits?.length
+      ? expense.payment_splits.map((split) => split.payment_source)
+      : [expense.payment_source]
   ).map(normalizeText);
 
   if (filter === "Salario") {
@@ -159,7 +173,10 @@ function matchesCategoryFilter(expense: Expense, selectedCategoryId: string) {
   return expense.category_id === Number(selectedCategoryId);
 }
 
-function matchesPaymentStatusFilter(expense: Expense, filter: PaymentStatusFilter) {
+function matchesPaymentStatusFilter(
+  expense: Expense,
+  filter: PaymentStatusFilter,
+) {
   if (filter === "Todas") {
     return true;
   }
@@ -181,7 +198,10 @@ function getPaymentStatusApiValue(
   return undefined;
 }
 
-function getCategoryName(expense: Expense, categoriesById: Map<number, string>) {
+function getCategoryName(
+  expense: Expense,
+  categoriesById: Map<number, string>,
+) {
   if (expense.category) {
     return expense.category;
   }
@@ -216,7 +236,8 @@ function formatExpenseFullDate(date: string) {
 }
 
 function getExpenseMonthReference(expense: Expense) {
-  const [year, month] = expense.date.split("T")[0]?.split("-").map(Number) ?? [];
+  const [year, month] =
+    expense.date.split("T")[0]?.split("-").map(Number) ?? [];
 
   if (!year || !month) {
     return null;
@@ -291,7 +312,9 @@ function ExpenseCard({
   const installmentLabel = getInstallmentLabel(expense);
   const notes = expense.notes?.trim();
   const paymentSources = getExpensePaymentSources(expense);
-  const canAdvance = ["unica", "parcelada"].includes(normalizeText(expense.type));
+  const canAdvance = ["unica", "parcelada"].includes(
+    normalizeText(expense.type),
+  );
 
   return (
     <article
@@ -335,7 +358,11 @@ function ExpenseCard({
             className="mt-2 flex max-w-full items-center gap-1.5 truncate rounded-md bg-slate-50 px-2 py-1 text-xs text-slate-500 dark:bg-slate-950/60 dark:text-slate-400"
             title={notes}
           >
-            <FileText aria-hidden="true" className="shrink-0 text-blue-500" size={13} />
+            <FileText
+              aria-hidden="true"
+              className="shrink-0 text-blue-500"
+              size={13}
+            />
             <span className="truncate">{notes}</span>
           </p>
         ) : null}
@@ -373,7 +400,9 @@ function ExpenseCard({
               className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-amber-600 hover:bg-amber-500/10 hover:text-amber-700 disabled:cursor-not-allowed disabled:opacity-60 dark:text-amber-300 dark:hover:text-amber-200"
               disabled={isAdvanceStatusUpdating}
               onClick={() =>
-                expense.is_advanced ? onUndoAdvance(expense) : onAdvance(expense)
+                expense.is_advanced
+                  ? onUndoAdvance(expense)
+                  : onAdvance(expense)
               }
               title={expense.is_advanced ? "Desfazer adiantamento" : "Adiantar"}
               type="button"
@@ -416,10 +445,14 @@ function ExpenseCard({
 
         <div className="col-start-3 row-start-1 flex max-w-32 flex-col items-end gap-1.5 text-right sm:row-start-2 sm:max-w-none">
           <strong className="wrap-anywhere text-sm font-semibold tabular-nums text-red-600 dark:text-red-200 sm:text-lg">
-            - {formatMoney(expense.amount)}
+            <FinancialValue value={-expense.amount} />
           </strong>
           <p className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300 sm:text-sm">
-            <WalletCards aria-hidden="true" className="text-blue-500" size={14} />
+            <WalletCards
+              aria-hidden="true"
+              className="text-blue-500"
+              size={14}
+            />
             {paymentSources.length === 1
               ? paymentSources[0]
               : `${paymentSources.length} origens`}
@@ -453,9 +486,14 @@ export function ExpensesView() {
   const [detailsTarget, setDetailsTarget] = useState<Expense | null>(null);
   const [formExpense, setFormExpense] = useState<Expense | null>(null);
   const [formMode, setFormMode] = useState<ExpenseFormMode | null>(null);
-  const [highlightedExpenseId, setHighlightedExpenseId] = useState<number | null>(null);
-  const [paymentStatusTarget, setPaymentStatusTarget] = useState<Expense | null>(null);
-  const [undoAdvanceTarget, setUndoAdvanceTarget] = useState<Expense | null>(null);
+  const [highlightedExpenseId, setHighlightedExpenseId] = useState<
+    number | null
+  >(null);
+  const [paymentStatusTarget, setPaymentStatusTarget] =
+    useState<Expense | null>(null);
+  const [undoAdvanceTarget, setUndoAdvanceTarget] = useState<Expense | null>(
+    null,
+  );
   const [paymentSourceFilter, setPaymentSourceFilter] =
     useState<PaymentSourceFilter>("Todas");
   const [paymentStatusFilter, setPaymentStatusFilter] =
@@ -479,11 +517,19 @@ export function ExpensesView() {
   const paymentStatusUpdatingId = useExpenseStore(
     (state) => state.paymentStatusUpdatingId,
   );
-  const updatePaymentStatus = useExpenseStore((state) => state.updatePaymentStatus);
-  const updateAdvanceStatus = useExpenseStore((state) => state.updateAdvanceStatus);
+  const updatePaymentStatus = useExpenseStore(
+    (state) => state.updatePaymentStatus,
+  );
+  const updateAdvanceStatus = useExpenseStore(
+    (state) => state.updateAdvanceStatus,
+  );
 
   useEffect(() => {
-    void loadInitialData(month, year, getPaymentStatusApiValue(paymentStatusFilter));
+    void loadInitialData(
+      month,
+      year,
+      getPaymentStatusApiValue(paymentStatusFilter),
+    );
   }, [loadInitialData, month, paymentStatusFilter, year]);
 
   useEffect(() => {
@@ -499,7 +545,11 @@ export function ExpensesView() {
   }, [clearFeedback, message]);
 
   useEffect(() => {
-    if (!highlightedExpenseId || isLoading || !expenses.some((expense) => expense.id === highlightedExpenseId)) {
+    if (
+      !highlightedExpenseId ||
+      isLoading ||
+      !expenses.some((expense) => expense.id === highlightedExpenseId)
+    ) {
       return;
     }
 
@@ -514,7 +564,10 @@ export function ExpensesView() {
     return () => window.clearTimeout(timeoutId);
   }, [expenses, highlightedExpenseId, isLoading]);
 
-  const categoriesById = useMemo(() => getCategoriesMap(categories), [categories]);
+  const categoriesById = useMemo(
+    () => getCategoriesMap(categories),
+    [categories],
+  );
   const filteredExpenses = useMemo(() => {
     return expenses.filter((expense) => {
       const matchesSearch = matchesSearchFilter(expense, searchQuery);
@@ -523,7 +576,10 @@ export function ExpensesView() {
         expense,
         paymentSourceFilter,
       );
-      const matchesCategory = matchesCategoryFilter(expense, selectedCategoryId);
+      const matchesCategory = matchesCategoryFilter(
+        expense,
+        selectedCategoryId,
+      );
       const matchesPaymentStatus = matchesPaymentStatusFilter(
         expense,
         paymentStatusFilter,
@@ -553,7 +609,10 @@ export function ExpensesView() {
         expense,
         paymentSourceFilter,
       );
-      const matchesCategory = matchesCategoryFilter(expense, selectedCategoryId);
+      const matchesCategory = matchesCategoryFilter(
+        expense,
+        selectedCategoryId,
+      );
       const matchesPaymentStatus = matchesPaymentStatusFilter(
         expense,
         paymentStatusFilter,
@@ -583,7 +642,10 @@ export function ExpensesView() {
         expense,
         paymentSourceFilter,
       );
-      const matchesCategory = matchesCategoryFilter(expense, selectedCategoryId);
+      const matchesCategory = matchesCategoryFilter(
+        expense,
+        selectedCategoryId,
+      );
       const matchesPaymentStatus = matchesPaymentStatusFilter(
         expense,
         paymentStatusFilter,
@@ -635,11 +697,19 @@ export function ExpensesView() {
   function refreshExpenses() {
     closeFormDialog();
     setDeleteTarget(null);
-    void loadInitialData(month, year, getPaymentStatusApiValue(paymentStatusFilter));
+    void loadInitialData(
+      month,
+      year,
+      getPaymentStatusApiValue(paymentStatusFilter),
+    );
   }
 
   function refreshExpenseList() {
-    void loadInitialData(month, year, getPaymentStatusApiValue(paymentStatusFilter));
+    void loadInitialData(
+      month,
+      year,
+      getPaymentStatusApiValue(paymentStatusFilter),
+    );
   }
 
   function togglePaymentStatus(expense: Expense) {
@@ -707,23 +777,76 @@ export function ExpensesView() {
         <div className="space-y-3 sm:hidden">
           <div className="flex items-center gap-2">
             <div className="relative min-w-0 flex-1">
-              <Search aria-hidden="true" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input aria-label="Buscar despesa" placeholder="Buscar despesa..." value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 outline-none focus:ring-2 focus:ring-blue-400 dark:border-slate-800 dark:bg-slate-900" />
+              <Search
+                aria-hidden="true"
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                aria-label="Buscar despesa"
+                placeholder="Buscar despesa..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 outline-none focus:ring-2 focus:ring-blue-400 dark:border-slate-800 dark:bg-slate-900"
+              />
             </div>
-            <Button aria-label="Filtros de despesas" aria-expanded={isMobileFiltersOpen} aria-controls="mobile-expense-filters" onClick={() => setIsMobileFiltersOpen((open) => !open)} variant="secondary" size="iconLg">
+            <Button
+              aria-label="Filtros de despesas"
+              aria-expanded={isMobileFiltersOpen}
+              aria-controls="mobile-expense-filters"
+              onClick={() => setIsMobileFiltersOpen((open) => !open)}
+              variant="secondary"
+              size="iconLg"
+            >
               <ListFilter aria-hidden="true" size={22} />
             </Button>
           </div>
-          <div aria-label="Tipo de despesa" className="grid grid-cols-4 gap-1.5">
+          <div
+            aria-label="Tipo de despesa"
+            className="grid grid-cols-4 gap-1.5"
+          >
             {typeFilters.map((type) => (
-              <button key={type} type="button" aria-pressed={typeFilter === type} onClick={() => setTypeFilter(type)} className={`h-11 min-w-0 cursor-pointer rounded-full px-1 text-xs font-semibold ${typeFilter === type ? "bg-blue-600 text-white" : "bg-slate-200/70 text-slate-600 dark:bg-slate-800 dark:text-slate-300"}`}>{type}</button>
+              <button
+                key={type}
+                type="button"
+                aria-pressed={typeFilter === type}
+                onClick={() => setTypeFilter(type)}
+                className={`h-11 min-w-0 cursor-pointer rounded-full px-1 text-xs font-semibold ${typeFilter === type ? "bg-blue-600 text-white" : "bg-slate-200/70 text-slate-600 dark:bg-slate-800 dark:text-slate-300"}`}
+              >
+                {type}
+              </button>
             ))}
           </div>
           {isMobileFiltersOpen ? (
             <div id="mobile-expense-filters" className="grid grid-cols-2 gap-2">
-              <DropdownSelect ariaLabel="Origem da despesa" icon={WalletCards} value={paymentSourceFilter} onChange={setPaymentSourceFilter} options={paymentSourceFilterOptions} />
-              <DropdownSelect ariaLabel="Status de pagamento" icon={CheckCircle2} value={paymentStatusFilter} onChange={setPaymentStatusFilter} options={paymentStatusFilterOptions} />
-              <DropdownSelect ariaLabel="Categoria da despesa" className="col-span-2" icon={ListFilter} value={selectedCategoryId} onChange={setSelectedCategoryId} options={[{label:"Todas categorias",value:"Todas"},...categories.map((category)=>({label:category.name,value:String(category.id)}))]} />
+              <DropdownSelect
+                ariaLabel="Origem da despesa"
+                icon={WalletCards}
+                value={paymentSourceFilter}
+                onChange={setPaymentSourceFilter}
+                options={paymentSourceFilterOptions}
+              />
+              <DropdownSelect
+                ariaLabel="Status de pagamento"
+                icon={CheckCircle2}
+                value={paymentStatusFilter}
+                onChange={setPaymentStatusFilter}
+                options={paymentStatusFilterOptions}
+              />
+              <DropdownSelect
+                ariaLabel="Categoria da despesa"
+                className="col-span-2"
+                icon={ListFilter}
+                value={selectedCategoryId}
+                onChange={setSelectedCategoryId}
+                options={[
+                  { label: "Todas categorias", value: "Todas" },
+                  ...categories.map((category) => ({
+                    label: category.name,
+                    value: String(category.id),
+                  })),
+                ]}
+              />
             </div>
           ) : null}
         </div>
@@ -819,9 +942,13 @@ export function ExpensesView() {
             </div>
           </div>
           <div className="flex items-center gap-2 text-right">
-            <CalendarDays aria-hidden="true" className="text-slate-400" size={18} />
+            <CalendarDays
+              aria-hidden="true"
+              className="text-slate-400"
+              size={18}
+            />
             <strong className="text-lg font-semibold text-red-600 dark:text-red-300">
-              - {formatMoney(totalAmount)}
+              <FinancialValue value={-totalAmount} />
             </strong>
           </div>
         </div>
@@ -860,11 +987,13 @@ export function ExpensesView() {
                       {expense.description}
                     </p>
                     <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                      Prevista para {formatExpenseFullDate(expense.date)} · Considerada em {formatExpenseFullDate(expense.advanced_at ?? "")}
+                      Prevista para {formatExpenseFullDate(expense.date)} ·
+                      Considerada em{" "}
+                      {formatExpenseFullDate(expense.advanced_at ?? "")}
                     </p>
                   </div>
                   <strong className="shrink-0 text-sm font-semibold text-red-600 dark:text-red-300">
-                    - {formatMoney(expense.amount)}
+                    <FinancialValue value={-expense.amount} />
                   </strong>
                 </button>
               ))}
@@ -874,7 +1003,9 @@ export function ExpensesView() {
 
         {isLoading ? <ExpensesSkeleton /> : null}
 
-        {!isLoading && !filteredExpenses.length && !filteredAdvancedExpenses.length ? (
+        {!isLoading &&
+        !filteredExpenses.length &&
+        !filteredAdvancedExpenses.length ? (
           <div className="rounded-[1.35rem] border border-slate-200 bg-white px-6 py-10 text-center dark:border-slate-800 dark:bg-slate-900">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300">
               <ReceiptText aria-hidden="true" size={28} />
@@ -937,7 +1068,9 @@ export function ExpensesView() {
       ) : null}
 
       <ConfirmationDialog
-        confirmLabel={paymentStatusTarget?.is_paid ? "Sim, desmarcar" : "Sim, marcar"}
+        confirmLabel={
+          paymentStatusTarget?.is_paid ? "Sim, desmarcar" : "Sim, marcar"
+        }
         description={
           paymentStatusTarget?.is_paid
             ? `A despesa “${paymentStatusTarget.description}” voltará a aparecer como pendente.`

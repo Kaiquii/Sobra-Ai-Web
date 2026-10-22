@@ -4,6 +4,7 @@ import { ChevronDown, Check } from "lucide-react";
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { SelectionSheet } from "@/components/ui/selection-sheet";
 
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,10 @@ type DropdownSelectProps<TValue extends string> = {
   onChange: (value: TValue) => void;
   options: DropdownOption<TValue>[];
   triggerClassName?: string;
+  presentation?: "popover" | "sheet";
+  variant?: "default" | "filter";
+  sheetTitle?: string;
+  triggerLabel?: string;
   value: TValue;
 };
 
@@ -40,6 +45,10 @@ export function DropdownSelect<TValue extends string>({
   onChange,
   options,
   triggerClassName,
+  presentation = "popover",
+  variant = "default",
+  sheetTitle,
+  triggerLabel,
   value,
 }: DropdownSelectProps<TValue>) {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,6 +58,8 @@ export function DropdownSelect<TValue extends string>({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const listboxId = useId();
   const selectedOption = options.find((option) => option.value === value) ?? options[0];
+  const isFilter = variant === "filter";
+  const isActive = value !== options[0]?.value;
 
   const updateMenuPosition = useCallback(() => {
     const trigger = triggerRef.current;
@@ -85,7 +96,7 @@ export function DropdownSelect<TValue extends string>({
   }, []);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || presentation === "sheet") {
       return;
     }
 
@@ -117,13 +128,13 @@ export function DropdownSelect<TValue extends string>({
       window.removeEventListener("resize", updateMenuPosition);
       window.removeEventListener("scroll", updateMenuPosition, true);
     };
-  }, [isOpen, updateMenuPosition]);
+  }, [isOpen, presentation, updateMenuPosition]);
 
   useLayoutEffect(() => {
-    if (isOpen) {
+    if (isOpen && presentation === "popover") {
       updateMenuPosition();
     }
-  }, [isOpen, updateMenuPosition]);
+  }, [isOpen, presentation, updateMenuPosition]);
 
   function selectOption(nextValue: TValue) {
     if (disabled) {
@@ -138,16 +149,20 @@ export function DropdownSelect<TValue extends string>({
     <div className={cn("relative", className)} ref={dropdownRef}>
       <button
         aria-expanded={isOpen}
-        aria-haspopup="listbox"
+        aria-controls={isOpen ? listboxId : undefined}
+        aria-haspopup={presentation === "sheet" ? "dialog" : "listbox"}
         aria-label={ariaLabel}
         className={cn(
-          "flex h-10 w-full cursor-default items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 text-left text-sm font-semibold text-slate-800 outline-none hover:border-slate-300 hover:bg-white focus-visible:border-blue-500 focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950/50 dark:text-slate-100 dark:hover:border-slate-700 dark:hover:bg-slate-950 dark:focus-visible:border-blue-500 dark:focus-visible:ring-blue-950/60",
+          isFilter
+            ? "flex h-8 w-full cursor-default items-center gap-1 whitespace-nowrap rounded-2xl px-3 text-left text-xs font-normal outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:cursor-not-allowed disabled:opacity-60"
+            : "flex h-10 w-full cursor-default items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 text-left text-sm font-semibold text-slate-800 outline-none hover:border-slate-300 hover:bg-white focus-visible:border-blue-500 focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950/50 dark:text-slate-100 dark:hover:border-slate-700 dark:hover:bg-slate-950 dark:focus-visible:border-blue-500 dark:focus-visible:ring-blue-950/60",
+          isFilter && (isActive ? "bg-brand/20 text-brand" : "bg-slate-100 text-[#7A849E] dark:bg-[#202934]"),
           triggerClassName,
         )}
         disabled={disabled}
         id={id}
         onClick={() => {
-          updateMenuPosition();
+          if (presentation === "popover") updateMenuPosition();
           setIsOpen((current) => !current);
         }}
         ref={triggerRef}
@@ -156,21 +171,42 @@ export function DropdownSelect<TValue extends string>({
         {Icon ? (
           <Icon
             aria-hidden={true}
-            className="shrink-0 text-slate-400"
+            className={isFilter ? "shrink-0" : "shrink-0 text-slate-400"}
             size={16}
             strokeWidth={2.25}
           />
         ) : null}
-        <span className="min-w-0 flex-1 truncate">{selectedOption?.label}</span>
-        <ChevronDown
+        <span className="min-w-0 flex-1 truncate">{triggerLabel ?? selectedOption?.label}</span>
+        {!isFilter ? <ChevronDown
           aria-hidden="true"
           className={cn("shrink-0 text-slate-400", isOpen && "rotate-180")}
           size={16}
           strokeWidth={2.25}
-        />
+        /> : null}
       </button>
 
-      {isOpen && menuStyle
+      {isOpen && presentation === "sheet" ? (
+        <SelectionSheet title={sheetTitle ?? ariaLabel} onClose={() => setIsOpen(false)}>
+          <div role="listbox" aria-label={sheetTitle ?? ariaLabel} id={listboxId} onKeyDown={(event) => {
+            if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+            event.preventDefault();
+            const items = [...event.currentTarget.querySelectorAll<HTMLButtonElement>('button[role="option"]')];
+            const index = items.indexOf(document.activeElement as HTMLButtonElement);
+            const next = event.key === "Home" ? 0 : event.key === "End" ? items.length - 1 : (index + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+            items[next]?.focus();
+          }}>
+            {options.map((option) => (
+              <button key={option.value} type="button" role="option" aria-selected={option.value === value}
+                onClick={() => selectOption(option.value)}
+                className="flex min-h-12 w-full cursor-default items-center justify-between gap-4 rounded-lg py-3 text-left text-base font-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
+                <span>{option.label}</span>
+                {option.value === value ? <Check aria-hidden="true" className="shrink-0 text-brand" size={24} /> : null}
+              </button>
+            ))}
+          </div>
+        </SelectionSheet>
+      ) : null}
+      {isOpen && presentation === "popover" && menuStyle
         ? createPortal(
             <div
               className="fixed z-70 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg shadow-slate-950/10 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/30"

@@ -53,6 +53,13 @@ O componente ja cuida de:
 - fechamento com `Esc`;
 - estado desabilitado.
 
+## Seleção e filtros no celular
+
+- Reutilizar `DropdownSelect` com `variant="filter"` e `presentation="sheet"` nos filtros compactos que seguem o Android. A variante usa pílulas sem seta, mantendo o cursor padrão do dropdown.
+- `triggerLabel` mantém o rótulo compacto; `sheetTitle` define o título do painel. As opções continuam usando o mesmo contrato de valores e seleção do dropdown.
+- `SelectionSheet` centraliza o painel inferior, bloqueio de rolagem, foco, fechamento pela área externa e tecla Esc. As listas de seleção suportam navegação pelo teclado e devolvem o foco ao gatilho ao fechar.
+- `CompactExpenseCard`, em `features/expenses/components`, centraliza a apresentação de despesa do Início: categoria, parcelas, pagamento, adiantamento, observações, valor privado e origem. Ações de detalhes continuam usando o diálogo compartilhado existente.
+
 ## DatePicker
 
 O componente `components/ui/date-picker.tsx` e o seletor de data padrao do projeto.

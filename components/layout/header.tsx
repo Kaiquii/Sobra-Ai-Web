@@ -2,6 +2,8 @@
 
 import {
   ChevronDown,
+  Eye,
+  EyeOff,
   ArrowLeft,
   Diamond,
   Home,
@@ -13,6 +15,7 @@ import {
   UserRound,
 } from "lucide-react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -21,9 +24,11 @@ import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { ProfilePhotoPreviewDialog } from "@/components/ui/profile-photo-preview-dialog";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { AssistantChatDialog } from "@/features/assistant/components/AssistantChatView";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useFinancialPrivacyStore } from "@/store/useFinancialPrivacyStore";
 import { buildApiAssetUrl } from "@/lib/api";
+
+const AssistantChatDialog = dynamic(() => import("@/features/assistant/components/AssistantChatView").then((module) => module.AssistantChatDialog));
 
 type HeaderProps = {
   onOpenSidebar: () => void;
@@ -50,6 +55,8 @@ function getCurrentPageTitle(pathname: string) {
 }
 
 export function Header({ onOpenSidebar }: HeaderProps) {
+  const valuesHidden = useFinancialPrivacyStore((state) => state.valuesHidden);
+  const toggleValues = useFinancialPrivacyStore((state) => state.toggle);
   const [isAssistantDialogOpen, setIsAssistantDialogOpen] = useState(false);
   const [isPhotoPreviewOpen, setIsPhotoPreviewOpen] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
@@ -63,6 +70,9 @@ export function Header({ onOpenSidebar }: HeaderProps) {
   const avatarUrl = buildApiAssetUrl(user?.avatar_url, user?.avatar_cache_key);
   const profileEmail = user?.email;
   const currentPageTitle = getCurrentPageTitle(pathname);
+  const showFinancialPrivacy = ["/inicio", "/despesas", "/relatorios", "/salario"].some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
   const userName = user?.name ?? "Usuário";
   const userEmail = user?.email ?? "E-mail não informado.";
   const isAdmin = user?.role === "admin";
@@ -118,7 +128,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-3 py-2 text-slate-950 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:text-slate-50 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-3 py-2 text-slate-950 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:text-slate-50 sm:px-6 lg:px-8">
         <div className="flex w-full items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <Button
@@ -163,6 +173,17 @@ export function Header({ onOpenSidebar }: HeaderProps) {
             >
               <Home aria-hidden="true" size={16} strokeWidth={2.25} />
             </Button>
+            {showFinancialPrivacy ? <Button
+              aria-label={valuesHidden ? "Mostrar valores" : "Ocultar valores"}
+              title={valuesHidden ? "Mostrar valores" : "Ocultar valores"}
+              aria-pressed={valuesHidden}
+              onClick={toggleValues}
+              size="icon"
+              variant="ghost"
+              className="h-11 w-11 shrink-0 rounded-full sm:h-8 sm:w-8"
+            >
+              {valuesHidden ? <EyeOff aria-hidden="true" size={20} /> : <Eye aria-hidden="true" size={20} />}
+            </Button> : null}
             <Button
               aria-label="Abrir assistente com IA"
               className="h-11 w-11 shrink-0 rounded-full border-0 bg-transparent text-brand shadow-none dark:bg-transparent dark:text-brand sm:h-8 sm:w-8"
@@ -344,10 +365,10 @@ export function Header({ onOpenSidebar }: HeaderProps) {
         isOpen={isPhotoPreviewOpen}
         onClose={() => setIsPhotoPreviewOpen(false)}
       />
-      <AssistantChatDialog
+      {isAssistantDialogOpen ? <AssistantChatDialog
         isOpen={isAssistantDialogOpen}
         onClose={() => setIsAssistantDialogOpen(false)}
-      />
+      /> : null}
     </>
   );
 }
