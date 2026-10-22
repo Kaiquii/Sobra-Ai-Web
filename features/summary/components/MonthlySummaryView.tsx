@@ -119,7 +119,7 @@ function SummaryCard({
           "border-red-300 bg-red-50 dark:border-red-900/60 dark:bg-red-950/25",
         "max-sm:min-h-0 max-sm:border-0 max-sm:shadow-none max-sm:after:hidden",
         isFeatured
-          ? "max-sm:bg-[#E0F2FE]! max-sm:p-[18px]! dark:max-sm:bg-[#13325B]!"
+          ? "max-sm:bg-[#E0F2FE]! max-sm:p-4.5! dark:max-sm:bg-[#13325B]!"
           : isRemaining
             ? "max-sm:bg-[#F3E8FF]! dark:max-sm:bg-[#221A36]!"
             : "max-sm:bg-[#F8F9FA]! dark:max-sm:bg-[#202934]!",
@@ -198,7 +198,7 @@ function SummaryCard({
                 isExtra && "text-emerald-600 dark:text-emerald-500",
                 amountState === "negative" && "text-red-500 dark:text-red-400",
                 isFeatured &&
-                  "max-sm:absolute max-sm:right-[18px] max-sm:top-1/2 max-sm:-translate-y-1/2 max-sm:text-brand!",
+                  "max-sm:absolute max-sm:right-4.5 max-sm:top-1/2 max-sm:-translate-y-1/2 max-sm:text-brand!",
                 isExtra && "max-sm:text-[#4CAF50]!",
               )}
             >
