@@ -123,10 +123,10 @@ function SummaryCard({
           "border-red-300 bg-red-50 dark:border-red-900/60 dark:bg-red-950/25",
         "max-sm:min-h-0 max-sm:border-0 max-sm:shadow-none max-sm:after:hidden",
         isFeatured
-          ? "max-sm:bg-[#E0F2FE]! max-sm:p-4.5! dark:max-sm:bg-[#13325B]!"
+          ? "max-sm:bg-blue-100! max-sm:p-4.5! dark:max-sm:bg-blue-950!"
           : isRemaining
-            ? "max-sm:bg-[#F3E8FF]! dark:max-sm:bg-[#221A36]!"
-            : "max-sm:bg-[#F8F9FA]! dark:max-sm:bg-[#202934]!",
+            ? "max-sm:bg-violet-100! dark:max-sm:bg-violet-950/70!"
+            : "max-sm:bg-slate-50! dark:max-sm:bg-slate-900!",
         className,
       )}
     >
@@ -145,7 +145,7 @@ function SummaryCard({
               isRemaining && "text-violet-700/70 dark:text-violet-200/55",
               amountState === "negative" &&
                 "text-red-700/80 dark:text-red-200/75",
-              "max-sm:text-[#7A849E]!",
+              "max-sm:text-slate-500! dark:max-sm:text-slate-400!",
             )}
           >
             {label}
@@ -187,7 +187,7 @@ function SummaryCard({
                   isFeatured && "text-blue-700/60 dark:text-blue-200/45",
                   amountState === "negative" &&
                     "text-red-700/70 dark:text-red-200/60",
-                  "max-sm:mt-1 max-sm:text-[11px] max-sm:text-[#7A849E]!",
+                  "max-sm:mt-1 max-sm:text-[11px] max-sm:text-slate-500! dark:max-sm:text-slate-400!",
                 )}
               >
                 {hidden ? "Saldo do mês" : <><span className="sm:hidden">{isFeatured && value < 0 ? "Atenção: saldo negativo no mês" : hint}</span><span className="hidden sm:inline">{hint}</span></>}

@@ -82,7 +82,7 @@ export function SelectionSheet({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="flex max-h-[min(85dvh,calc(100dvh-env(safe-area-inset-top)-16px))] w-full flex-col rounded-t-[28px] bg-white text-slate-950 shadow-2xl dark:bg-[#121212] dark:text-white"
+        className="flex max-h-[min(85dvh,calc(100dvh-env(safe-area-inset-top)-16px))] w-full flex-col rounded-t-[28px] bg-white text-slate-950 shadow-2xl dark:bg-slate-900 dark:text-slate-50"
       >
         <button
           type="button"
@@ -92,7 +92,7 @@ export function SelectionSheet({
         >
           <span
             aria-hidden="true"
-            className="h-1 w-8 rounded-full bg-slate-400 dark:bg-[#CAC4D0]"
+            className="h-1 w-8 rounded-full bg-slate-400 dark:bg-slate-500"
           />
         </button>
         <div className="mb-4 flex items-center justify-between gap-3 px-6">

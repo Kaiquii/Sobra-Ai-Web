@@ -22,6 +22,7 @@ A versão mobile do site deve reproduzir a interface e os fluxos do Android, nã
 - Na seção de despesas do Início, seguir `DespesasSection.kt`, `FilterOptionItem.kt` e a variante compacta de `ExpenseCard.kt`: filtros em pílulas sem seta, seleção por painel inferior, chips individuais para limpar filtros, data curta e badge colorido de origem. O cartão compacto não possui ícone de categoria à esquerda. O cartão compacto e o painel de seleção devem ser compartilhados.
 
 - Preservar a paleta existente do web. A adaptação deve reproduzir a estrutura e os fluxos do Android; não fazer uma troca global de cores.
+- Superfícies neutras, painéis inferiores, campos e filtros usam a paleta Slate do web, com azul-escuro no tema escuro. Não copiar fundos pretos ou cinza-neutros do Android. Cards de destaque mantêm as cores semânticas azul e violeta, e os tipos de despesa preservam seus acentos próprios.
 - Verde para valores positivos, vermelho para gastos e alertas, violeta para saldos por origem e Premium; administrador mantém destaque dourado.
 - No celular, navegação inferior com Início, Despesas, Relatórios e Perfil, com criação de despesa no centro.
 - No celular, Início e visão mensal usam o resumo financeiro do Android, seguido da lista de despesas. No desktop, preservar a composição anterior, sem a lista de despesas. O botão de privacidade oculta os valores e bloqueia as ações de renda enquanto estiver ativo. Exibir o botão somente nas telas de resumo, despesas, relatórios e rendas; não exibir na Home, no Perfil ou em suas subtelas.

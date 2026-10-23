@@ -36,7 +36,7 @@ function ExpenseFiltersSheet({ filters, categories, availableCategoryIds, onClos
 
   return (
     <SelectionSheet title="Filtrar despesas" onClose={onClose} showCloseButton>
-      <p className="-mt-2 text-sm text-slate-500 dark:text-slate-400">Escolha quais despesas você quer visualizar.</p>
+      <p className="text-sm text-slate-500 dark:text-slate-400">Escolha quais despesas você quer visualizar.</p>
       <div className="mt-5 flex flex-col gap-5">
         <div>
           <label className="mb-2 block font-semibold" htmlFor="expense-filter-category">Categoria</label>
@@ -94,7 +94,7 @@ export function ExpenseListControls({ month, year, onMonthChange, total, count, 
   return (
     <div className="flex min-w-0 flex-col gap-2 sm:hidden">
       <MonthSwitcher variant="android" month={month} year={year} onChange={onMonthChange} />
-      <div className="flex min-h-17.5 items-center justify-between gap-3 rounded-2xl border border-brand/32 bg-[#E0F2FE] p-3 text-slate-950 dark:bg-[#13325B] dark:text-white">
+      <div className="flex min-h-17.5 items-center justify-between gap-3 rounded-2xl border border-brand/32 bg-blue-100 p-3 text-slate-950 dark:bg-blue-950 dark:text-slate-50">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase text-slate-950/75 dark:text-white/75">{totalLabel}</p>
           <strong className="block wrap-anywhere text-2xl font-bold tabular-nums">{total === null ? "—" : <FinancialValue value={total} />}</strong>
@@ -109,17 +109,17 @@ export function ExpenseListControls({ month, year, onMonthChange, total, count, 
           <input aria-label="Buscar despesa por descrição ou valor" placeholder="Buscar despesa..." type="search" enterKeyHint="search"
             value={search} onChange={(event) => onSearchChange(event.target.value)}
             onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }}
-            className="h-12 w-full rounded-xl border border-transparent bg-[#F8F9FA] pl-10 pr-3 text-sm outline-none focus:border-brand dark:bg-[#202934]" />
+            className="h-12 w-full rounded-xl border border-transparent bg-slate-50 pl-10 pr-3 text-sm outline-none focus:border-brand dark:bg-slate-900" />
         </div>
         <Button aria-label="Filtrar despesas" aria-haspopup="dialog" aria-expanded={filtersOpen}
           title={active ? "Filtros ativos" : "Sem filtros ativos"} variant="ghost" size="iconLg"
-          className={`h-12 w-12 rounded-xl ${active ? "bg-brand/16 text-brand dark:text-brand" : "bg-[#F8F9FA] text-slate-500 dark:bg-[#202934] dark:text-slate-400"}`}
+          className={`h-12 w-12 rounded-xl ${active ? "bg-brand/16 text-brand dark:text-brand" : "bg-slate-50 text-slate-500 dark:bg-slate-900 dark:text-slate-400"}`}
           onClick={() => setFiltersOpen(true)}><SlidersHorizontal aria-hidden="true" size={24} /></Button>
       </div>
       <div aria-label="Tipo de despesa" className="scrollbar-none flex min-w-0 gap-2 overflow-x-auto">
         {types.map((item) => <button key={item} type="button" aria-pressed={type === item} onClick={() => onTypeChange(item)}
           className="flex min-h-12 shrink-0 cursor-pointer items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
-          <span className={`rounded-full border px-4 py-1.5 text-sm ${type === item ? "border-transparent bg-brand font-semibold text-white" : "border-slate-950/8 bg-[#F8F9FA] text-slate-600 dark:border-white/8 dark:bg-[#202934] dark:text-slate-300"}`}>{item}</span>
+          <span className={`rounded-full border px-4 py-1.5 text-sm ${type === item ? "border-transparent bg-brand font-semibold text-white" : "border-slate-950/8 bg-slate-50 text-slate-600 dark:border-white/8 dark:bg-slate-900 dark:text-slate-300"}`}>{item}</span>
         </button>)}
       </div>
       {filtersOpen ? <ExpenseFiltersSheet filters={filters} categories={categories} availableCategoryIds={availableCategoryIds}

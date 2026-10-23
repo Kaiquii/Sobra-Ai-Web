@@ -156,7 +156,7 @@ export function DropdownSelect<TValue extends string>({
           isFilter
             ? "flex h-8 w-full cursor-default items-center gap-1 whitespace-nowrap rounded-2xl px-3 text-left text-xs font-normal outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:cursor-not-allowed disabled:opacity-60"
             : "flex h-10 w-full cursor-default items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 text-left text-sm font-semibold text-slate-800 outline-none hover:border-slate-300 hover:bg-white focus-visible:border-blue-500 focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950/50 dark:text-slate-100 dark:hover:border-slate-700 dark:hover:bg-slate-950 dark:focus-visible:border-blue-500 dark:focus-visible:ring-blue-950/60",
-          isFilter && (isActive ? "bg-brand/20 text-brand" : "bg-slate-100 text-[#7A849E] dark:bg-[#202934]"),
+          isFilter && (isActive ? "bg-brand/20 text-brand" : "bg-slate-100 text-slate-500 dark:bg-slate-900 dark:text-slate-400"),
           triggerClassName,
         )}
         disabled={disabled}

@@ -88,12 +88,12 @@ export function CompactExpenseCard({
       : expense.type;
 
   return (
-    <article className="flex min-w-0 items-center gap-2 rounded-xl bg-[#F8F9FA] p-4 text-slate-950 dark:bg-[#202934] dark:text-white">
+    <article className="flex min-w-0 items-center gap-2 rounded-xl bg-slate-50 p-4 text-slate-950 dark:bg-slate-900 dark:text-slate-50">
       <div className="min-w-0 flex-1">
         <h3 className="truncate text-sm font-bold leading-5">
           {expense.description?.trim() || "Despesa sem descrição"}
         </h3>
-        <p className="truncate text-xs leading-5 text-[#7A849E]">
+        <p className="truncate text-xs leading-5 text-slate-500 dark:text-slate-400">
           {categoryName}
         </p>
         <div className="scrollbar-none mt-2 flex min-w-0 items-center gap-1.5 overflow-x-auto">
@@ -112,7 +112,7 @@ export function CompactExpenseCard({
               <span>Adiantada</span>
             </Chip>
           ) : (
-            <span className="shrink-0 whitespace-nowrap text-[10px] text-[#7A849E]">
+            <span className="shrink-0 whitespace-nowrap text-[10px] text-slate-500 dark:text-slate-400">
               {day}/{month}
             </span>
           )}
@@ -127,7 +127,7 @@ export function CompactExpenseCard({
             type="button"
             aria-label={`Visualizar despesa ${expense.description}`}
             onClick={() => onView(expense)}
-            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-[#7A849E] hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-slate-500 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-slate-400 dark:hover:text-brand"
           >
             <Eye aria-hidden="true" size={18} />
           </button>

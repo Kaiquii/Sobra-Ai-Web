@@ -305,7 +305,7 @@ function ExpenseCard({
 
   return (
     <article
-      className={`grid grid-cols-[auto_minmax(0,1fr)_auto] gap-x-2.5 gap-y-2 rounded-lg border bg-white px-3 py-3 shadow-sm hover:shadow-md dark:bg-slate-900/85 max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:items-center max-sm:gap-x-2 max-sm:gap-y-0 max-sm:rounded-2xl max-sm:border-0 max-sm:bg-[#F8F9FA] max-sm:p-4 max-sm:shadow-none dark:max-sm:bg-[#202934] sm:items-center sm:px-4 ${
+      className={`grid grid-cols-[auto_minmax(0,1fr)_auto] gap-x-2.5 gap-y-2 rounded-lg border bg-white px-3 py-3 shadow-sm hover:shadow-md dark:bg-slate-900/85 max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:items-center max-sm:gap-x-2 max-sm:gap-y-0 max-sm:rounded-2xl max-sm:border-0 max-sm:bg-slate-50 max-sm:p-4 max-sm:shadow-none dark:max-sm:bg-slate-900 sm:items-center sm:px-4 ${
         expense.is_paid
           ? "border-emerald-200 hover:border-emerald-300 dark:border-emerald-900/70 dark:hover:border-emerald-800"
           : "border-slate-200 hover:border-blue-200 dark:border-slate-800 dark:hover:border-blue-900/70"

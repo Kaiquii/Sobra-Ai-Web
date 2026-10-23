@@ -74,7 +74,7 @@ export function MonthlyExpensesSection({
       <div className="flex min-w-0 flex-col gap-2">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-bold">Despesas</h2>
-          <span className="text-xs font-semibold text-[#7A849E]">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
             {filtered.length} {filtered.length === 1 ? "despesa" : "despesas"}
           </span>
         </div>
@@ -145,7 +145,7 @@ export function MonthlyExpensesSection({
         ) : null}
       </div>
       {!filtered.length ? (
-        <p className="px-4 py-8 text-center text-sm text-[#7A849E]">
+        <p className="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
           {activeFilters.length
             ? "Nenhuma despesa encontrada para estes filtros."
             : "Nenhuma despesa neste mês."}
@@ -165,7 +165,7 @@ export function MonthlyExpensesSection({
       ))}
       <Button
         variant="secondary"
-        className="h-14 w-full rounded-xl border-[#7A849E]/50 bg-transparent! text-base font-normal dark:bg-transparent!"
+        className="h-14 w-full rounded-xl border-slate-300 bg-transparent! text-base font-normal dark:border-slate-700 dark:bg-transparent!"
         onClick={onAdd}
       >
         <CirclePlus aria-hidden="true" size={24} />
