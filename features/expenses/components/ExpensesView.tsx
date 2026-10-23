@@ -31,6 +31,8 @@ import {
 import { ExpenseDeleteDialog } from "@/features/expenses/components/ExpenseDeleteDialog";
 import { ExpenseAdvanceDialog } from "@/features/expenses/components/ExpenseAdvanceDialog";
 import { ExpenseDetailsDialog } from "@/features/expenses/components/ExpenseDetailsDialog";
+import { ExpenseListControls } from "@/features/expenses/components/ExpenseListControls";
+import { expenseTotalLabel, expenseTypeAccent } from "@/features/expenses/utils/expensePresentation";
 import {
   ExpenseFormDialog,
   type ExpenseFormMode,
@@ -40,7 +42,6 @@ import { useExpenseComposerStore } from "@/features/expenses/store/useExpenseCom
 import type {
   Category,
   Expense,
-  ExpensePaymentStatus,
   ExpenseTypeFilter,
 } from "@/features/expenses/types/expense";
 import { FinancialValue } from "@/components/ui/financial-value";
@@ -184,20 +185,6 @@ function matchesPaymentStatusFilter(
   return filter === "Pagas" ? expense.is_paid : !expense.is_paid;
 }
 
-function getPaymentStatusApiValue(
-  filter: PaymentStatusFilter,
-): ExpensePaymentStatus | undefined {
-  if (filter === "Pagas") {
-    return "paid";
-  }
-
-  if (filter === "Pendentes") {
-    return "pending";
-  }
-
-  return undefined;
-}
-
 function getCategoryName(
   expense: Expense,
   categoriesById: Map<number, string>,
@@ -318,7 +305,7 @@ function ExpenseCard({
 
   return (
     <article
-      className={`grid grid-cols-[auto_minmax(0,1fr)_auto] gap-x-2.5 gap-y-2 rounded-lg border bg-white px-3 py-3 shadow-sm hover:shadow-md dark:bg-slate-900/85 sm:items-center sm:px-4 ${
+      className={`grid grid-cols-[auto_minmax(0,1fr)_auto] gap-x-2.5 gap-y-2 rounded-lg border bg-white px-3 py-3 shadow-sm hover:shadow-md dark:bg-slate-900/85 max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:items-center max-sm:gap-x-2 max-sm:gap-y-0 max-sm:rounded-2xl max-sm:border-0 max-sm:bg-[#F8F9FA] max-sm:p-4 max-sm:shadow-none dark:max-sm:bg-[#202934] sm:items-center sm:px-4 ${
         expense.is_paid
           ? "border-emerald-200 hover:border-emerald-300 dark:border-emerald-900/70 dark:hover:border-emerald-800"
           : "border-slate-200 hover:border-blue-200 dark:border-slate-800 dark:hover:border-blue-900/70"
@@ -326,36 +313,37 @@ function ExpenseCard({
       id={`expense-${expense.id}`}
       onDoubleClick={() => onView(expense)}
     >
-      <div className="row-start-1 flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/55 dark:text-blue-300 sm:row-span-2">
+      <div className="row-start-1 hidden h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/55 dark:text-blue-300 sm:row-span-2 sm:flex">
         <ReceiptText aria-hidden="true" size={19} />
       </div>
 
-      <div className="col-start-2 row-start-1 min-w-0 sm:row-span-2">
-        <h2 className="truncate text-sm font-semibold text-slate-950 dark:text-white sm:text-base">
+      <div className="col-start-2 row-start-1 min-w-0 max-sm:col-start-1 max-sm:row-span-2 sm:row-span-2">
+        <h2 className="truncate text-base font-bold text-slate-950 dark:text-white sm:font-semibold">
           {expense.description}
         </h2>
-        <p className="text-xs font-medium text-slate-500 dark:text-slate-400 sm:text-sm">
+        <p className="truncate text-[13px] text-slate-500 dark:text-slate-400 sm:text-sm sm:font-medium">
           {categoryName}
         </p>
-        <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-          <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-700/65 dark:text-slate-300">
-            {expense.type}
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 sm:mt-1.5 sm:text-sm">
+          <span className={`${expenseTypeAccent(expense.type)} rounded bg-(--expense-accent)/10 px-1.5 py-0.5 text-[10px] text-(--expense-accent) sm:text-xs sm:font-medium`}>
+            <span className="sm:hidden">{installmentLabel ? `Parc. ${installmentLabel}` : expense.type}</span>
+            <span className="hidden sm:inline">{expense.type}</span>
           </span>
           {installmentLabel ? (
-            <span className="rounded bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+            <span className={`${expenseTypeAccent(expense.type)} hidden rounded bg-(--expense-accent)/10 px-1.5 py-0.5 text-xs font-medium text-(--expense-accent) sm:inline`}>
               {installmentLabel}
             </span>
           ) : null}
-          <span>• {formatExpenseDate(expense.date)}</span>
+          <span className={expense.is_advanced ? "hidden sm:inline" : ""}>• {formatExpenseDate(expense.date)}</span>
           {expense.is_advanced && expense.advanced_at ? (
-            <span className="rounded bg-amber-50 px-1.5 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
-              Adiantada para {formatExpenseFullDate(expense.advanced_at)}
+            <span className="rounded bg-brand/14 px-1.5 py-0.5 text-[10px] font-semibold text-brand sm:bg-amber-50 sm:text-xs sm:text-amber-800 sm:dark:bg-amber-950/50 sm:dark:text-amber-200">
+              <span className="sm:hidden">Adiantada</span><span className="hidden sm:inline">Adiantada para {formatExpenseFullDate(expense.advanced_at)}</span>
             </span>
           ) : null}
         </div>
         {notes ? (
           <p
-            className="mt-2 flex max-w-full items-center gap-1.5 truncate rounded-md bg-slate-50 px-2 py-1 text-xs text-slate-500 dark:bg-slate-950/60 dark:text-slate-400"
+            className="mt-2 hidden max-w-full items-center gap-1.5 truncate rounded-md bg-slate-50 px-2 py-1 text-xs text-slate-500 dark:bg-slate-950/60 dark:text-slate-400 sm:flex"
             title={notes}
           >
             <FileText
@@ -370,7 +358,7 @@ function ExpenseCard({
 
       <div className="contents">
         <div
-          className="col-span-3 row-start-2 flex items-center justify-end gap-1 border-t border-slate-100 pt-1 dark:border-slate-800 sm:col-span-1 sm:col-start-3 sm:row-start-1 sm:border-0 sm:pt-0 [&_button]:min-h-11 [&_button]:min-w-11 sm:[&_button]:min-h-7 sm:[&_button]:min-w-7"
+          className="col-span-1 col-start-2 row-start-1 flex w-36 items-center justify-between gap-0 sm:col-start-3 sm:w-auto sm:justify-end sm:gap-1 [&_button]:min-h-8 [&_button]:min-w-7 sm:[&_button]:min-h-7 sm:[&_button]:min-w-7"
           onDoubleClick={(event) => event.stopPropagation()}
         >
           <button
@@ -443,19 +431,19 @@ function ExpenseCard({
           </button>
         </div>
 
-        <div className="col-start-3 row-start-1 flex max-w-32 flex-col items-end gap-1.5 text-right sm:row-start-2 sm:max-w-none">
-          <strong className="wrap-anywhere text-sm font-semibold tabular-nums text-red-600 dark:text-red-200 sm:text-lg">
-            <FinancialValue value={-expense.amount} />
+        <div className="col-start-2 row-start-2 flex min-w-0 flex-col items-end gap-1 text-right sm:col-start-3 sm:max-w-none sm:gap-1.5">
+          <strong className="wrap-anywhere text-base font-bold tabular-nums text-slate-950 dark:text-white sm:text-lg sm:font-semibold">
+            <FinancialValue prefix="- " value={expense.amount} />
           </strong>
-          <p className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300 sm:text-sm">
+          <p className="inline-flex max-w-full items-center gap-1 text-xs text-slate-500 dark:text-slate-400 sm:rounded-full sm:bg-slate-100 sm:px-1.5 sm:py-0.5 sm:text-sm sm:font-medium sm:text-slate-600 dark:sm:bg-slate-800 dark:sm:text-slate-300">
             <WalletCards
               aria-hidden="true"
               className="text-blue-500"
               size={14}
             />
-            {paymentSources.length === 1
+            <span className="truncate">{paymentSources.length === 1
               ? paymentSources[0]
-              : `${paymentSources.length} origens`}
+              : <><span className="sm:hidden">Pagamento dividido</span><span className="hidden sm:inline">{paymentSources.length} origens</span></>}</span>
           </p>
         </div>
       </div>
@@ -477,7 +465,6 @@ function ExpensesSkeleton() {
 }
 
 export function ExpensesView() {
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const isComposerOpen = useExpenseComposerStore((state) => state.isOpen);
   const closeComposer = useExpenseComposerStore((state) => state.close);
   const [{ month, year }, setSelectedDate] = useState(getCurrentMonthReference);
@@ -525,12 +512,9 @@ export function ExpensesView() {
   );
 
   useEffect(() => {
-    void loadInitialData(
-      month,
-      year,
-      getPaymentStatusApiValue(paymentStatusFilter),
-    );
-  }, [loadInitialData, month, paymentStatusFilter, year]);
+    // Keep the month's categories available when status filters change locally.
+    void loadInitialData(month, year);
+  }, [loadInitialData, month, year]);
 
   useEffect(() => {
     if (!message) {
@@ -672,6 +656,7 @@ export function ExpensesView() {
     (total, expense) => total + expense.amount,
     0,
   );
+  const totalsAvailable = !isLoading && (!error || expenses.length > 0 || effectiveExpenses.length > 0);
   const isPaymentStatusConfirming =
     paymentStatusTarget?.id === paymentStatusUpdatingId;
   const isAdvanceStatusSubmitting =
@@ -697,19 +682,11 @@ export function ExpensesView() {
   function refreshExpenses() {
     closeFormDialog();
     setDeleteTarget(null);
-    void loadInitialData(
-      month,
-      year,
-      getPaymentStatusApiValue(paymentStatusFilter),
-    );
+    void loadInitialData(month, year);
   }
 
   function refreshExpenseList() {
-    void loadInitialData(
-      month,
-      year,
-      getPaymentStatusApiValue(paymentStatusFilter),
-    );
+    void loadInitialData(month, year);
   }
 
   function togglePaymentStatus(expense: Expense) {
@@ -774,82 +751,25 @@ export function ExpensesView() {
   return (
     <>
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-4">
-        <div className="space-y-3 sm:hidden">
-          <div className="flex items-center gap-2">
-            <div className="relative min-w-0 flex-1">
-              <Search
-                aria-hidden="true"
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <input
-                aria-label="Buscar despesa"
-                placeholder="Buscar despesa..."
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 outline-none focus:ring-2 focus:ring-blue-400 dark:border-slate-800 dark:bg-slate-900"
-              />
-            </div>
-            <Button
-              aria-label="Filtros de despesas"
-              aria-expanded={isMobileFiltersOpen}
-              aria-controls="mobile-expense-filters"
-              onClick={() => setIsMobileFiltersOpen((open) => !open)}
-              variant="secondary"
-              size="iconLg"
-            >
-              <ListFilter aria-hidden="true" size={22} />
-            </Button>
-          </div>
-          <div
-            aria-label="Tipo de despesa"
-            className="grid grid-cols-4 gap-1.5"
-          >
-            {typeFilters.map((type) => (
-              <button
-                key={type}
-                type="button"
-                aria-pressed={typeFilter === type}
-                onClick={() => setTypeFilter(type)}
-                className={`h-11 min-w-0 cursor-pointer rounded-full px-1 text-xs font-semibold ${typeFilter === type ? "bg-blue-600 text-white" : "bg-slate-200/70 text-slate-600 dark:bg-slate-800 dark:text-slate-300"}`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
-          {isMobileFiltersOpen ? (
-            <div id="mobile-expense-filters" className="grid grid-cols-2 gap-2">
-              <DropdownSelect
-                ariaLabel="Origem da despesa"
-                icon={WalletCards}
-                value={paymentSourceFilter}
-                onChange={setPaymentSourceFilter}
-                options={paymentSourceFilterOptions}
-              />
-              <DropdownSelect
-                ariaLabel="Status de pagamento"
-                icon={CheckCircle2}
-                value={paymentStatusFilter}
-                onChange={setPaymentStatusFilter}
-                options={paymentStatusFilterOptions}
-              />
-              <DropdownSelect
-                ariaLabel="Categoria da despesa"
-                className="col-span-2"
-                icon={ListFilter}
-                value={selectedCategoryId}
-                onChange={setSelectedCategoryId}
-                options={[
-                  { label: "Todas categorias", value: "Todas" },
-                  ...categories.map((category) => ({
-                    label: category.name,
-                    value: String(category.id),
-                  })),
-                ]}
-              />
-            </div>
-          ) : null}
-        </div>
+        <ExpenseListControls
+          month={month}
+          year={year}
+          onMonthChange={setSelectedDate}
+          total={totalsAvailable ? totalAmount : null}
+          count={totalsAvailable ? filteredExpenses.length : null}
+          search={searchQuery}
+          onSearchChange={setSearchQuery}
+          type={typeFilter}
+          onTypeChange={setTypeFilter}
+          filters={{ category: selectedCategoryId, source: paymentSourceFilter, status: paymentStatusFilter }}
+          categories={categories}
+          availableCategoryIds={new Set(expenses.flatMap((expense) => expense.category_id == null ? [] : [expense.category_id]))}
+          onFiltersChange={({ category, source, status }) => {
+            setSelectedCategoryId(category);
+            setPaymentSourceFilter(source);
+            setPaymentStatusFilter(status);
+          }}
+        />
         <div className="hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:block">
           <div className="grid grid-cols-2 gap-2 lg:grid-cols-3 xl:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)_minmax(0,1.15fr)_minmax(0,1.05fr)_minmax(0,0.95fr)_auto] xl:items-center">
             <DropdownSelect
@@ -918,7 +838,7 @@ export function ExpensesView() {
           </div>
         </div>
 
-        <div className="flex justify-center">
+        <div className="hidden justify-center sm:flex">
           <MonthSwitcher
             className="border-transparent bg-transparent shadow-none dark:border-transparent dark:bg-transparent"
             month={month}
@@ -927,7 +847,7 @@ export function ExpensesView() {
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 py-1 sm:rounded-2xl sm:border sm:border-slate-200 sm:bg-white sm:px-5 sm:py-4 sm:shadow-sm sm:dark:border-slate-800 sm:dark:bg-slate-900">
+        <div className="hidden flex-wrap items-center justify-between gap-3 py-1 sm:flex sm:rounded-2xl sm:border sm:border-slate-200 sm:bg-white sm:px-5 sm:py-4 sm:shadow-sm sm:dark:border-slate-800 sm:dark:bg-slate-900">
           <div className="flex items-center gap-3">
             <div className="hidden h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300 sm:flex">
               <FileText aria-hidden="true" size={22} />
@@ -947,9 +867,12 @@ export function ExpensesView() {
               className="text-slate-400"
               size={18}
             />
-            <strong className="text-lg font-semibold text-red-600 dark:text-red-300">
-              <FinancialValue value={-totalAmount} />
-            </strong>
+            <div>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{expenseTotalLabel(typeFilter)}</p>
+              <strong className="text-lg font-semibold text-slate-950 dark:text-white">
+                {totalsAvailable ? <FinancialValue value={totalAmount} /> : "—"}
+              </strong>
+            </div>
           </div>
         </div>
 
@@ -992,8 +915,8 @@ export function ExpensesView() {
                       {formatExpenseFullDate(expense.advanced_at ?? "")}
                     </p>
                   </div>
-                  <strong className="shrink-0 text-sm font-semibold text-red-600 dark:text-red-300">
-                    <FinancialValue value={-expense.amount} />
+                  <strong className="shrink-0 text-sm font-semibold text-slate-950 dark:text-white">
+                    <FinancialValue prefix="- " value={expense.amount} />
                   </strong>
                 </button>
               ))}

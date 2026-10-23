@@ -190,7 +190,7 @@ function SummaryCard({
                   "max-sm:mt-1 max-sm:text-[11px] max-sm:text-[#7A849E]!",
                 )}
               >
-                {hidden ? "Saldo do mês" : hint}
+                {hidden ? "Saldo do mês" : <><span className="sm:hidden">{isFeatured && value < 0 ? "Atenção: saldo negativo no mês" : hint}</span><span className="hidden sm:inline">{hint}</span></>}
               </p>
             ) : null}
           </div>

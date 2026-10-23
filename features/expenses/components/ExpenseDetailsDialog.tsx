@@ -218,8 +218,8 @@ export function ExpenseDetailsDialog({
               <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 Valor da despesa
               </p>
-              <strong className="mt-1 block wrap-break-word text-3xl font-semibold tabular-nums text-red-700 dark:text-red-300 sm:text-4xl">
-                <FinancialValue value={-expense.amount} />
+              <strong className="mt-1 block wrap-break-word text-3xl font-semibold tabular-nums text-slate-950 dark:text-white sm:text-4xl">
+                <FinancialValue prefix="- " value={expense.amount} />
               </strong>
             </div>
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-700 shadow-sm dark:border-red-950/80 dark:bg-red-950/40 dark:text-red-300">

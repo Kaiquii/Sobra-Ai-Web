@@ -2,17 +2,21 @@
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { useLockBodyScroll } from "@/components/ui/use-lock-body-scroll";
 
 export function SelectionSheet({
   title,
   onClose,
   children,
+  showCloseButton = false,
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  showCloseButton?: boolean;
 }) {
   const titleId = useId();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -31,6 +35,10 @@ export function SelectionSheet({
     )?.focus();
 
     function handleKeyDown(event: KeyboardEvent) {
+      // A selector can portal its menu outside the sheet. Let its own Escape
+      // handler close that menu without discarding the sheet's filter draft.
+      const openSelector = sheet?.querySelector<HTMLElement>('[aria-haspopup="listbox"][aria-expanded="true"]');
+      if (event.key === "Escape" && openSelector) return;
       if (event.key === "Escape") {
         event.preventDefault();
         closeRef.current();
@@ -40,20 +48,23 @@ export function SelectionSheet({
         ...sheet.querySelectorAll<HTMLElement>(
           'button:not(:disabled), [href], [tabindex="0"]',
         ),
-      ];
-      const first = items[0];
-      const last = items.at(-1);
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last?.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first?.focus();
-      }
+      ].flatMap((item) => {
+        const menuId = item.getAttribute("aria-controls");
+        const menu = menuId ? document.getElementById(menuId) : null;
+        return menu && !sheet.contains(menu)
+          ? [item, ...menu.querySelectorAll<HTMLElement>('button:not(:disabled)')]
+          : [item];
+      });
+      const index = items.indexOf(document.activeElement as HTMLElement);
+      const nextIndex = event.shiftKey
+        ? (index - 1 + items.length) % items.length
+        : (index + 1) % items.length;
+      event.preventDefault();
+      items[nextIndex]?.focus();
     }
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown, true);
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown, true);
       if (previousFocus instanceof HTMLElement && previousFocus.isConnected)
         previousFocus.focus();
     };
@@ -84,9 +95,10 @@ export function SelectionSheet({
             className="h-1 w-8 rounded-full bg-slate-400 dark:bg-[#CAC4D0]"
           />
         </button>
-        <h2 id={titleId} className="mb-4 px-6 text-xl font-bold leading-7">
-          {title}
-        </h2>
+        <div className="mb-4 flex items-center justify-between gap-3 px-6">
+          <h2 id={titleId} className="text-xl font-bold leading-7">{title}</h2>
+          {showCloseButton ? <Button aria-label="Fechar filtros" variant="ghost" size="iconSm" onClick={onClose}><X aria-hidden="true" size={22} /></Button> : null}
+        </div>
         <div className="min-h-0 overflow-y-auto overscroll-contain px-6 pb-[max(32px,env(safe-area-inset-bottom))]">
           {children}
         </div>
