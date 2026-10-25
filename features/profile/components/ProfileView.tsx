@@ -272,7 +272,7 @@ export function ProfileView() {
 
           <div className="mt-3 grid min-w-0 gap-3">
             <ProfileShortcut
-              description="Salário, adiantamento e renda extra."
+              description="Salário, adiantamento, renda extra, VA e VR."
               href="/salario"
               icon={<CircleDollarSign aria-hidden="true" size={20} strokeWidth={2.25} />}
               title="Configurações de Renda"

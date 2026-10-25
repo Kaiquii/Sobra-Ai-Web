@@ -11,6 +11,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Alert } from "@/components/ui/alert";
+import { AppNotification } from "@/components/ui/app-notification";
 import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,7 @@ import {
 } from "@/components/ui/month-switcher";
 import { useIncomeStore } from "@/features/incomes/store/useIncomeStore";
 import type { Income, IncomeSource } from "@/features/incomes/types/income";
-import { findIncomeByReference } from "@/features/incomes/utils/incomeUtils";
+import { buildIncomeCreateRequest, findIncomeByReference } from "@/features/incomes/utils/incomeUtils";
 import {
   formatAmountInput,
   formatMoney,
@@ -181,16 +182,18 @@ export function IncomeSettingsView() {
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
 
   useEffect(() => {
-    void loadIncomes();
+    void loadIncomes(month, year);
 
     return () => clearFeedback();
-  }, [clearFeedback, loadIncomes]);
+  }, [clearFeedback, loadIncomes, month, year]);
 
   const currentIncomes = useMemo(
     () => ({
       adiantamento: findIncomeByReference(incomes, "Adiantamento", month, year),
       rendaExtra: findIncomeByReference(incomes, "Renda Extra", month, year),
       salario: findIncomeByReference(incomes, "Salario", month, year),
+      VA: findIncomeByReference(incomes, "VA", month, year),
+      VR: findIncomeByReference(incomes, "VR", month, year),
     }),
     [incomes, month, year],
   );
@@ -213,14 +216,7 @@ export function IncomeSettingsView() {
         return;
       }
 
-      await createIncome({
-        amount,
-        month,
-        repeat_future: source === "Renda Extra" ? repeatFuture : null,
-        source,
-        type: "Fixa",
-        year,
-      });
+      await createIncome(buildIncomeCreateRequest(source, amount, month, year, source === "Renda Extra" ? repeatFuture : true));
     } catch {}
   }
 
@@ -253,19 +249,28 @@ export function IncomeSettingsView() {
           backHref="/perfil"
           description={`Referência selecionada: ${String(month).padStart(2, "0")}/${year}.`}
           eyebrow="Configurações de Renda"
-          title="Salário, Adiantamento e Renda Extra"
+          title="Suas fontes de renda"
         />
 
-        {error ? <Alert variant="error">{error}</Alert> : null}
-        {message ? <Alert variant="success">{message}</Alert> : null}
+        {error ? <div className="space-y-3"><Alert variant="error">{error}</Alert><Button variant="secondary" disabled={isLoading || isSubmitting} onClick={() => void loadIncomes(month, year)}>Tentar novamente</Button></div> : null}
+        <AppNotification key={message} message={message} />
         {isLoading ? <Alert>Carregando rendas...</Alert> : null}
 
         <div className={cn("grid gap-4 lg:grid-cols-3", isLoading && "opacity-70")}>
+          {(["VA", "VR"] as const).map((source) => <IncomeCard
+            key={`${source}-${month}-${year}-${currentIncomes[source]?.id ?? "new"}-${currentIncomes[source]?.amount ?? 0}`}
+            existingIncome={currentIncomes[source]}
+            icon={<Banknote aria-hidden="true" size={22} />}
+            isSubmitting={isSubmitting || isLoading}
+            title={source === "VA" ? "Vale-alimentação (VA)" : "Vale-refeição (VR)"}
+            onDelete={() => { const income = currentIncomes[source]; if (income) setDeleteTarget({ income, title: source }); }}
+            onSave={(amount, future, repeat) => handleSave(source, currentIncomes[source], amount, future, repeat)}
+          />)}
           <IncomeCard
             existingIncome={currentIncomes.salario}
             icon={<Banknote aria-hidden="true" size={22} strokeWidth={2.25} />}
-            isSubmitting={isSubmitting}
-            key={`salario-${month}-${year}-${currentIncomes.salario?.id ?? "new"}`}
+            isSubmitting={isSubmitting || isLoading}
+            key={`salario-${month}-${year}-${currentIncomes.salario?.id ?? "new"}-${currentIncomes.salario?.amount ?? 0}`}
             onDelete={() =>
               currentIncomes.salario
                 ? setDeleteTarget({
@@ -289,8 +294,8 @@ export function IncomeSettingsView() {
           <IncomeCard
             existingIncome={currentIncomes.adiantamento}
             icon={<CircleDollarSign aria-hidden="true" size={22} strokeWidth={2.25} />}
-            isSubmitting={isSubmitting}
-            key={`adiantamento-${month}-${year}-${currentIncomes.adiantamento?.id ?? "new"}`}
+            isSubmitting={isSubmitting || isLoading}
+            key={`adiantamento-${month}-${year}-${currentIncomes.adiantamento?.id ?? "new"}-${currentIncomes.adiantamento?.amount ?? 0}`}
             onDelete={() =>
               currentIncomes.adiantamento
                 ? setDeleteTarget({
@@ -314,8 +319,8 @@ export function IncomeSettingsView() {
           <IncomeCard
             existingIncome={currentIncomes.rendaExtra}
             icon={<Gift aria-hidden="true" size={22} strokeWidth={2.25} />}
-            isSubmitting={isSubmitting}
-            key={`renda-extra-${month}-${year}-${currentIncomes.rendaExtra?.id ?? "new"}`}
+            isSubmitting={isSubmitting || isLoading}
+            key={`renda-extra-${month}-${year}-${currentIncomes.rendaExtra?.id ?? "new"}-${currentIncomes.rendaExtra?.amount ?? 0}`}
             onDelete={() =>
               currentIncomes.rendaExtra
                 ? setDeleteTarget({

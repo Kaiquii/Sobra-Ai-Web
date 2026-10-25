@@ -1,5 +1,7 @@
 "use client";
 
+import { paymentSourceLabel } from "@/lib/payment-sources";
+
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -345,7 +347,7 @@ function mapPaymentSources(sources: MonthComparisonPaymentSource[]) {
     currentValue: source.valor_atual,
     difference: source.diferenca,
     id: source.fonte_pagamento,
-    label: source.fonte_pagamento,
+    label: paymentSourceLabel(source.fonte_pagamento),
     percentage: source.percentual,
     status: source.status,
   }));

@@ -34,6 +34,7 @@ import type {
 } from "@/features/expenses/types/expense";
 import { formatAmountInput, formatMoney, parseAmountInput } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
+import { canonicalPaymentSource, paymentSources, paymentSourceOptions, paymentSourceLabel, validPaymentDistribution } from "@/lib/payment-sources";
 
 export type ExpenseFormMode = "create" | "edit";
 
@@ -64,16 +65,11 @@ type PaymentSplitDraft = {
 };
 
 const NOTES_MAX_LENGTH = 500;
-const paymentSources: PaymentSource[] = ["Sal\u00e1rio", "Adiantamento", "Renda Extra"];
 const expenseTypes: ExpenseType[] = ["\u00danica", "Parcelada", "Fixa"];
 
 const dropdownTriggerClassName =
   "h-11 rounded-md border-slate-300 bg-white text-slate-950 shadow-sm focus-visible:border-emerald-500 focus-visible:bg-white focus-visible:ring-emerald-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:focus-visible:border-emerald-400 dark:focus-visible:bg-slate-950 dark:focus-visible:ring-emerald-950";
 
-const paymentSourceOptions = paymentSources.map((source) => ({
-  label: source,
-  value: source,
-}));
 
 const expenseTypeOptions = expenseTypes.map((type) => ({
   label: type,
@@ -102,17 +98,7 @@ function normalizeType(value: string): ExpenseType {
 }
 
 function normalizePaymentSource(value: string): PaymentSource {
-  const normalized = normalizeText(value);
-
-  if (normalized.includes("adiantamento")) {
-    return "Adiantamento";
-  }
-
-  if (normalized.includes("renda extra")) {
-    return "Renda Extra";
-  }
-
-  return "Sal\u00e1rio";
+  return canonicalPaymentSource(value) ?? value.trim();
 }
 
 function padDatePart(value: number) {
@@ -159,7 +145,7 @@ function buildCreateDraft(month: number, year: number): ExpenseDraft {
     description: "",
     installments: 1,
     notes: "",
-    paymentSource: "Sal\u00e1rio",
+    paymentSource: "Salario",
     type: "\u00danica",
     updateFuture: false,
   };
@@ -273,7 +259,7 @@ function ExpenseFormDialogContent({
 
     void loadExpense(expense.id).then((loadedExpense) => {
       if (isMounted && loadedExpense) {
-        setDraft(buildEditDraft(loadedExpense, categories, month, year));
+        setDraft(buildEditDraft(loadedExpense, useExpenseStore.getState().categories, month, year));
         const splits = getExpensePaymentSplits(loadedExpense);
         setIsSplitPayment(splits.length > 1);
         setPaymentSplits(splits);
@@ -283,7 +269,7 @@ function ExpenseFormDialogContent({
     return () => {
       isMounted = false;
     };
-  }, [categories, expense, loadExpense, mode, month, year]);
+  }, [expense, loadExpense, mode, month, year]);
 
   const selectedCategoryId = draft.categoryId ?? categories[0]?.id ?? null;
   const showInstallments = draft.type === "Parcelada";
@@ -296,21 +282,15 @@ function ExpenseFormDialogContent({
     const splitAmount = parseAmountInput(split.amount);
     return total + (Number.isFinite(splitAmount) ? splitAmount : 0);
   }, 0);
-  const hasValidSplitAmounts = paymentSplits.every((split) => {
-    const splitAmount = parseAmountInput(split.amount);
-    return Number.isFinite(splitAmount) && splitAmount > 0;
-  });
   const hasUniqueSplitSources =
     new Set(paymentSplits.map((split) => normalizePaymentSource(split.paymentSource))).size ===
     paymentSplits.length;
   const expenseAmount = parseAmountInput(draft.amount);
   const displayedExpenseAmount = Number.isFinite(expenseAmount) ? expenseAmount : 0;
-  const isDistributionValid =
-    paymentSplits.length >= 2 &&
-    hasValidSplitAmounts &&
-    hasUniqueSplitSources &&
-    Number.isFinite(expenseAmount) &&
-    Math.abs(splitTotal - displayedExpenseAmount) < 0.005;
+  const isDistributionValid = validPaymentDistribution(expenseAmount, paymentSplits.map((split) => ({ amount: parseAmountInput(split.amount), payment_source: split.paymentSource })));
+  const sourceOptions = [...paymentSourceOptions, ...Array.from(new Set([draft.paymentSource, ...paymentSplits.map((split) => split.paymentSource)]))
+    .filter((source) => source && !canonicalPaymentSource(source))
+    .map((value) => ({ value, label: paymentSourceLabel(value) }))];
 
   const categoryOptions = useMemo(
     () =>
@@ -560,7 +540,7 @@ function ExpenseFormDialogContent({
 
 
 
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+            <div>
               <div className="space-y-2">
                 <Label htmlFor="expense-category">Categoria</Label>
                 <DropdownSelect
@@ -572,19 +552,9 @@ function ExpenseFormDialogContent({
                   options={categoryOptions}
                   triggerClassName={dropdownTriggerClassName}
                   value={selectedCategoryId ? String(selectedCategoryId) : ""}
+                  trailingAction={<Button aria-label="Criar categoria" title="Criar categoria" onClick={() => setIsAddingCategory((current) => !current)} variant="ghost" size="icon" className="text-emerald-600 dark:text-emerald-400"><Plus aria-hidden="true" size={22} /></Button>}
                 />
               </div>
-
-              <button
-                aria-label="Criar categoria"
-                title="Criar categoria"
-                className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-800"
-                onClick={() => setIsAddingCategory((current) => !current)}
-                type="button"
-              >
-                <Plus aria-hidden="true" size={16} />
-                <span className="hidden sm:inline">Categoria</span>
-              </button>
             </div>
 
             {isAddingCategory ? (
@@ -616,7 +586,7 @@ function ExpenseFormDialogContent({
                       id="expense-source"
                       icon={WalletCards}
                       onChange={(value) => updateDraft({ paymentSource: value })}
-                      options={paymentSourceOptions}
+                      options={sourceOptions}
                       triggerClassName={dropdownTriggerClassName}
                       value={draft.paymentSource}
                     />
@@ -652,7 +622,7 @@ function ExpenseFormDialogContent({
                         const selectedSources = paymentSplits
                           .filter((_, splitIndex) => splitIndex !== index)
                           .map((item) => normalizePaymentSource(item.paymentSource));
-                        const options = paymentSourceOptions.filter(
+                        const options = sourceOptions.filter(
                           (option) =>
                             option.value === split.paymentSource ||
                             !selectedSources.includes(normalizePaymentSource(option.value)),

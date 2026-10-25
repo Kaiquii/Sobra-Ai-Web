@@ -77,6 +77,8 @@ Este projeto deve manter uma arquitetura simples, previsivel e facil de evoluir.
 
 ## UI, tema e responsividade
 
+- Mapa de comparação Android/web, invariantes financeiros, diferenças conhecidas e matriz de aceitação: `docs/android-parity-harness.md`. Esse documento e `docs/android-reference.md` integram o contexto obrigatório de `npm run ai:context`; `ai:doctor` exige sua presença. A incorporação documental não altera componentes ou contratos implementados.
+
 - Usar Tailwind CSS com suporte a tema claro e escuro via classe `dark`.
 - Toda nova UI deve ser responsiva por padrao.
 - Antes de finalizar uma tela, revisar como ela se comporta em mobile e nos dois temas.

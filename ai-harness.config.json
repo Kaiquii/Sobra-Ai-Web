@@ -10,7 +10,9 @@
       "rules.md",
       "docs/ai-guidelines.md",
       "docs/project-architecture.md",
-      "docs/backend-api-contract.md"
+      "docs/backend-api-contract.md",
+      "docs/android-reference.md",
+      "docs/android-parity-harness.md"
     ],
     "sourceRoots": [
       "app",
@@ -44,6 +46,7 @@
       "lint"
     ],
     "full": [
+      "test",
       "lint",
       "build"
     ]

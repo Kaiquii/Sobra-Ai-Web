@@ -10,10 +10,11 @@ import { MonthSwitcher } from "@/components/ui/month-switcher";
 import { SelectionSheet } from "@/components/ui/selection-sheet";
 import type { Category, ExpenseTypeFilter } from "@/features/expenses/types/expense";
 import { expenseTotalLabel } from "@/features/expenses/utils/expensePresentation";
+import { paymentSourceOptions, type CanonicalPaymentSource } from "@/lib/payment-sources";
 
 type Filters = {
   category: string;
-  source: "Adiantamento" | "Renda Extra" | "Salario" | "Todas";
+  source: CanonicalPaymentSource | "Todas";
   status: "Pagas" | "Pendentes" | "Todas";
 };
 
@@ -54,8 +55,7 @@ function ExpenseFiltersSheet({ filters, categories, availableCategoryIds, onClos
           <DropdownSelect id="expense-filter-source" ariaLabel="Origem do pagamento" value={draft.source}
             onChange={(source) => setDraft((current) => ({ ...current, source }))}
             options={[
-              { label: "Todas", value: "Todas" }, { label: "Salário", value: "Salario" },
-              { label: "Adiantamento", value: "Adiantamento" }, { label: "Renda extra", value: "Renda Extra" },
+              { label: "Todas", value: "Todas" }, ...paymentSourceOptions,
             ]} />
         </div>
         <div>

@@ -12,6 +12,8 @@ Antes de alterar codigo neste projeto, leia e siga:
 - `docs/ai-guidelines.md`
 - `docs/project-architecture.md`
 - `docs/backend-api-contract.md`
+- `docs/android-reference.md`
+- `docs/android-parity-harness.md`
 
 As regras desses arquivos fazem parte do contrato do projeto. Nao fuja da arquitetura existente sem motivo forte e sem registrar a decisao.
 

@@ -23,6 +23,7 @@ function isDateInMonth(date: string | null | undefined, month: number, year: num
 }
 
 type ExpenseState = {
+  revision: number;
   advancedExpenses: Expense[];
   categories: Category[];
   effectiveExpenses: Expense[];
@@ -64,7 +65,10 @@ type ExpenseState = {
   updateExpense: (id: number, data: UpdateExpenseRequest) => Promise<void>;
 };
 
+let latestExpenseLoad = 0;
+
 export const useExpenseStore = create<ExpenseState>((set) => ({
+  revision: 0,
   advancedExpenses: [],
   categories: [],
   effectiveExpenses: [],
@@ -105,7 +109,7 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
 
     try {
       const response = await expensesApi.createExpense(data);
-      set({ isSubmitting: false, message: response.message });
+      set((state) => ({ revision: state.revision + 1, isSubmitting: false, message: response.message }));
     } catch (error) {
       set({ error: getApiErrorMessage(error), isSubmitting: false, message: null });
       throw error;
@@ -133,7 +137,7 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
 
     try {
       const response = await expensesApi.deleteExpense(id, deleteFuture);
-      set({ isSubmitting: false, message: response.message });
+      set((state) => ({ revision: state.revision + 1, isSubmitting: false, message: response.message }));
     } catch (error) {
       set({ error: getApiErrorMessage(error), isSubmitting: false, message: null });
       throw error;
@@ -171,21 +175,25 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
   },
 
   loadExpenses: async (month, year, paymentStatus, periodMode) => {
+    const requestId = ++latestExpenseLoad;
     set({ error: null, isLoading: true });
 
     try {
       const response = await expensesApi.getExpenses(month, year, paymentStatus, periodMode);
+      if (requestId !== latestExpenseLoad) return;
       set({
         expenses: response.expenses,
         isLoading: false,
         total: response.total,
       });
     } catch (error) {
+      if (requestId !== latestExpenseLoad) return;
       set({ error: getApiErrorMessage(error), isLoading: false });
     }
   },
 
   loadInitialData: async (month, year, paymentStatus, periodMode) => {
+    const requestId = ++latestExpenseLoad;
     set({ error: null, isLoading: true });
 
     try {
@@ -194,6 +202,8 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
         expensesApi.getExpenses(month, year, paymentStatus, periodMode),
         expensesApi.getExpenses(month, year, paymentStatus, "effective"),
       ]);
+
+      if (requestId !== latestExpenseLoad) return;
 
       set({
         advancedExpenses: effectiveExpensesResponse.expenses.filter(
@@ -208,6 +218,7 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
         total: expensesResponse.total,
       });
     } catch (error) {
+      if (requestId !== latestExpenseLoad) return;
       set({ error: getApiErrorMessage(error), isLoading: false });
     }
   },
@@ -239,7 +250,7 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
 
     try {
       const response = await expensesApi.updateExpense(id, data);
-      set({ isSubmitting: false, message: response.message });
+      set((state) => ({ revision: state.revision + 1, isSubmitting: false, message: response.message }));
     } catch (error) {
       set({ error: getApiErrorMessage(error), isSubmitting: false, message: null });
       throw error;
@@ -254,6 +265,7 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
 
       set((state) => ({
         advanceStatusUpdatingId: null,
+        revision: state.revision + 1,
         expenses: state.expenses.map((expense) =>
           expense.id === id ? { ...expense, ...response.expense } : expense,
         ),
@@ -280,6 +292,7 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
       const response = await expensesApi.updatePaymentStatus(id, isPaid);
 
       set((state) => ({
+        revision: state.revision + 1,
         expenses: state.expenses.map((expense) =>
           expense.id === id ? { ...expense, ...response.expense } : expense,
         ),

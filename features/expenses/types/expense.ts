@@ -2,7 +2,7 @@ export type ExpenseType = "Fixa" | "Parcelada" | "\u00danica";
 
 export type ExpenseTypeFilter = "Fixas" | "Parceladas" | "Todas" | "\u00danicas";
 
-export type PaymentSource = "Adiantamento" | "Renda Extra" | "Salario" | "Sal\u00e1rio";
+export type PaymentSource = import("@/lib/payment-sources").CanonicalPaymentSource | "Sal\u00e1rio" | (string & {});
 
 export type PaymentSplit = {
   amount: number;

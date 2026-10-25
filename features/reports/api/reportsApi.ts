@@ -13,6 +13,7 @@ import type {
   YearlySummary,
 } from "@/features/reports/types/report";
 import { apiClient } from "@/lib/api";
+import { withSummaryBenefits } from "@/lib/summary-benefits";
 
 const exportTimeoutMs = 120_000;
 
@@ -174,7 +175,7 @@ export const reportsApi = {
       params: { month, year },
     });
 
-    return response.data;
+    return withSummaryBenefits(response.data, month, year);
   },
 
   async getYearlySummary(year: number) {

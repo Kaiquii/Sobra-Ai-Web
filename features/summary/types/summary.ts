@@ -1,4 +1,10 @@
 export type MonthlySummary = {
+  va?: number;
+  vr?: number;
+  total_gasto_va?: number;
+  total_gasto_vr?: number;
+  restante_va?: number;
+  restante_vr?: number;
   adiantamento: number;
   month: number;
   renda_extra_amt: number;

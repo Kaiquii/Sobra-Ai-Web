@@ -1,5 +1,8 @@
 "use client";
 
+import { useIncomeStore } from "@/features/incomes/store/useIncomeStore";
+import { useExpenseStore } from "@/features/expenses/store/useExpenseStore";
+
 import { ResponsivePie } from "@nivo/pie";
 import {
   BarChart3,
@@ -456,6 +459,8 @@ export function ReportsView() {
   const error = useReportsStore((state) => state.error);
   const isLoading = useReportsStore((state) => state.isLoading);
   const loadReports = useReportsStore((state) => state.loadReports);
+  const incomeRevision = useIncomeStore((state) => state.revision);
+  const expenseRevision = useExpenseStore((state) => state.revision);
   const summary = useReportsStore((state) => state.summary);
   const yearlySummary = useReportsStore((state) => state.yearlySummary);
 
@@ -490,7 +495,7 @@ export function ReportsView() {
 
   useEffect(() => {
     void loadReports(month, year);
-  }, [loadReports, month, refreshKey, year]);
+  }, [loadReports, month, refreshKey, incomeRevision, expenseRevision, year]);
 
   useEffect(() => {
     void loadComparison({

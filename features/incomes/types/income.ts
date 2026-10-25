@@ -1,4 +1,6 @@
-export type IncomeSource = "Adiantamento" | "Renda Extra" | "Salario";
+import type { CanonicalPaymentSource } from "@/lib/payment-sources";
+
+export type IncomeSource = CanonicalPaymentSource;
 
 type IncomeType = "Fixa" | "\u00danica";
 

@@ -22,8 +22,8 @@ export const incomesApi = {
     return response.data;
   },
 
-  async getIncomes() {
-    const response = await apiClient.get<IncomeListResponse>("/api/incomes/");
+  async getIncomes(month: number, year: number) {
+    const response = await apiClient.get<IncomeListResponse>("/api/incomes/", { params: { month, year } });
 
     return response.data;
   },

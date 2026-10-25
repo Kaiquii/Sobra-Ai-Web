@@ -55,9 +55,11 @@ O componente ja cuida de:
 
 ## Seleção e filtros no celular
 
-- Reutilizar `DropdownSelect` com `variant="filter"` e `presentation="sheet"` nos filtros compactos que seguem o Android. A variante usa pílulas sem seta, mantendo o cursor padrão do dropdown.
+- Referência final de busca, dimensão intermediária, estabilidade da lista e teclado: `docs/android-parity-harness.md`. `DropdownSelect` delega a lista a `SelectionDialog`, um modal nativo com busca normalizada e altura estável pela lista original, limitado à viewport. O fundo acompanha os demais modais do web. Evoluir o componente compartilhado sem redesenhar os campos consumidores.
+
+- Reutilizar `DropdownSelect` com `variant="filter"` e `presentation="sheet"` nos filtros compactos que seguem o Android. A variante usa pílulas sem seta. Gatilhos e opções habilitados usam cursor de mão e hover nos dois temas; o item selecionado preserva seu destaque azul.
 - `triggerLabel` mantém o rótulo compacto; `sheetTitle` define o título do painel. As opções continuam usando o mesmo contrato de valores e seleção do dropdown.
-- `SelectionSheet` centraliza o painel inferior, bloqueio de rolagem, foco, fechamento pela área externa e tecla Esc. As listas de seleção suportam navegação pelo teclado e devolvem o foco ao gatilho ao fechar.
+- `SelectionSheet` mantém o painel de rascunho dos filtros. `SelectionDialog` centraliza a escolha de opções com busca, foco isolado pelo diálogo nativo, fechamento por área externa/Escape e retorno ao gatilho. O título e a geometria não devem deslocar ao filtrar. Ajustar a caixa para bordas e espaçamentos não criarem rolagem quando as opções cabem.
 - `CompactExpenseCard`, em `features/expenses/components`, centraliza a apresentação de despesa do Início: categoria, parcelas, pagamento, adiantamento, observações, valor privado e origem. Ações de detalhes continuam usando o diálogo compartilhado existente.
 
 ## Faixas compactas com rolagem

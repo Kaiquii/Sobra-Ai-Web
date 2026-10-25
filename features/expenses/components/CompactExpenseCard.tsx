@@ -1,5 +1,7 @@
 "use client";
 
+import { paymentSourceLabel } from "@/lib/payment-sources";
+
 import {
   CalendarCheck,
   Eye,
@@ -19,27 +21,9 @@ export function normalizeExpenseText(value: string) {
 }
 
 export function getExpensePaymentSources(expense: Expense) {
-  return [
-    ...new Set(
-      (expense.payment_splits?.length
-        ? expense.payment_splits.map((split) => split.payment_source)
-        : [expense.payment_source]
-      )
-        .filter((source) => typeof source === "string" && source.trim())
-        .map((source) => {
-          switch (normalizeExpenseText(source.trim())) {
-            case "salario":
-              return "Salário";
-            case "adiantamento":
-              return "Adiantamento";
-            case "renda extra":
-              return "Renda Extra";
-            default:
-              return source.trim();
-          }
-        }),
-    ),
-  ];
+  return [...new Set((expense.payment_splits?.length ? expense.payment_splits.map((split) => split.payment_source) : [expense.payment_source])
+    .filter((source) => typeof source === "string" && source.trim())
+    .map((source) => paymentSourceLabel(source, true)))];
 }
 
 function Chip({

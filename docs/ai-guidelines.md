@@ -10,7 +10,7 @@ Este arquivo define regras permanentes para qualquer IA ou pessoa que trabalhar 
 - Leia `docs/backend-api-contract.md` antes de implementar ou alterar chamadas de API.
 - Como este projeto usa Next.js 16, consulte a documentacao local em `node_modules/next/dist/docs/` antes de usar APIs, convencoes ou estruturas do Next.js.
 - Entenda a estrutura atual antes de criar arquivos, pastas, componentes ou stores.
-- Para alterações visuais, consulte `docs/android-reference.md` e o projeto Android indicado nele.
+- Para alterações visuais ou financeiras, consulte `docs/android-reference.md`, `docs/android-parity-harness.md` e as fontes Android indicadas. O harness registra requisitos e diferenças, não uma aprovação de paridade já implementada.
 
 ## Execução local do projeto
 

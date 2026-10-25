@@ -20,6 +20,11 @@ export function getApiErrorMessage(
         return data.error;
       }
     }
+    if (!error.response) {
+      return error.code === "ECONNABORTED" || error.code === "ETIMEDOUT"
+        ? "A solicitação demorou mais que o esperado. Tente novamente."
+        : "Não foi possível conectar ao serviço. Tente novamente.";
+    }
   }
 
   return fallback;

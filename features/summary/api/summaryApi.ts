@@ -1,5 +1,6 @@
 import type { MonthlySummary } from "@/features/summary/types/summary";
 import { apiClient } from "@/lib/api";
+import { withSummaryBenefits } from "@/lib/summary-benefits";
 
 export const summaryApi = {
   async getMonthlySummary(month: number, year: number) {
@@ -7,6 +8,6 @@ export const summaryApi = {
       params: { month, year },
     });
 
-    return response.data;
+    return withSummaryBenefits(response.data, month, year);
   },
 };

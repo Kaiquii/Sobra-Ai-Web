@@ -57,7 +57,7 @@ export function ExpenseAdvanceDialog({
     [expense],
   );
   const [advancedAt, setAdvancedAt] = useState(() =>
-    maximumDate ? getInitialAdvancedDate(maximumDate) : "",
+    expense?.is_advanced && expense.advanced_at ? toDateValue(expense.advanced_at) : maximumDate ? getInitialAdvancedDate(maximumDate) : "",
   );
   const isValidDate = Boolean(advancedAt && advancedAt <= maximumDate);
 
@@ -96,7 +96,7 @@ export function ExpenseAdvanceDialog({
               className="mt-2 text-xl font-semibold text-slate-950 dark:text-white sm:text-2xl"
               id="expense-advance-title"
             >
-              Adiantar despesa
+              {expense.is_advanced ? "Alterar adiantamento" : "Adiantar despesa"}
             </h2>
           </div>
           <Button
@@ -113,8 +113,7 @@ export function ExpenseAdvanceDialog({
         </div>
 
         <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-          A despesa continuará pendente e prevista na agenda original. Apenas o
-          impacto no planejamento financeiro será antecipado.
+          A data prevista e o status de pagamento serão preservados. Apenas o impacto no planejamento financeiro será antecipado.
         </p>
 
         <div className="mt-5 space-y-4">

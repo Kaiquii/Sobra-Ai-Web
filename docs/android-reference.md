@@ -3,7 +3,8 @@
 O web é a versão para navegador do SobraAí Android. A identidade e os fluxos devem ser reconhecíveis nas duas plataformas, com adaptação de espaço para desktop.
 
 - Repositório: https://github.com/Kaiquii/Sobra-Ai-Android.git
-- Projeto local: `C:\Users\kaiqu\Documents\App-Financeiro`
+- Projeto local: `C:\Users\kaiqu\StudioProjects\App-Financeiro`
+- Referência aprovada atual: Android 1.4.5, versionCode 145, commit `78a86c6`, conforme guia recebido em 25/10/2026. Critérios completos, fontes atuais e diferenças web estão em [android-parity-harness.md](android-parity-harness.md).
 - Referências consultadas: `core/designsystem/theme/Color.kt`, `StandardBottomBar.kt` e as telas de início, despesas, relatórios, perfil e autenticação.
 
 ## Direção visual
@@ -21,11 +22,10 @@ A versão mobile do site deve reproduzir a interface e os fluxos do Android, nã
 - Somente no celular, o Início acompanha o Android atual: resumo em cards pareados, despesas do mês com filtros e detalhes e controle compartilhado para ocultar valores. Preservar a apresentação do bloco de despesas adiantadas na tela de Despesas.
 - Na seção de despesas do Início, seguir `DespesasSection.kt`, `FilterOptionItem.kt` e a variante compacta de `ExpenseCard.kt`: filtros em pílulas sem seta, seleção por painel inferior, chips individuais para limpar filtros, data curta e badge colorido de origem. O cartão compacto não possui ícone de categoria à esquerda. O cartão compacto e o painel de seleção devem ser compartilhados.
 
-- Preservar a paleta existente do web. A adaptação deve reproduzir a estrutura e os fluxos do Android; não fazer uma troca global de cores.
-- Superfícies neutras, painéis inferiores, campos e filtros usam a paleta Slate do web, com azul-escuro no tema escuro. Não copiar fundos pretos ou cinza-neutros do Android. Cards de destaque mantêm as cores semânticas azul e violeta, e os tipos de despesa preservam seus acentos próprios.
+- A referência atual exige máxima proximidade do celular com o Android em fonte, ícones, campos e estados. A orientação posterior do usuário em 25/10/2026 preserva o fundo e a paleta Slate padrão do web, inclusive nos seletores. Não trocar globalmente as cores para copiar os fundos Android. A área autenticada mobile usa Roboto; login mantém o layout web próprio.
 - Verde para valores positivos, vermelho para gastos e alertas, violeta para saldos por origem e Premium; administrador mantém destaque dourado.
 - No celular, navegação inferior com Início, Despesas, Relatórios e Perfil, com criação de despesa no centro.
-- No celular, Início e visão mensal usam o resumo financeiro do Android, seguido da lista de despesas. No desktop, preservar a composição anterior, sem a lista de despesas. O botão de privacidade oculta os valores e bloqueia as ações de renda enquanto estiver ativo. Exibir o botão somente nas telas de resumo, despesas, relatórios e rendas; não exibir na Home, no Perfil ou em suas subtelas.
+- No celular, Início e visão mensal usam o resumo financeiro do Android, seguido da lista de despesas. No desktop, os três totais ficam no topo e as cinco fontes em colunas, cada uma com renda, restante e gasto. Aumentar com moderação, preservar a tipografia e evitar rolagem desnecessária; não esticar os cards até ocupar toda a altura. O botão de privacidade oculta os valores e bloqueia as ações de renda enquanto estiver ativo. Exibir o botão somente nas telas de resumo, despesas, relatórios e rendas; não exibir na Home, no Perfil ou em suas subtelas.
 - Despesas no celular acompanha `ExpenseListControls.kt`: seletor de mês, card azul com total do planejamento filtrado e quantidade de lançamentos, busca com botão de filtros e pílulas de tipos com rolagem horizontal. O painel inferior edita categoria, origem e status em rascunho; somente “Aplicar filtros” confirma, fechar descarta e “Limpar filtros” limpa o rascunho. As categorias disponíveis são as presentes nas despesas do mês.
 - Os cartões detalhados de despesas no celular não possuem ícone lateral: descrição, categoria, tipo e data ficam à esquerda; ações, valor e origem ficam à direita. Preservar o acesso às ações de adiantamento existentes no web.
 - Em celular e desktop, `ExpenseTypeStyle.kt` orienta as cores de únicas (azul), parceladas (violeta) e fixas (verde-petróleo), com tons próprios para cada tema. O valor de cada despesa usa a cor principal do texto e sinal separado da moeda, como `- R$ 100,00`. O total é positivo e seu rótulo acompanha o filtro de tipo, como no Android. A composição do desktop permanece preservada.

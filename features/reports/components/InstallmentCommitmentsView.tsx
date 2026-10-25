@@ -30,6 +30,7 @@ import type {
 } from "@/features/reports/types/report";
 import { formatMoney } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
+import { paymentSourceLabel } from "@/lib/payment-sources";
 
 type InstallmentCommitmentsViewProps = {
   initialMonth?: number;
@@ -67,11 +68,7 @@ function formatMonthYear(month: number, year: number) {
 }
 
 function formatPaymentSource(source: string) {
-  if (source === "Salario") {
-    return "Salário";
-  }
-
-  return source;
+  return paymentSourceLabel(source);
 }
 
 function getParcelValue(parcel: InstallmentParcel | null | undefined, fallback: number) {

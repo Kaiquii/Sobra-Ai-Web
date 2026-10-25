@@ -32,6 +32,7 @@ import {
   type IncomeShortcutAction,
 } from "@/features/incomes/components/IncomeShortcutDialog";
 import type { IncomeSource } from "@/features/incomes/types/income";
+import { useIncomeStore } from "@/features/incomes/store/useIncomeStore";
 import { summaryApi } from "@/features/summary/api/summaryApi";
 import type { MonthlySummary } from "@/features/summary/types/summary";
 import { FinancialValue } from "@/components/ui/financial-value";
@@ -127,6 +128,7 @@ function SummaryCard({
           : isRemaining
             ? "max-sm:bg-violet-100! dark:max-sm:bg-violet-950/70!"
             : "max-sm:bg-slate-50! dark:max-sm:bg-slate-900!",
+        amountState === "negative" && "max-sm:bg-red-50! dark:max-sm:bg-red-950!",
         className,
       )}
     >
@@ -323,7 +325,9 @@ export function MonthlySummaryView() {
     null,
   );
   const [refreshKey, setRefreshKey] = useState(0);
-  const requestKey = `${year}-${month}-${refreshKey}`;
+  const incomeRevision = useIncomeStore((state) => state.revision);
+  const expenseRevision = useExpenseStore((state) => state.revision);
+  const requestKey = `${year}-${month}-${refreshKey}-${incomeRevision}-${expenseRevision}`;
   const [loadState, setLoadState] = useState<MonthlyLoadState>({
     requestKey: "",
     status: "loading",
@@ -409,6 +413,13 @@ export function MonthlySummaryView() {
     summary?.total_gasto_adiantamento ??
     Math.max(adiantamento - restanteAdiantamento, 0);
   const gastoRendaExtra = summary?.total_gasto_renda_extra ?? 0;
+  const sourceSummary = [
+    { source: "Salario" as const, label: "Salário", income: salario, remaining: restanteSalario, spent: gastoSalario },
+    { source: "Adiantamento" as const, label: "Adiantamento", income: adiantamento, remaining: restanteAdiantamento, spent: gastoAdiantamento },
+    { source: "Renda Extra" as const, label: "Renda Extra", income: rendaExtra, remaining: restanteRendaExtra, spent: gastoRendaExtra },
+    { source: "VA" as const, label: "VA", income: summary?.va ?? 0, remaining: summary?.restante_va ?? 0, spent: summary?.total_gasto_va ?? 0 },
+    { source: "VR" as const, label: "VR", income: summary?.vr ?? 0, remaining: summary?.restante_vr ?? 0, spent: summary?.total_gasto_vr ?? 0 },
+  ];
   const spentPercentage = summary
     ? getSpentPercentage(summary.total_expense, summary.total_income)
     : null;
@@ -433,7 +444,7 @@ export function MonthlySummaryView() {
     <>
       <section
         aria-busy={isLoading}
-        className="mx-auto flex w-full max-w-6xl flex-col gap-4"
+        className="mx-auto flex w-full max-w-6xl flex-col gap-4 lg:max-w-7xl"
       >
         <div className="sm:hidden">
           <MonthSwitcher
@@ -513,8 +524,26 @@ export function MonthlySummaryView() {
           </div>
         ) : null}
 
+        {summary ? <div className="hidden space-y-3 lg:block">
+          <div className="grid grid-cols-3 gap-3">
+            <SummaryCard label="Total Geral Disponível" tone="balance" value={summary.total_geral_disponivel} icon={<PiggyBank aria-hidden="true" size={30} />} />
+            <SummaryCard label="Total Recebido" tone="income" value={summary.total_income} icon={<TrendingUp aria-hidden="true" size={26} />} />
+            <SummaryCard label="Total Gasto" tone="expense" value={summary.total_expense} icon={<Wallet aria-hidden="true" size={26} />} />
+          </div>
+          <div className="grid grid-cols-5 gap-3">
+            {sourceSummary.map((item) => <article key={item.source} aria-label={`Resumo de ${item.label}`} className="flex min-h-[clamp(280px,38dvh,340px)] min-w-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white text-slate-950 dark:border-slate-800 dark:bg-slate-800/75 dark:text-white">
+              <div className="flex min-h-14 shrink-0 items-center justify-between gap-1 px-3 py-2">
+                <h2 className="min-w-0 text-sm font-semibold">{item.label}</h2>
+                <div className="flex shrink-0"><IncomeActions amount={item.income} month={month} year={year} onOpen={setIncomeShortcut} source={item.source} /></div>
+              </div>
+              <div className="flex flex-1 flex-col justify-center gap-1 px-3 pb-3"><p className="text-xs text-slate-500 dark:text-slate-400">Renda</p><strong className="block wrap-anywhere text-xl font-semibold tabular-nums"><FinancialValue value={item.income} /></strong></div>
+              <div className={cn("flex flex-1 flex-col justify-center gap-1 bg-violet-100 px-3 py-3 dark:bg-violet-950/70", !hidden && item.remaining < 0 && "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300")}><p className="text-xs font-medium">Restante</p><strong className="block wrap-anywhere text-xl font-semibold tabular-nums"><FinancialValue value={item.remaining} /></strong></div>
+              <div className="flex flex-1 flex-col justify-center gap-1 px-3 py-3"><p className="text-xs text-slate-500 dark:text-slate-400">Gasto</p><strong className="block wrap-anywhere text-xl font-semibold tabular-nums"><FinancialValue value={item.spent} /></strong></div>
+            </article>)}
+          </div>
+        </div> : null}
         {summary ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-1 md:grid-cols-2 lg:hidden">
             <SummaryCard
               className="col-span-2 sm:col-span-1 md:col-span-2 lg:col-span-4"
               hint="Saldo livre no mês."
@@ -586,6 +615,11 @@ export function MonthlySummaryView() {
               value={adiantamento}
             />
 
+            {(["VA", "VR"] as const).map((source) => (
+              <SummaryCard key={source} action={<IncomeActions amount={summary[source === "VA" ? "va" : "vr"] ?? 0} month={month} year={year} onOpen={setIncomeShortcut} source={source} />}
+                label={source} tone="source" value={summary[source === "VA" ? "va" : "vr"] ?? 0} />
+            ))}
+
             <SummaryCard
               action={
                 <IncomeActions
@@ -609,6 +643,7 @@ export function MonthlySummaryView() {
               value={rendaExtra}
             />
 
+
             <SummaryCard
               label="Restante Salário"
               tone="remaining"
@@ -619,12 +654,16 @@ export function MonthlySummaryView() {
               tone="remaining"
               value={restanteAdiantamento}
             />
+            <SummaryCard label="Restante VA" tone="remaining" value={summary.restante_va ?? 0} />
+            <SummaryCard label="Restante VR" tone="remaining" value={summary.restante_vr ?? 0} />
+
             <SummaryCard
               className="col-span-2 sm:col-span-1 md:col-span-2 lg:col-span-2"
               label="Restante Renda Extra"
               tone="remaining"
               value={restanteRendaExtra}
             />
+
 
             <SummaryCard
               icon={
@@ -650,6 +689,9 @@ export function MonthlySummaryView() {
               tone="spent"
               value={gastoAdiantamento}
             />
+            <SummaryCard label="Gasto VA" tone="spent" value={summary.total_gasto_va ?? 0} />
+            <SummaryCard label="Gasto VR" tone="spent" value={summary.total_gasto_vr ?? 0} />
+
             <SummaryCard
               className="col-span-2 sm:col-span-1 md:col-span-2 lg:col-span-2"
               icon={
@@ -663,6 +705,7 @@ export function MonthlySummaryView() {
               tone="spent"
               value={gastoRendaExtra}
             />
+
           </div>
         ) : null}
         {summary && overview?.expensesData ? (

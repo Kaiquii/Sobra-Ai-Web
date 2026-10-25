@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input";
 import { useLockBodyScroll } from "@/components/ui/use-lock-body-scroll";
 import { useIncomeStore } from "@/features/incomes/store/useIncomeStore";
 import type { Income, IncomeSource } from "@/features/incomes/types/income";
-import { findIncomeByReference } from "@/features/incomes/utils/incomeUtils";
+import { buildIncomeCreateRequest, findIncomeByReference } from "@/features/incomes/utils/incomeUtils";
 import { formatAmountInput, parseAmountInput } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
+import { paymentSourceLabel } from "@/lib/payment-sources";
 
 export type IncomeShortcutAction = "create" | "delete" | "edit";
 
@@ -32,6 +33,8 @@ const sourceLabels: Record<IncomeSource, string> = {
   Adiantamento: "adiantamento",
   "Renda Extra": "renda extra",
   Salario: "salário",
+  VA: "Vale-alimentação (VA)",
+  VR: "Vale-refeição (VR)",
 };
 
 function findIncome(
@@ -44,6 +47,7 @@ function findIncome(
 }
 
 function getTitle({ action, source }: IncomeShortcut) {
+  if (source === "VA" || source === "VR") return action === "create" ? "Criar renda" : action === "edit" ? "Editar renda" : "Excluir renda";
   if (action === "create") {
     return `Criar ${sourceLabels[source]}`;
   }
@@ -119,13 +123,13 @@ function IncomeShortcutDialogContent({
   useEffect(() => {
     if (shortcut.action === "create") return;
     let active = true;
-    void loadIncomes().finally(() => {
+    void loadIncomes(shortcut.month, shortcut.year).finally(() => {
       if (active) setHasLoadedIncomes(true);
     });
     return () => {
       active = false;
     };
-  }, [loadIncomes, shortcut.action]);
+  }, [loadIncomes, shortcut.action, shortcut.month, shortcut.year]);
 
   const selectedIncome = useMemo(
     () => findIncome(incomes, shortcut.source, shortcut.month, shortcut.year),
@@ -166,26 +170,7 @@ function IncomeShortcutDialogContent({
       }
 
       if (shortcut.action === "create") {
-        const createPayload =
-          shortcut.source === "Renda Extra"
-            ? {
-                amount: parsedAmount,
-                month: shortcut.month,
-                repeat_future: applyFuture,
-                source: shortcut.source,
-                type: "Fixa" as const,
-                year: shortcut.year,
-              }
-            : {
-                amount: parsedAmount,
-                month: shortcut.month,
-                repeat_future: null,
-                source: shortcut.source,
-                type: "Fixa" as const,
-                year: shortcut.year,
-              };
-
-        await createIncome(createPayload);
+        await createIncome(buildIncomeCreateRequest(shortcut.source, parsedAmount, shortcut.month, shortcut.year, applyFuture));
       } else {
         await updateIncome(selectedIncome!.id, {
           amount: parsedAmount,
@@ -210,6 +195,7 @@ function IncomeShortcutDialogContent({
         <h2 className="text-xl font-semibold tracking-normal text-slate-950 dark:text-white">
           {getTitle(shortcut)}
         </h2>
+        {(shortcut.source === "VA" || shortcut.source === "VR") ? <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{paymentSourceLabel(shortcut.source)}</p> : null}
 
         <div className="mt-7 space-y-5">
           {error || localError ? (

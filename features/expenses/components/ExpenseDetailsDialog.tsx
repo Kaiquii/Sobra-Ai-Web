@@ -1,5 +1,7 @@
 "use client";
 
+import { paymentSourceLabel } from "@/lib/payment-sources";
+
 import {
   CalendarClock,
   CalendarDays,
@@ -22,6 +24,7 @@ type ExpenseDetailsDialogProps = {
   categoryName: string;
   expense: Expense | null;
   onClose: () => void;
+  onRemoveAdvance?: (expense: Expense) => void;
 };
 
 function normalizeText(value: string) {
@@ -63,17 +66,7 @@ function formatPaidAt(date: string | null) {
 }
 
 function getPaymentSourceLabel(source: string) {
-  const normalized = normalizeText(source);
-
-  if (normalized.includes("adiantamento")) {
-    return "Adiantamento";
-  }
-
-  if (normalized.includes("renda extra")) {
-    return "Renda Extra";
-  }
-
-  return "Salário";
+  return paymentSourceLabel(source);
 }
 
 function getExpensePaymentSplits(expense: Expense) {
@@ -161,6 +154,7 @@ export function ExpenseDetailsDialog({
   categoryName,
   expense,
   onClose,
+  onRemoveAdvance,
 }: ExpenseDetailsDialogProps) {
   useLockBodyScroll(Boolean(expense));
 
@@ -270,6 +264,8 @@ export function ExpenseDetailsDialog({
             {paymentSplits.length > 1 ? (
               <PaymentSplitsDetailItem splits={paymentSplits} />
             ) : null}
+
+            {expense.is_advanced && onRemoveAdvance ? <div className="border-t border-slate-200 p-3 dark:border-slate-800 sm:col-span-2"><Button variant="ghost" onClick={() => onRemoveAdvance(expense)} className="text-blue-600 dark:text-blue-400">Remover adiantamento</Button></div> : null}
 
             {expense.is_paid ? (
               <DetailItem

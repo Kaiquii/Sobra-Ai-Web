@@ -2,12 +2,13 @@
 
 import {
   CalendarClock,
+  CalendarCheck,
+  CalendarArrowUp,
   CalendarDays,
   Check,
   CheckCircle2,
   Circle,
   Eye,
-  FastForward,
   FileText,
   ListFilter,
   Pencil,
@@ -15,12 +16,12 @@ import {
   ReceiptText,
   Search,
   Trash2,
-  Undo2,
   WalletCards,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Alert } from "@/components/ui/alert";
+import { AppNotification } from "@/components/ui/app-notification";
 import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { DropdownSelect } from "@/components/ui/dropdown-select";
@@ -46,8 +47,9 @@ import type {
 } from "@/features/expenses/types/expense";
 import { FinancialValue } from "@/components/ui/financial-value";
 import { formatMoney } from "@/lib/formatters";
+import { paymentSources, paymentSourceLabel, paymentSourcesMatch } from "@/lib/payment-sources";
 
-type PaymentSourceFilter = "Adiantamento" | "Renda Extra" | "Salario" | "Todas";
+type PaymentSourceFilter = import("@/lib/payment-sources").CanonicalPaymentSource | "Todas";
 type PaymentStatusFilter = "Pagas" | "Pendentes" | "Todas";
 
 const typeFilters: ExpenseTypeFilter[] = [
@@ -58,9 +60,7 @@ const typeFilters: ExpenseTypeFilter[] = [
 ];
 const paymentSourceFilters: PaymentSourceFilter[] = [
   "Todas",
-  "Salario",
-  "Adiantamento",
-  "Renda Extra",
+  ...paymentSources,
 ];
 const paymentStatusFilters: PaymentStatusFilter[] = [
   "Todas",
@@ -77,9 +77,7 @@ const paymentSourceFilterOptions = paymentSourceFilters.map((source) => ({
   label:
     source === "Todas"
       ? "Todas origens"
-      : source === "Salario"
-        ? "Sal\u00e1rio"
-        : source,
+      : paymentSourceLabel(source),
   value: source,
 }));
 
@@ -157,13 +155,8 @@ function matchesPaymentSourceFilter(
     expense.payment_splits?.length
       ? expense.payment_splits.map((split) => split.payment_source)
       : [expense.payment_source]
-  ).map(normalizeText);
-
-  if (filter === "Salario") {
-    return sources.includes("salario");
-  }
-
-  return sources.includes(normalizeText(filter));
+  );
+  return sources.some((source) => paymentSourcesMatch(source, filter));
 }
 
 function matchesCategoryFilter(expense: Expense, selectedCategoryId: string) {
@@ -234,17 +227,7 @@ function getExpenseMonthReference(expense: Expense) {
 }
 
 function getPaymentSourceLabel(source: string) {
-  const normalized = normalizeText(source);
-
-  if (normalized.includes("adiantamento")) {
-    return "Adiantamento";
-  }
-
-  if (normalized.includes("renda extra")) {
-    return "Renda Extra";
-  }
-
-  return "Sal\u00e1rio";
+  return paymentSourceLabel(source, true);
 }
 
 function getExpensePaymentSources(expense: Expense) {
@@ -276,7 +259,6 @@ type ExpenseCardProps = {
   isHighlighted?: boolean;
   onDelete: (expense: Expense) => void;
   onAdvance: (expense: Expense) => void;
-  onUndoAdvance: (expense: Expense) => void;
   onEdit: (expense: Expense) => void;
   onTogglePaid: (expense: Expense) => void;
   onView: (expense: Expense) => void;
@@ -290,7 +272,6 @@ function ExpenseCard({
   isHighlighted = false,
   onDelete,
   onAdvance,
-  onUndoAdvance,
   onEdit,
   onTogglePaid,
   onView,
@@ -384,21 +365,17 @@ function ExpenseCard({
           </button>
           {canAdvance ? (
             <button
-              aria-label={`${expense.is_advanced ? "Desfazer adiantamento de" : "Adiantar"} ${expense.description}`}
-              className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-amber-600 hover:bg-amber-500/10 hover:text-amber-700 disabled:cursor-not-allowed disabled:opacity-60 dark:text-amber-300 dark:hover:text-amber-200"
+              aria-label={`${expense.is_advanced ? "Alterar adiantamento de" : "Adiantar"} ${expense.description}`}
+              className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-blue-600 hover:bg-blue-500/10 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:text-blue-400 dark:hover:text-blue-300"
               disabled={isAdvanceStatusUpdating}
-              onClick={() =>
-                expense.is_advanced
-                  ? onUndoAdvance(expense)
-                  : onAdvance(expense)
-              }
-              title={expense.is_advanced ? "Desfazer adiantamento" : "Adiantar"}
+              onClick={() => onAdvance(expense)}
+              title={expense.is_advanced ? "Alterar adiantamento" : "Adiantar"}
               type="button"
             >
               {expense.is_advanced ? (
-                <Undo2 aria-hidden="true" size={16} strokeWidth={2.4} />
+                <CalendarCheck aria-hidden="true" size={16} strokeWidth={2.4} />
               ) : (
-                <FastForward aria-hidden="true" size={16} strokeWidth={2.4} />
+                <CalendarArrowUp aria-hidden="true" size={16} strokeWidth={2.4} />
               )}
             </button>
           ) : null}
@@ -955,7 +932,6 @@ export function ExpensesView() {
                 onDelete={setDeleteTarget}
                 onEdit={openEditDialog}
                 onTogglePaid={togglePaymentStatus}
-                onUndoAdvance={setUndoAdvanceTarget}
                 onView={setDetailsTarget}
                 isPaymentStatusUpdating={paymentStatusUpdatingId === expense.id}
               />
@@ -973,22 +949,7 @@ export function ExpensesView() {
         <Plus aria-hidden="true" size={30} strokeWidth={2.4} />
       </button>
 
-      {message ? (
-        <div
-          aria-live="polite"
-          className="fixed right-4 top-20 z-40 w-[calc(100vw-2rem)] max-w-sm rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 shadow-xl shadow-slate-950/20 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-100 sm:right-8"
-        >
-          <div className="flex items-start gap-3">
-            <CheckCircle2
-              aria-hidden="true"
-              className="mt-0.5 shrink-0"
-              size={18}
-              strokeWidth={2.25}
-            />
-            <span>{message}</span>
-          </div>
-        </div>
-      ) : null}
+      <AppNotification key={message} message={message} />
 
       <ConfirmationDialog
         confirmLabel={
@@ -1051,6 +1012,7 @@ export function ExpensesView() {
         expense={detailsTarget}
         key={detailsTarget?.id ?? "empty-details-dialog"}
         onClose={() => setDetailsTarget(null)}
+        onRemoveAdvance={(expense) => { setDetailsTarget(null); setUndoAdvanceTarget(expense); }}
       />
     </>
   );

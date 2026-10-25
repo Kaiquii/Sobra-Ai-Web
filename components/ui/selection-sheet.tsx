@@ -35,6 +35,7 @@ export function SelectionSheet({
     )?.focus();
 
     function handleKeyDown(event: KeyboardEvent) {
+      if (document.querySelector("dialog[open]")) return;
       // A selector can portal its menu outside the sheet. Let its own Escape
       // handler close that menu without discarding the sheet's filter draft.
       const openSelector = sheet?.querySelector<HTMLElement>('[aria-haspopup="listbox"][aria-expanded="true"]');

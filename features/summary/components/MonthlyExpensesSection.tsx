@@ -13,10 +13,10 @@ import { DropdownSelect } from "@/components/ui/dropdown-select";
 import {
   CompactExpenseCard,
   getExpensePaymentSources,
-  normalizeExpenseText,
 } from "@/features/expenses/components/CompactExpenseCard";
 import { ExpenseDetailsDialog } from "@/features/expenses/components/ExpenseDetailsDialog";
 import type { Category, Expense } from "@/features/expenses/types/expense";
+import { paymentSourceOptions, paymentSourceLabel, paymentSourcesMatch } from "@/lib/payment-sources";
 
 export type MonthlyExpensesData = {
   expenses: Expense[];
@@ -42,13 +42,13 @@ export function MonthlyExpensesSection({
       (!category || String(expense.category_id) === category) &&
       (!source ||
         getExpensePaymentSources(expense).some(
-          (item) => normalizeExpenseText(item) === normalizeExpenseText(source),
+          (item) => paymentSourcesMatch(item, source),
         )) &&
       (!status || expense.is_paid === (status === "paid")),
   );
   const statusLabel =
     status === "paid" ? "Pagas" : status === "pending" ? "Pendentes" : "Todas";
-  const sourceLabel = source === "Salario" ? "Salário" : source;
+  const sourceLabel = paymentSourceLabel(source);
   const activeFilters = [
     ...(source
       ? [{ label: `Origem: ${sourceLabel}`, clear: () => setSource("") }]
@@ -90,9 +90,7 @@ export function MonthlyExpensesSection({
             value={source}
             options={[
               { label: "Todas", value: "" },
-              { label: "Salário", value: "Salario" },
-              { label: "Adiantamento", value: "Adiantamento" },
-              { label: "Renda Extra", value: "Renda Extra" },
+              ...paymentSourceOptions,
             ]}
           />
           <DropdownSelect

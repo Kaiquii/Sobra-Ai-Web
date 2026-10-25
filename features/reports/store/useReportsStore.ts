@@ -21,6 +21,8 @@ type ReportsState = {
   loadReports: (month: number, year: number) => Promise<void>;
 };
 
+let latestReportRequest = 0;
+
 export const useReportsStore = create<ReportsState>((set) => ({
   categories: [],
   chartData: [],
@@ -30,6 +32,7 @@ export const useReportsStore = create<ReportsState>((set) => ({
   yearlySummary: null,
 
   loadReports: async (month, year) => {
+    const requestId = ++latestReportRequest;
     set({ error: null, isLoading: true });
 
     try {
@@ -40,6 +43,7 @@ export const useReportsStore = create<ReportsState>((set) => ({
         reportsApi.getYearlySummary(year),
       ]);
 
+      if (requestId !== latestReportRequest) return;
       set({
         categories,
         chartData,
@@ -49,6 +53,7 @@ export const useReportsStore = create<ReportsState>((set) => ({
         yearlySummary,
       });
     } catch (error) {
+      if (requestId !== latestReportRequest) return;
       set({
         categories: [],
         chartData: [],
