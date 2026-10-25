@@ -128,7 +128,6 @@ function SummaryCard({
           : isRemaining
             ? "max-sm:bg-violet-100! dark:max-sm:bg-violet-950/70!"
             : "max-sm:bg-slate-50! dark:max-sm:bg-slate-900!",
-        amountState === "negative" && "max-sm:bg-red-50! dark:max-sm:bg-red-950!",
         className,
       )}
     >

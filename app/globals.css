@@ -1,8 +1,4 @@
 @import "tailwindcss";
-@import "@fontsource/roboto/latin-400.css";
-@import "@fontsource/roboto/latin-500.css";
-@import "@fontsource/roboto/latin-600.css";
-@import "@fontsource/roboto/latin-700.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -41,10 +37,6 @@ body {
 }
 
 @media (max-width: 639px) {
-  [data-android-surface], body:has([data-android-surface]) [role="dialog"], body:has([data-android-surface]) dialog, body:has([data-android-surface]) [role="status"] {
-    font-family: "Roboto", Arial, sans-serif;
-  }
-
   input:not([type="checkbox"]):not([type="radio"]), textarea {
     font-size: 16px;
   }

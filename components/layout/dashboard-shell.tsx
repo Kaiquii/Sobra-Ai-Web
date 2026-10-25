@@ -29,7 +29,7 @@ export function DashboardShell({ children }: Readonly<{ children: React.ReactNod
 
   return (
     <AuthGuard>
-      <div data-android-surface className="min-h-screen bg-slate-100 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
+      <div className="min-h-screen bg-slate-100 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
         <Header onOpenSidebar={() => setIsSidebarOpen(true)} />
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         <main className={`w-full px-4 pb-[calc(100px+env(safe-area-inset-bottom))] pt-5 sm:px-6 sm:py-5 lg:px-8 ${pathname === "/home" ? "max-sm:hidden" : ""}`}>

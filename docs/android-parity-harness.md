@@ -10,9 +10,11 @@ não é presumida. Esta cópia adaptada mantém os critérios sem expor rotas,
 métodos HTTP, corpos de requisição ou detalhes operacionais da API em Markdown.
 Consultar o código das features e a documentação privada para transporte.
 
-**No celular, o web deve ser o mais parecido possível com o Android aprovado**:
-desenho, cores, fonte, hierarquia, ícones, cards, campos, botões, navegação,
-modais e estados. Consultar o Android final, não versões intermediárias rejeitadas.
+**Correção de escopo em 25/10/2026:** nesta adaptação, implementar apenas os
+Dropdowns e VA/VR. Preservar a paleta Slate e a fonte originais do web no celular;
+não copiar os fundos neutros nem a tipografia do Android. Esta orientação mais
+recente prevalece sobre recomendações visuais amplas deste documento.
+Consultar o Android final para os seletores e benefícios, não versões intermediárias rejeitadas.
 No desktop, aproveitar colunas e espaço horizontal com diferenças leves,
 preservando identidade, regras financeiras e comportamentos.
 
