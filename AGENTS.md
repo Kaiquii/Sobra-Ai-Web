@@ -20,6 +20,7 @@ As regras desses arquivos fazem parte do contrato do projeto. Nao fuja da arquit
 ## Harness de IA
 
 - Respeite a separação visual registrada em `rules.md` e `docs/android-parity-harness.md`: desktop tem modais Web próprios e dropdowns em lista junto ao campo; celular/PWA usa modais e seletores semelhantes ao Android. Não transportar o padrão mobile ao desktop.
+- Preserve sempre a fonte padrão da Web, inclusive no celular/PWA e em seus modais. Paridade Android não autoriza copiar Roboto ou adicionar outras fontes.
 
 - Somente o usuário inicia o projeto. IAs não devem iniciar ou reiniciar servidores, nem executar `npm run dev`, `next dev`, `npm start` ou equivalentes, inclusive em outra porta ou em segundo plano. Para validação visual, usar o servidor iniciado pelo usuário; se não houver, solicitar que ele o inicie.
 

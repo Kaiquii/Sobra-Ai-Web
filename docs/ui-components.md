@@ -1,5 +1,10 @@
 # Componentes de UI
 
+Todos os componentes herdam a fonte padrão Web, inclusive modais, seletores,
+campos e cabeçalhos no celular/PWA. Não adicionar fontes próprias ou trocar a
+família tipográfica para imitar Android. Essa regra é permanente em `rules.md`
+e verificada pelo harness.
+
 Troca de tema é imediata. Componentes não devem usar transições de cor, de todas
 as propriedades ou `transition` genérico. Somente transformações geométricas
 podem ter transição quando necessárias. O harness verifica essa regra.
@@ -36,6 +41,11 @@ Apresentação obrigatória, definida pelo breakpoint:
   substituto dessa experiência.
 - O prop legado `presentation` não sobrepõe essa regra. Compartilhar o mesmo
   dropdown entre telas deve preservar as duas apresentações.
+
+No desktop, ações auxiliares dentro do campo devem caber na sua altura, com
+hover discreto e foco visível no padrão Web. Não usar um alvo mobile de 48 px
+dentro de um campo desktop de 40 px. Ajustes exclusivos do desktop devem usar
+o breakpoint correspondente, preservando os estados mobile.
 
 Use `DropdownSelect` sempre que a interface precisar escolher uma opcao em lista, incluindo:
 

@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import process from "node:process";
-import { hasThemeColorTransition } from "./ui-guardrails.mjs";
+import { hasCustomFontLoading, hasThemeColorTransition } from "./ui-guardrails.mjs";
 
 const projectRoot = process.cwd();
 const configPath = resolve(projectRoot, "ai-harness.config.json");
@@ -134,6 +134,23 @@ function doctor(config) {
     for (const file of uiFiles) {
       if (hasThemeColorTransition(readFileSync(resolve(projectRoot, file), "utf8"))) {
         errors.push(`Transição de cor/tema proibida: ${file}. Use somente transições geométricas quando necessárias.`);
+      }
+    }
+  }
+
+  if (config.guardrails.forbidCustomFonts) {
+    const ignored = new Set(config.context.ignoredDirectories);
+    const files = ["public", ...config.context.sourceRoots].flatMap((root) =>
+      listFiles(resolve(projectRoot, root), ignored),
+    );
+    for (const file of files) {
+      if (/\.(?:ttf|ttc|otf|woff2?|eot)$/i.test(file)) {
+        errors.push(`Arquivo de fonte próprio proibido: ${file}. Preserve a fonte padrão Web.`);
+      } else if (
+        /\.(?:tsx?|jsx?|css)$/.test(file) &&
+        hasCustomFontLoading(readFileSync(resolve(projectRoot, file), "utf8"))
+      ) {
+        errors.push(`Carregamento de fonte própria proibido: ${file}. Preserve a fonte padrão Web.`);
       }
     }
   }

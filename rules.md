@@ -10,13 +10,21 @@ Orientação permanente do usuário, reforçada em 26/10/2026:
 - Dropdown no celular é o modal de seleção semelhante ao Android, com busca e dimensões próprias. Não trocar esse modal pela lista desktop.
 - `DropdownSelect` decide a apresentação pelo breakpoint compartilhado do projeto: abaixo de 640 px, modal; a partir de 640 px, lista. `presentation="sheet"` em um consumidor não autoriza modal no desktop.
 - Compartilhar estado, validação e componentes não significa unificar a apresentação entre plataformas. Conferir desktop e celular separadamente, inclusive dentro de modais e nos temas claro/escuro.
+- Correções solicitadas especificamente para desktop devem limitar estilos e estados ao breakpoint desktop, inclusive hover, tamanho e alinhamento de ações auxiliares. Não alterar a apresentação mobile como consequência.
 - Essas orientações prevalecem sobre descrições antigas ou genéricas de paridade. Não redesenhar o desktop ao adaptar uma tela ao Android.
 
 ## Patrimônio no celular e PWA
 
 - Patrimônio segue estrutura, proporções, navegação e interações do Android 1.4.8, commit `136a9a5`, conforme handoff autorizado em 26/10/2026.
-- A exceção visual é a paleta: preservar tokens Slate, azul principal e verde positivo da Web nos dois temas. Na tela e nos painéis de Patrimônio no celular, usar Roboto local conforme a referência; não alterar a fonte das demais telas.
+- Preservar a paleta e a fonte padrão da Web nos dois temas e em todas as larguras. A referência Android não autoriza copiar Roboto nem substituir a tipografia, inclusive no celular/PWA.
 - Desktop pode reorganizar o conteúdo mantendo todas as ações. Critérios e limitações de validação estão em `docs/patrimonio.md`.
+
+## Tipografia padrão em todas as plataformas
+
+- Manter a fonte padrão já definida no `body` de `app/globals.css` em todo o projeto: desktop, celular/PWA, páginas, cabeçalhos, campos, dropdowns e modais.
+- A semelhança com Android é de estrutura e comportamento; não copiar a família tipográfica Android. Esta orientação prevalece sobre handoffs e textos anteriores que sugeriam Roboto no celular.
+- Não adicionar fontes locais ou remotas, arquivos de fonte, `@font-face`, carregadores de fontes ou famílias específicas por feature/breakpoint. Herdar a fonte padrão da Web.
+- O harness verifica `forbidCustomFonts` para impedir a reintrodução de fontes empacotadas e carregadores próprios.
 
 ## Troca de tema imediata
 

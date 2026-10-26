@@ -11,9 +11,11 @@ recebido por handoff autorizado em **26/10/2026**. Fontes consultadas em
 No celular e no PWA, manter estrutura, ordem, proporções, ícones equivalentes
 Lucide, espaços, estados e ações da referência. Desktop pode aproveitar duas
 colunas na lista. A paleta permanece Web: fundo Slate, superfícies claras/Slate
-900, azul `brand` para FGTS/ações e verde Emerald para investimentos. Roboto
-local, copiada da referência, é restrita à nova tela e painéis no celular;
-as demais telas conservam a fonte atual. Licença incluída junto às fontes.
+900, azul `brand` para FGTS/ações e verde Emerald para investimentos. A fonte
+padrão Web é preservada em todas as larguras, inclusive no celular/PWA, nos
+painéis e no seletor de categorias. A correção direta do usuário em 26/10/2026
+revoga a orientação anterior de usar Roboto: os arquivos de fonte e suas
+declarações foram removidos. Não copiar a família tipográfica do Android.
 
 Correção exigida pelo usuário em 26/10/2026: os modais desktop seguem o padrão
 Web existente, centralizados, largura de formulário, campos padrão e rodapé
@@ -24,9 +26,12 @@ harness de paridade.
 
 No desktop, a própria página reutiliza o `Header` autenticado, `PageHeader` e
 `Card`: três totais separados, bordas/raios do padrão Web e ações identificadas
-como botões. O celular preserva o cabeçalho secundário e resumo Android. Gerenciar
-categorias usa botão com ícone e borda, evitando uma ação com aparência de texto
-solto. A troca de tema é imediata, protegida pelo harness.
+como botões. O celular preserva o cabeçalho secundário e resumo Android. No
+desktop, Gerenciar categorias ocupa a largura do campo, com fundo azul, borda,
+ícone e hover tonal. A ação “+” cabe dentro do campo: botão de 32 px no campo
+de 40 px, com hover azul discreto. Esses ajustes usam o breakpoint desktop e
+preservam as dimensões e os estados mobile. A troca de tema é imediata,
+protegida pelo harness.
 
 Início tem carteira sem texto, alvo de 48 pixels, ícone de 24 e raio de 16.
 A navegação mede sua área e reserva espaço para o atalho e o último conteúdo,
@@ -95,7 +100,7 @@ retry, fallback/reentrada, proteção/conflito de categorias, resposta perdida e
 isolamento entre contas. Não altera dados reais.
 
 Verificação registrada: 17 testes específicos de Patrimônio, dois testes da
-proteção de tema (42 no conjunto),
+proteção de tema e dois da proteção de tipografia (44 no conjunto),
 lint, TypeScript e build de produção com Webpack. O comando obrigatório
 `npm run ai:check` foi executado: testes/lint passaram, mas o build padrão
 Turbopack falhou ao iniciar seu subprocesso CSS, inclusive fora do sandbox.
@@ -111,8 +116,13 @@ modal, seleção por ID e seletor modal mobile. Capturas e medidas foram salvas
 nos artefatos locais da tarefa. Essa evidência não certifica API real nem PWA
 instalado. Build não certifica paridade visual.
 Também conferidos o cabeçalho padrão desktop, os três cards de totais, botão
-de gerenciar categorias com borda/ícone, ausência de animação de cor e o filtro
-de categorias de Despesas como lista desktop com Escape e retorno de foco.
+de gerenciar categorias com fundo, borda, ícone e largura do campo, ausência de
+animação de cor e o filtro de categorias de Despesas como lista desktop com
+Escape e retorno de foco. A correção desktop foi conferida com hover nos dois
+temas: “+” de 32 px contido no campo e abertura dos dois diálogos de categorias.
+O alvo mobile de 48 px foi preservado. A família computada de páginas, painéis,
+campos e seletores foi comparada com a do `body` em desktop e celular, sem
+substituições por fontes próprias da aplicação.
 Conferir em navegador/PWA: temas, larguras estreitas, fonte ampliada, safe-area,
 FGTS zero, CRUD, seleção automática, proteção, conflito em uso, privacidade com
 leitor de tela, voltar à origem, teclado e gestos. Verificar falhas/retry e

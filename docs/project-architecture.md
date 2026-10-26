@@ -37,7 +37,7 @@ Este projeto deve manter uma arquitetura simples, previsivel e facil de evoluir.
 
 ## Features
 
-- `features/patrimony` mantém patrimônio e categorias de investimentos isolados das finanças mensais. Centavos exatos e transporte Axios pertencem à feature; `ModalPanel` concentra foco, viewport, proteção do teclado e retorno dos modais. Composição mobile/PWA e exceção de paleta: `docs/patrimonio.md`.
+- `features/patrimony` mantém patrimônio e categorias de investimentos isolados das finanças mensais. Centavos exatos e transporte Axios pertencem à feature; `ModalPanel` concentra foco, viewport, proteção do teclado e retorno dos modais. Composição mobile/PWA com paleta e tipografia Web preservadas: `docs/patrimonio.md`.
 
 - Codigo especifico de uma funcionalidade deve ficar dentro da sua pasta em `features`.
 - Uma feature deve expor componentes, tipos, stores e APIs relacionados ao proprio dominio.
@@ -78,6 +78,8 @@ Este projeto deve manter uma arquitetura simples, previsivel e facil de evoluir.
 - Evitar chamadas HTTP diretamente dentro de componentes quando elas puderem ficar em uma camada de API.
 
 ## UI, tema e responsividade
+
+- A fonte padrão de `app/globals.css` é herdada por todas as plataformas e features. Não há exceção mobile ou Android para famílias tipográficas. O guardrail `forbidCustomFonts` rejeita fontes empacotadas, declarações de fonte própria e carregadores de fontes.
 
 - O guardrail `forbidThemeColorTransitions` do harness impede animações de cor na troca de tema. A implementação está em `scripts/ui-guardrails.mjs`, chamada por `ai:doctor`, com cobertura de regressão própria. Preservar somente movimentos geométricos e indicadores de carregamento quando necessários.
 

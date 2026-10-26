@@ -40,7 +40,8 @@
     ],
     "allowEnvironmentTemplate": ".env.example",
     "forbidApiRoutesInMarkdown": true,
-    "forbidThemeColorTransitions": true
+    "forbidThemeColorTransitions": true,
+    "forbidCustomFonts": true
   },
   "checks": {
     "quick": [

@@ -43,7 +43,7 @@ export function PatrimonyView() {
     setEditor(value);
   };
   return (
-    <section className="patrimony-surface mx-auto grid w-full max-w-3xl gap-3 sm:max-w-6xl sm:gap-5">
+    <section className="mx-auto grid w-full max-w-3xl gap-3 sm:max-w-6xl sm:gap-5">
       <div className="hidden sm:block">
         <PageHeader
           title="Patrimônio"

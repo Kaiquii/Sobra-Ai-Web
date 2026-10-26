@@ -5,8 +5,10 @@ O web é a versão para navegador do SobraAí Android. A identidade e os fluxos 
 Atualização em 26/10/2026: Patrimônio segue Android 1.4.8 (`136a9a5`) no
 celular/PWA, com exceção da paleta oficial Web. Essa autorização acrescenta a
 feature ao escopo anterior de Dropdowns/VA/VR; não autoriza redesenhar outras
-telas. Roboto local restrita à nova tela/painéis no celular. Critérios, fontes,
-testes e pendências: [patrimonio.md](patrimonio.md).
+telas. A orientação posterior do usuário em 26/10/2026 preserva também a fonte
+padrão Web em todas as larguras, inclusive no celular/PWA e em seus modais;
+não copiar Roboto. Critérios, referências, testes e pendências:
+[patrimonio.md](patrimonio.md).
 
 - Repositório: https://github.com/Kaiquii/Sobra-Ai-Android.git
 - Projeto local: `C:\Users\kaiqu\StudioProjects\App-Financeiro`

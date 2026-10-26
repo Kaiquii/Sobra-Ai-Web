@@ -132,7 +132,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
     router.replace("/login");
   }
 
-  const patrimonyMobileHeader = pathname === "/patrimonio" ? <header className="patrimony-surface sticky top-0 z-30 bg-slate-100 px-3 pt-[env(safe-area-inset-top)] text-slate-950 dark:bg-slate-950 dark:text-slate-50 sm:hidden">
+  const patrimonyMobileHeader = pathname === "/patrimonio" ? <header className="sticky top-0 z-30 bg-slate-100 px-3 pt-[env(safe-area-inset-top)] text-slate-950 dark:bg-slate-950 dark:text-slate-50 sm:hidden">
     <div className="mx-auto flex min-h-14 max-w-3xl items-center gap-3">
       <Button aria-label="Voltar" size="iconLg" variant="ghost" onClick={() => router.replace(new URLSearchParams(window.location.search).get("origem") === "perfil" ? "/perfil" : "/inicio")}><ArrowLeft aria-hidden="true" size={24} /></Button>
       <h1 className="min-w-0 flex-1 text-xl font-bold">Patrimônio</h1>

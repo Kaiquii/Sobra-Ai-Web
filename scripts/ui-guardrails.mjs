@@ -4,3 +4,7 @@ export function hasThemeColorTransition(source) {
     source,
   );
 }
+
+export function hasCustomFontLoading(source) {
+  return /@font-face\b|["'](?:next\/font(?:\/(?:google|local))?|@fontsource(?:-variable)?\/[^"']+)["']|fonts\.(?:googleapis|gstatic)\.com/i.test(source);
+}

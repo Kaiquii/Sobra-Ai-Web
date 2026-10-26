@@ -23,6 +23,8 @@ Este arquivo define regras permanentes para qualquer IA ou pessoa que trabalhar 
 
 ## Componentes visuais
 
+- Preservar a tipografia padrão Web em desktop, celular/PWA e modais. Não importar fontes Android nem criar famílias por feature ou breakpoint. A paridade com Android preserva a família de fonte Web; a regra permanente está em `rules.md` e no harness.
+
 - Respeitar a distinção obrigatória de plataformas em `rules.md`: desktop preserva os modais Web e dropdowns antigos em lista junto ao campo; celular/PWA usa os modais e seletores semelhantes ao Android. Não aplicar o padrão mobile ao desktop.
 - Ao alterar um componente compartilhado, conferir as duas apresentações separadamente. No desktop, conferir lista ancorada e modal centralizado; no celular, conferir seletor modal e o formato Android de cada formulário. Registrar qualquer verificação visual que permaneça pendente.
 

@@ -22,6 +22,12 @@ conferir seletor modal e composição Android. Conferir temas, teclado,
 seleção/Escape, foco de retorno, áreas seguras e listas dentro de modais.
 Build não substitui essa comparação. Registrar evidências e pendências reais.
 
+A fonte padrão da Web permanece em todas as plataformas, páginas e modais,
+inclusive no celular/PWA. Correção direta do usuário em 26/10/2026: paridade
+Android não autoriza copiar Roboto ou importar fontes. Não criar famílias por
+feature/breakpoint. `forbidCustomFonts` impede arquivos de fonte, `@font-face`
+e carregadores de fontes; verificar herança da fonte também nos seletores.
+
 Troca de tema deve ser imediata nas duas plataformas. `ai:doctor` verifica
 `forbidThemeColorTransitions` e rejeita classes de transição de cores/todas as
 propriedades ou transição genérica. A suíte testa a proteção em
@@ -144,8 +150,8 @@ consequência deste guia.
 - Android usa Roboto, azul `#1877F2`, fundo escuro `#121212` e cards `#202934`.
   Consultar tokens e usos em `Color.kt`, `Theme.kt` e `Typography.kt`. Na orientação
   posterior de 25/10/2026, o usuário pediu preservar o fundo padrão do projeto web,
-  inclusive nos seletores; a paleta Slate permanece. Roboto é servida localmente
-  na área autenticada mobile. Essa diferença de paleta é intencional.
+  inclusive nos seletores; a paleta Slate e a fonte padrão Web permanecem.
+  A orientação reforçada em 26/10/2026 proíbe copiar Roboto também no celular/PWA.
 - Títulos superiores alinhados à esquerda. Cards compactos com ações no topo
   direito: pagar, adiantar, visualizar, editar, excluir; não criar rodapé de ações.
   Conferir variantes e ícones no Android atual, inclusive a variante do Início.

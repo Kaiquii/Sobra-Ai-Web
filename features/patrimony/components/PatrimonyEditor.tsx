@@ -173,7 +173,6 @@ export function PatrimonyEditor({
                     id="patrimony-category"
                     ariaLabel="Categoria do investimento"
                     sheetTitle="Categoria"
-                    selectionDialogClassName="patrimony-surface"
                     value={currentCategoryId}
                     triggerLabel={
                       state.categories.find((item) => String(item.id) === currentCategoryId)
@@ -191,7 +190,7 @@ export function PatrimonyEditor({
                         variant="ghost"
                         aria-label="Nova categoria"
                         size="iconLg"
-                        className="text-emerald-700 dark:text-emerald-400"
+                        className="text-emerald-700 dark:text-emerald-400 sm:h-8 sm:w-8 sm:text-brand sm:hover:bg-brand/10 sm:focus-visible:ring-brand/30 sm:dark:text-brand sm:dark:hover:bg-brand/15"
                         disabled={blocked || categoryBlocked || state.supported !== true}
                         onClick={() => {
                           state.clearMutationError();
@@ -205,14 +204,14 @@ export function PatrimonyEditor({
                   {state.supported === true ? (
                     <Button
                       variant="secondary"
-                      className="justify-self-start rounded-lg"
+                      className="justify-self-start rounded-lg sm:w-full sm:gap-2.5 sm:border-blue-200 sm:bg-blue-50 sm:hover:bg-blue-100 sm:dark:border-blue-800 sm:dark:bg-blue-950 sm:dark:hover:bg-blue-900"
                       disabled={state.saving}
                       onClick={() => {
                         state.clearMutationError();
                         setManager(true);
                       }}
                     >
-                      <Settings2 aria-hidden="true" size={16} />
+                      <Settings2 aria-hidden="true" className="sm:text-brand" size={16} />
                       Gerenciar categorias
                     </Button>
                   ) : null}

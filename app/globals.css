@@ -144,33 +144,3 @@ input[type="password"]::-ms-clear {
 @media (max-height: 360px) {
   .patrimony-category-help { display: none; }
 }
-
-@font-face {
-  font-family: "Patrimony Roboto";
-  src: url("/fonts/patrimony-roboto-400.ttf") format("truetype");
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Patrimony Roboto";
-  src: url("/fonts/patrimony-roboto-500.ttf") format("truetype");
-  font-weight: 500;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Patrimony Roboto";
-  src: url("/fonts/patrimony-roboto-600.ttf") format("truetype");
-  font-weight: 600;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Patrimony Roboto";
-  src: url("/fonts/patrimony-roboto-700.ttf") format("truetype");
-  font-weight: 700;
-  font-display: swap;
-}
-@media (max-width: 639px) {
-  .patrimony-surface, .modal-panel {
-    font-family: "Patrimony Roboto", sans-serif;
-  }
-}
