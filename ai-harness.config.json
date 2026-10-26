@@ -39,7 +39,8 @@
       ".env.production.local"
     ],
     "allowEnvironmentTemplate": ".env.example",
-    "forbidApiRoutesInMarkdown": true
+    "forbidApiRoutesInMarkdown": true,
+    "forbidThemeColorTransitions": true
   },
   "checks": {
     "quick": [

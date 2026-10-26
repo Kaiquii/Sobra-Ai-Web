@@ -1,5 +1,30 @@
 # Regras do projeto
 
+## Desktop e celular têm apresentações diferentes
+
+Orientação permanente do usuário, reforçada em 26/10/2026:
+
+- A versão de celular/PWA deve ser o mais parecida possível com o Android em estrutura, navegação, modais, seletores e interações, mantendo a paleta Web e as exceções expressamente documentadas.
+- A versão desktop tem um padrão próprio. Reutilizar os modais existentes do desktop: centralizados, largura adequada ao formulário, campos e botões no padrão Web e ações compactas. Não transportar alça, painel inferior, dimensões ou rodapé mobile para o desktop.
+- Dropdown no desktop é a lista antiga junto ao campo, abrindo abaixo ou acima conforme o espaço, sem modal de seleção ou escurecimento do fundo. Preservar a apresentação antiga, os temas, a seleção e a navegação por teclado.
+- Dropdown no celular é o modal de seleção semelhante ao Android, com busca e dimensões próprias. Não trocar esse modal pela lista desktop.
+- `DropdownSelect` decide a apresentação pelo breakpoint compartilhado do projeto: abaixo de 640 px, modal; a partir de 640 px, lista. `presentation="sheet"` em um consumidor não autoriza modal no desktop.
+- Compartilhar estado, validação e componentes não significa unificar a apresentação entre plataformas. Conferir desktop e celular separadamente, inclusive dentro de modais e nos temas claro/escuro.
+- Essas orientações prevalecem sobre descrições antigas ou genéricas de paridade. Não redesenhar o desktop ao adaptar uma tela ao Android.
+
+## Patrimônio no celular e PWA
+
+- Patrimônio segue estrutura, proporções, navegação e interações do Android 1.4.8, commit `136a9a5`, conforme handoff autorizado em 26/10/2026.
+- A exceção visual é a paleta: preservar tokens Slate, azul principal e verde positivo da Web nos dois temas. Na tela e nos painéis de Patrimônio no celular, usar Roboto local conforme a referência; não alterar a fonte das demais telas.
+- Desktop pode reorganizar o conteúdo mantendo todas as ações. Critérios e limitações de validação estão em `docs/patrimonio.md`.
+
+## Troca de tema imediata
+
+- Trocar entre claro e escuro deve aplicar as cores imediatamente, sem animação, fade ou atraso.
+- Não usar `transition-colors`, `transition-all`, `transition` genérico nem transições CSS de fundo, texto, borda, sombra, fill ou stroke. Durações não podem afetar a troca de tema.
+- Transições estritamente geométricas, como `transition-transform` de uma seta ou switch, e indicadores de carregamento podem permanecer quando necessários.
+- `npm run ai:doctor`, `ai:check:quick` e `ai:check` verificam essa regra por meio de `forbidThemeColorTransitions`. Não desabilitar a proteção para acomodar uma violação.
+
 ## Cursor de elementos interativos
 
 - Todo botão habilitado deve exibir `cursor: pointer`.

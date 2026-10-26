@@ -31,7 +31,7 @@ export function Switch({
       <span
         aria-hidden="true"
         className={cn(
-          "flex h-7 w-12 items-center rounded-full p-1 transition-colors",
+          "flex h-7 w-12 items-center rounded-full p-1",
           checked ? "bg-blue-600" : "bg-slate-300 dark:bg-slate-700",
         )}
       >

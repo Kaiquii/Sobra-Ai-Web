@@ -1,10 +1,41 @@
 # Componentes de UI
 
+Troca de tema é imediata. Componentes não devem usar transições de cor, de todas
+as propriedades ou `transition` genérico. Somente transformações geométricas
+podem ter transição quando necessárias. O harness verifica essa regra.
+
+## ModalPanel
+
+`components/ui/modal-panel.tsx` usa diálogo nativo para isolar foco e fundo,
+restaurar foco e compartilhar uma pilha de voltar com `SelectionDialog`.
+Variante `sheet` tem rolagem, VisualViewport, proteção do teclado para descarte
+implícito e bloqueio durante salvamento. `ConfirmationDialog` oferece
+`nativeModal` para confirmações acima de painéis. Patrimônio usa esses
+componentes; critérios de teclado/gestos e QA pendente: `docs/patrimonio.md`.
+
+O painel inferior e sua alça existem somente abaixo de 640 px. No desktop,
+`ModalPanel` deve seguir os modais Web existentes: centro da viewport, largura
+adequada ao formulário, borda, raio, padding e ações compactas. Não manter um
+painel mobile preso ao topo no desktop. Os editores de Patrimônio usam o rodapé
+desktop com Cancelar/Salvar à direita; o celular mantém Salvar em largura total.
+
 Este arquivo registra padroes visuais obrigatorios para componentes globais do projeto.
 
 ## DropdownSelect
 
 O componente `components/ui/dropdown-select.tsx` e o dropdown padrao do projeto.
+
+Apresentação obrigatória, definida pelo breakpoint:
+
+- Desktop (640 px ou mais): lista antiga ao lado do campo, abaixo/acima conforme
+  espaço. `DesktopSelectMenu` conserva largura do gatilho, opções compactas,
+  seleção, hover, Escape e setas. Usa popover não modal para funcionar acima de
+  diálogos nativos sem escurecer o fundo.
+- Celular/PWA (abaixo de 640 px): `SelectionDialog`, modal semelhante ao Android
+  com busca, altura estável e foco isolado. Nunca usar a lista desktop como
+  substituto dessa experiência.
+- O prop legado `presentation` não sobrepõe essa regra. Compartilhar o mesmo
+  dropdown entre telas deve preservar as duas apresentações.
 
 Use `DropdownSelect` sempre que a interface precisar escolher uma opcao em lista, incluindo:
 

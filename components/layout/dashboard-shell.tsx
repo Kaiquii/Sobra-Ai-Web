@@ -32,7 +32,7 @@ export function DashboardShell({ children }: Readonly<{ children: React.ReactNod
       <div className="min-h-screen bg-slate-100 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
         <Header onOpenSidebar={() => setIsSidebarOpen(true)} />
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-        <main className={`w-full px-4 pb-[calc(100px+env(safe-area-inset-bottom))] pt-5 sm:px-6 sm:py-5 lg:px-8 ${pathname === "/home" ? "max-sm:hidden" : ""}`}>
+        <main className={`w-full px-4 ${pathname === "/patrimonio" ? "pb-[calc(24px+env(safe-area-inset-bottom))] pt-2" : "pb-(--mobile-content-bottom,calc(100px+env(safe-area-inset-bottom))) pt-5"} sm:px-6 sm:py-5 lg:px-8 ${pathname === "/home" ? "max-sm:hidden" : ""}`}>
           {hideFinancialContent ? <div role="status" className="mx-auto max-w-6xl rounded-xl bg-white p-6 text-slate-500 dark:bg-slate-900 dark:text-slate-400">Valores ocultos. Use o botão de mostrar valores no cabeçalho para visualizar este conteúdo financeiro.</div> : null}
           <div hidden={hideFinancialContent}>{children}</div>
         </main>

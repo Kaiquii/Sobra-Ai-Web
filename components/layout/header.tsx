@@ -13,8 +13,11 @@ import {
   MessageCircle,
   Star,
   UserRound,
+  Wallet,
+  LoaderCircle,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -27,6 +30,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { useFinancialPrivacyStore } from "@/store/useFinancialPrivacyStore";
 import { buildApiAssetUrl } from "@/lib/api";
+import { usePatrimonyStore } from "@/features/patrimony/store/usePatrimonyStore";
 
 const AssistantChatDialog = dynamic(() => import("@/features/assistant/components/AssistantChatView").then((module) => module.AssistantChatDialog));
 
@@ -42,6 +46,7 @@ const extraRouteTitles = [
   { href: "/perfil/ajuda", label: "Central de Ajuda" },
   { href: "/perfil/categorias", label: "Categorias" },
   { href: "/perfil/editar", label: "Editar Perfil" },
+  { href: "/patrimonio", label: "Patrimônio" },
 ];
 
 const routeTitles = [...extraRouteTitles, ...dashboardNavigation];
@@ -56,6 +61,7 @@ function getCurrentPageTitle(pathname: string) {
 
 export function Header({ onOpenSidebar }: HeaderProps) {
   const valuesHidden = useFinancialPrivacyStore((state) => state.valuesHidden);
+  const patrimonyLoading = usePatrimonyStore((state) => state.loading && state.data !== null);
   const toggleValues = useFinancialPrivacyStore((state) => state.toggle);
   const [isAssistantDialogOpen, setIsAssistantDialogOpen] = useState(false);
   const [isPhotoPreviewOpen, setIsPhotoPreviewOpen] = useState(false);
@@ -70,7 +76,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
   const avatarUrl = buildApiAssetUrl(user?.avatar_url, user?.avatar_cache_key);
   const profileEmail = user?.email;
   const currentPageTitle = getCurrentPageTitle(pathname);
-  const showFinancialPrivacy = ["/inicio", "/despesas", "/relatorios", "/salario"].some(
+  const showFinancialPrivacy = ["/inicio", "/despesas", "/relatorios", "/salario", "/patrimonio"].some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
   const userName = user?.name ?? "Usuário";
@@ -126,9 +132,19 @@ export function Header({ onOpenSidebar }: HeaderProps) {
     router.replace("/login");
   }
 
+  const patrimonyMobileHeader = pathname === "/patrimonio" ? <header className="patrimony-surface sticky top-0 z-30 bg-slate-100 px-3 pt-[env(safe-area-inset-top)] text-slate-950 dark:bg-slate-950 dark:text-slate-50 sm:hidden">
+    <div className="mx-auto flex min-h-14 max-w-3xl items-center gap-3">
+      <Button aria-label="Voltar" size="iconLg" variant="ghost" onClick={() => router.replace(new URLSearchParams(window.location.search).get("origem") === "perfil" ? "/perfil" : "/inicio")}><ArrowLeft aria-hidden="true" size={24} /></Button>
+      <h1 className="min-w-0 flex-1 text-xl font-bold">Patrimônio</h1>
+      {patrimonyLoading ? <LoaderCircle aria-label="Atualizando patrimônio" size={20} className="shrink-0 animate-spin text-brand" /> : null}
+      <Button aria-label={valuesHidden ? "Mostrar valores" : "Ocultar valores"} aria-pressed={valuesHidden} size="iconLg" variant="ghost" onClick={toggleValues}>{valuesHidden ? <EyeOff aria-hidden="true" size={24} /> : <Eye aria-hidden="true" size={24} />}</Button>
+    </div>
+  </header> : null;
+
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-3 py-2 text-slate-950 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:text-slate-50 sm:px-6 lg:px-8">
+      {patrimonyMobileHeader}
+      <header className={`sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-3 py-2 text-slate-950 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:text-slate-50 sm:px-6 lg:px-8 ${pathname === "/patrimonio" ? "max-sm:hidden" : ""}`}>
         <div className="flex w-full items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <Button
@@ -162,6 +178,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
           </div>
 
           <div className="flex items-center gap-1.5">
+            {pathname === "/inicio" || pathname === "/home" ? <Link aria-label="Abrir patrimônio" href="/patrimonio?origem=inicio" className="hidden h-10 w-10 items-center justify-center rounded-xl text-brand hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:flex"><Wallet aria-hidden="true" size={24} /></Link> : null}
             <Button
               aria-label="Ir para home"
               className="max-sm:hidden h-11 w-11 shrink-0 rounded-full border-0 bg-transparent shadow-none dark:bg-transparent sm:h-8 sm:w-8"
@@ -224,7 +241,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
                 </span>
                 <ChevronDown
                   aria-hidden="true"
-                  className={isUserMenuOpen ? "rotate-180 transition" : "transition"}
+                  className={isUserMenuOpen ? "rotate-180 transition-transform" : "transition-transform"}
                   size={14}
                   strokeWidth={2.25}
                 />

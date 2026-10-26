@@ -38,7 +38,13 @@ Este documento registra regras de comportamento entre o front-end e o back-end s
 - Categorias sao gerenciadas separadamente e usadas para classificacao local na interface.
 - Observacoes de despesas sao opcionais e limitadas a 500 caracteres.
 
-## Relatorios
+## Patrimônio
+
+- Saldos manuais substituem os anteriores e ficam separados das finanças mensais. Totais vêm do servidor; valores usam centavos exatos e zero é válido.
+- Categorias de investimentos têm catálogo próprio e identidade do servidor. Padrões são protegidos; conflito em uso conserva investimentos. Compatibilidade textual exige indisponibilidade específica do catálogo, nunca erro de rede/autorização.
+- Resposta de gravação perdida exige reconciliação por consulta sem repetir a gravação; bloquear novas gravações durante consulta/erro. Cache e consultas em andamento são isolados por sessão. Critérios completos: `docs/patrimonio.md`.
+
+## Relatórios
 
 - A area de relatorios apresenta resumo mensal, gastos por categoria, comparacao entre periodos, tendencia anual e compromissos parcelados.
 - Filtros de periodo que dependem de dados ja carregados devem ser aplicados localmente quando indicado pela feature.

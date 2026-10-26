@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useLockBodyScroll } from "@/components/ui/use-lock-body-scroll";
+import { ModalPanel } from "@/components/ui/modal-panel";
 
 type ConfirmationDialogProps = {
   cancelLabel?: string;
@@ -17,6 +18,7 @@ type ConfirmationDialogProps = {
   onConfirm: () => void;
   title: string;
   tone?: "danger" | "default";
+  nativeModal?: boolean;
 };
 
 export function ConfirmationDialog({
@@ -30,6 +32,7 @@ export function ConfirmationDialog({
   onConfirm,
   title,
   tone = "default",
+  nativeModal = false,
 }: ConfirmationDialogProps) {
   useLockBodyScroll(isOpen);
 
@@ -38,6 +41,12 @@ export function ConfirmationDialog({
   }
 
   const isDanger = tone === "danger";
+
+  if (nativeModal) return <ModalPanel title={title} onClose={onClose} busy={isSubmitting} icon={<AlertTriangle aria-hidden="true" size={24} className={isDanger ? "text-red-600 dark:text-red-300" : "text-brand"} />}>
+    <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">{description}</p>
+    {children ? <div className="mt-3">{children}</div> : null}
+    <div className="mt-5 flex flex-wrap justify-end gap-3"><Button variant="secondary" disabled={isSubmitting} onClick={onClose}>{cancelLabel}</Button><Button disabled={isSubmitting} className={isDanger ? "bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:text-white dark:hover:bg-red-400" : undefined} onClick={onConfirm}>{isSubmitting ? "Aguarde…" : confirmLabel}</Button></div>
+  </ModalPanel>;
 
   return (
     <div

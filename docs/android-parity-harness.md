@@ -1,5 +1,40 @@
 # Harness de paridade com Android
 
+## Contrato obrigatório de desktop e celular
+
+Reforçado diretamente pelo usuário em 26/10/2026. Este contrato prevalece sobre
+recomendações antigas ou genéricas deste documento:
+
+| Elemento | Desktop, a partir de 640 px | Celular/PWA, abaixo de 640 px |
+| --- | --- | --- |
+| Objetivo visual | Preservar o padrão próprio da Web | Máxima semelhança possível com Android, mantendo paleta Web e exceções registradas |
+| Dropdown | Lista antiga ancorada ao campo, acima/abaixo conforme espaço; sem modal ou backdrop | Modal de seleção semelhante ao Android, com busca e dimensões mobile |
+| Formulário modal | Modal centralizado, largura adequada, campos e ações compactas do desktop; sem alça | Formato da tela Android correspondente, incluindo painel inferior ou tela cheia quando indicado |
+
+`DropdownSelect` é o ponto compartilhado da decisão responsiva. A preferência
+legada `presentation="sheet"` de um consumidor não pode transformar desktop em
+seletor modal. Preservar IDs, valores, seleção, validação e regras financeiras
+ao trocar apenas a apresentação.
+
+Aceitação obrigatória: abrir o mesmo dropdown e formulário nas duas larguras;
+no desktop, conferir lista junto ao campo e modal centralizado; no celular,
+conferir seletor modal e composição Android. Conferir temas, teclado,
+seleção/Escape, foco de retorno, áreas seguras e listas dentro de modais.
+Build não substitui essa comparação. Registrar evidências e pendências reais.
+
+Troca de tema deve ser imediata nas duas plataformas. `ai:doctor` verifica
+`forbidThemeColorTransitions` e rejeita classes de transição de cores/todas as
+propriedades ou transição genérica. A suíte testa a proteção em
+`scripts/ui-guardrails.test.mjs`. Não desabilitar essa regra para passar o harness.
+
+## Atualização de Patrimônio
+
+Em 26/10/2026, handoff autorizado acrescentou Patrimônio com referência Android
+1.4.8, commit `136a9a5`, mantendo a paleta Web. Escopo próprio:
+[patrimonio.md](patrimonio.md) registra implementação, verificações no Chrome
+com dados simulados e validações reais ainda pendentes em PWA/dispositivos.
+Os critérios anteriores de VA/VR continuam aplicáveis.
+
 ## Origem e alcance
 
 Referência recebida em 25/10/2026: Android **1.4.5**, versionCode **145**, commit
@@ -76,7 +111,8 @@ consequência deste guia.
   Adaptar proporções para CSS/viewport, sem presumir equivalência física dp/px.
   Não retornar aos modelos rejeitados de 600 dp ou 360 dp/cinco itens.
 - Título próximo de 18 sp semibold; opções em corpo padrão, aproximadamente 16 sp;
-  alvos de toque de 48 dp. Desktop pode adaptar largura mantendo identidade.
+  alvos de toque de 48 dp. Essas medidas pertencem ao seletor mobile; no desktop,
+  preservar a lista antiga junto ao campo, conforme o contrato acima.
 - Busca discreta abaixo do título, lupa e espaço fixo para limpar. Não abrir
   teclado automaticamente. Ignorar caixa e acentos, aceitar múltiplos termos.
 - Preservar IDs, ordem e seleção ao filtrar, inclusive nomes repetidos com IDs

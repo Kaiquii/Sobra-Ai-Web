@@ -113,3 +113,64 @@ input[type="password"]::-ms-clear {
   width: 0;
   height: 0;
 }
+
+.modal-panel-sheet {
+  top: calc(var(--panel-top, 0px) + env(safe-area-inset-top) + 12px);
+  bottom: auto;
+  left: 0;
+  right: 0;
+  margin-top: 0;
+  width: 100%;
+  max-width: 640px;
+  max-height: calc(var(--panel-height, 100dvh) - env(safe-area-inset-top) - 12px);
+  border-radius: 28px 28px 0 0;
+  position: fixed;
+  transform: translateY(max(0px, calc(var(--panel-height, 100dvh) - env(safe-area-inset-top) - 12px - 100%)));
+}
+
+@media (min-width: 640px) {
+  .modal-panel-sheet {
+    top: var(--panel-top, 0px);
+    bottom: var(--panel-bottom, 0px);
+    margin-block: auto;
+    width: calc(100% - 32px);
+    max-width: 28rem;
+    max-height: calc(var(--panel-height, 100dvh) - 48px);
+    border-radius: 8px;
+    transform: none;
+  }
+}
+
+@media (max-height: 360px) {
+  .patrimony-category-help { display: none; }
+}
+
+@font-face {
+  font-family: "Patrimony Roboto";
+  src: url("/fonts/patrimony-roboto-400.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Patrimony Roboto";
+  src: url("/fonts/patrimony-roboto-500.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Patrimony Roboto";
+  src: url("/fonts/patrimony-roboto-600.ttf") format("truetype");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Patrimony Roboto";
+  src: url("/fonts/patrimony-roboto-700.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+@media (max-width: 639px) {
+  .patrimony-surface, .modal-panel {
+    font-family: "Patrimony Roboto", sans-serif;
+  }
+}

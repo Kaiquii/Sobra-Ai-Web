@@ -23,6 +23,9 @@ Este arquivo define regras permanentes para qualquer IA ou pessoa que trabalhar 
 
 ## Componentes visuais
 
+- Respeitar a distinção obrigatória de plataformas em `rules.md`: desktop preserva os modais Web e dropdowns antigos em lista junto ao campo; celular/PWA usa os modais e seletores semelhantes ao Android. Não aplicar o padrão mobile ao desktop.
+- Ao alterar um componente compartilhado, conferir as duas apresentações separadamente. No desktop, conferir lista ancorada e modal centralizado; no celular, conferir seletor modal e o formato Android de cada formulário. Registrar qualquer verificação visual que permaneça pendente.
+
 - Sempre reutilizar componentes visuais existentes antes de criar novos.
 - Nao criar varios botoes, modais, inputs, cards ou elementos repetidos quando for possivel ter um componente global reutilizavel.
 - Preferir componentes compartilhados em `components/ui` ou `components/layout`.
@@ -44,6 +47,8 @@ Este arquivo define regras permanentes para qualquer IA ou pessoa que trabalhar 
 - Em botoes de icone, passar o tamanho pelo prop `size` do icone para evitar icones pequenos, sumidos ou inconsistentes.
 
 ## Tema claro e escuro
+
+- A troca de tema é imediata. Não adicionar transições de cor, `transition-all`, `transition` genérico ou durações que animem fundos, texto e bordas ao alternar claro/escuro. O harness verifica essa regra; transições apenas de transformações geométricas não devem incluir cores.
 
 - Toda interface deve funcionar bem em tema claro e escuro.
 - O projeto deve usar tema claro/escuro com Tailwind CSS usando a classe `dark`.

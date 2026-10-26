@@ -1,6 +1,7 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Wallet } from "lucide-react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { dashboardNavigation } from "@/components/layout/navigation";
@@ -11,12 +12,32 @@ export function MobileNavigation() {
   const pathname = usePathname();
   const router = useRouter();
   const open = useExpenseComposerStore((state) => state.open);
+  const navRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const update = () => {
+      const shortcut = nav.querySelector<HTMLElement>("[data-patrimony-access]");
+      const top = shortcut?.getBoundingClientRect().top ?? nav.getBoundingClientRect().top;
+      document.documentElement.style.setProperty("--mobile-content-bottom", `${Math.max(100, window.innerHeight - top + 8)}px`);
+    };
+    const observer = new ResizeObserver(update);
+    observer.observe(nav);
+    update();
+    window.addEventListener("resize", update);
+    return () => { observer.disconnect(); window.removeEventListener("resize", update); document.documentElement.style.removeProperty("--mobile-content-bottom"); };
+  }, [pathname]);
+
+  if (pathname === "/patrimonio") return null;
 
   return (
     <nav
+      ref={navRef}
       aria-label="Navegação principal"
       className="fixed inset-x-3 bottom-[max(10px,env(safe-area-inset-bottom))] z-30 mx-auto grid h-17 max-w-lg grid-cols-5 items-center rounded-[26px] border border-slate-200 bg-white/95 px-1 shadow-lg backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 sm:hidden"
     >
+      {pathname === "/inicio" ? <Link data-patrimony-access href="/patrimonio?origem=inicio" aria-label="Abrir patrimônio" className="absolute -top-14 right-1 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-white shadow-md hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"><Wallet aria-hidden="true" size={24} /></Link> : null}
       {dashboardNavigation.map((item, index) => {
         const active =
           pathname === item.href ||

@@ -2,12 +2,26 @@
 
 O web é a versão para navegador do SobraAí Android. A identidade e os fluxos devem ser reconhecíveis nas duas plataformas, com adaptação de espaço para desktop.
 
+Atualização em 26/10/2026: Patrimônio segue Android 1.4.8 (`136a9a5`) no
+celular/PWA, com exceção da paleta oficial Web. Essa autorização acrescenta a
+feature ao escopo anterior de Dropdowns/VA/VR; não autoriza redesenhar outras
+telas. Roboto local restrita à nova tela/painéis no celular. Critérios, fontes,
+testes e pendências: [patrimonio.md](patrimonio.md).
+
 - Repositório: https://github.com/Kaiquii/Sobra-Ai-Android.git
 - Projeto local: `C:\Users\kaiqu\StudioProjects\App-Financeiro`
 - Referência aprovada atual: Android 1.4.5, versionCode 145, commit `78a86c6`, conforme guia recebido em 25/10/2026. Critérios completos, fontes atuais e diferenças web estão em [android-parity-harness.md](android-parity-harness.md).
 - Referências consultadas: `core/designsystem/theme/Color.kt`, `StandardBottomBar.kt` e as telas de início, despesas, relatórios, perfil e autenticação.
 
 ## Direção visual
+
+### Padrão próprio do desktop
+
+Orientação permanente do usuário em 26/10/2026: dropdown desktop é a lista antiga
+junto ao campo, sem modal; formulários desktop usam os modais centralizados e
+ações do padrão Web, sem alça ou painel inferior. A semelhança máxima com Android
+é objetivo do celular/PWA. Reutilizar dados e lógica não autoriza unificar essas
+apresentações. Critérios obrigatórios: `rules.md` e `android-parity-harness.md`.
 
 ### Paridade obrigatória no celular
 

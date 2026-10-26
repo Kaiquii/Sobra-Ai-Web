@@ -12,6 +12,7 @@ import {
   Star,
   Trash2,
   UserRound,
+  Wallet,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -264,6 +265,8 @@ export function ProfileView() {
 
         {error ? <Alert variant="error">{error}</Alert> : null}
         {message ? <Alert variant="success">{message}</Alert> : null}
+
+        <div className="min-w-0"><h2 className="text-lg font-semibold">Finanças</h2><div className="mt-3"><ProfileShortcut title="Patrimônio" description="FGTS e investimentos" href="/patrimonio?origem=perfil" icon={<Wallet aria-hidden="true" size={24} />} /></div></div>
 
         <div className="min-w-0">
           <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-50">

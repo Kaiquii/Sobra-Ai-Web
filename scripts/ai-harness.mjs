@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import process from "node:process";
+import { hasThemeColorTransition } from "./ui-guardrails.mjs";
 
 const projectRoot = process.cwd();
 const configPath = resolve(projectRoot, "ai-harness.config.json");
@@ -122,6 +123,17 @@ function doctor(config) {
 
       if (routePattern.test(contents)) {
         errors.push(`Detalhe operacional de API encontrado em Markdown: ${file}`);
+      }
+    }
+  }
+
+  if (config.guardrails.forbidThemeColorTransitions) {
+    const ignored = new Set(config.context.ignoredDirectories);
+    const uiFiles = config.context.sourceRoots.flatMap((root) => listFiles(resolve(projectRoot, root), ignored))
+      .filter((file) => /\.(?:tsx|jsx|css)$/.test(file));
+    for (const file of uiFiles) {
+      if (hasThemeColorTransition(readFileSync(resolve(projectRoot, file), "utf8"))) {
+        errors.push(`Transição de cor/tema proibida: ${file}. Use somente transições geométricas quando necessárias.`);
       }
     }
   }
