@@ -38,6 +38,7 @@ Este projeto deve manter uma arquitetura simples, previsivel e facil de evoluir.
 ## Features
 
 - `features/assistant` concentra transporte, mensagens e estado temporário do chat. O backend é responsável pelo roteamento automático de IA e pelo contexto; o cliente não tem catálogo, preferências de modelo ou SDK de provedor. Rascunho e respostas são isolados por sessão, com bloqueios de concorrência e sem reenvio automático. Critérios: `docs/assistant-automatic-routing.md`.
+- A formatação limitada das respostas do Assistente pertence à apresentação da feature, compartilhada entre mensagens novas e histórico. Preservar os textos originais, valores e sinais; interpretar somente respostas normais, com HTML/links/imagens inertes e parser linear. Critérios: `docs/assistant-message-formatting.md`.
 
 - `features/patrimony` mantém patrimônio e categorias de investimentos isolados das finanças mensais. Centavos exatos e transporte Axios pertencem à feature; `ModalPanel` concentra foco, viewport, proteção do teclado e retorno dos modais. Composição mobile/PWA com paleta e tipografia Web preservadas: `docs/patrimonio.md`.
 

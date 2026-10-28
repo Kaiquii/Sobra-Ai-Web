@@ -1,5 +1,11 @@
 import axios from "axios";
 
+export function isAssistantErrorCode(code: unknown): code is string {
+  return (
+    typeof code === "string" && (code.startsWith("assistant_") || code === "gemini_quota_exceeded")
+  );
+}
+
 export function assistantErrorDetails(value: unknown) {
   const payload = axios.isAxiosError(value) ? value.response?.data : value;
   const data =
@@ -12,7 +18,7 @@ export function assistantErrorDetails(value: unknown) {
     [data.message, data.error, data.reply].find(
       (item): item is string => typeof item === "string" && Boolean(item.trim()),
     ) ?? null;
-  const recognized = Boolean(code?.startsWith("assistant_") || code === "gemini_quota_exceeded");
+  const recognized = isAssistantErrorCode(code);
   const retryAfterSeconds =
     typeof data.retry_after_seconds === "number" &&
     Number.isFinite(data.retry_after_seconds) &&

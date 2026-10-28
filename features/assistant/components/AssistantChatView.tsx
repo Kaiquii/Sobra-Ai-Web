@@ -11,6 +11,7 @@ import { useAssistantStore } from "@/features/assistant/store/useAssistantStore"
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import type { AssistantConversation, AssistantMessage } from "@/features/assistant/types/assistant";
 import { cn } from "@/lib/utils";
+import { AssistantMessageContent } from "./AssistantMessageContent";
 
 type AssistantChatDialogProps = {
   isOpen: boolean;
@@ -149,7 +150,7 @@ function ChatMessage({ message }: { message: AssistantMessage }) {
 
   return (
     <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
-      <div className="max-w-[88%] sm:max-w-[82%]">
+      <div className="min-w-0 max-w-[88%] sm:max-w-[82%]">
         <div
           className={cn(
             "whitespace-pre-wrap rounded-lg px-3.5 py-2.5 text-sm leading-6 shadow-sm",
@@ -158,7 +159,7 @@ function ChatMessage({ message }: { message: AssistantMessage }) {
               : "rounded-bl-sm bg-white text-slate-800 dark:bg-slate-800 dark:text-slate-100",
           )}
         >
-          {renderText(message.content)}
+          <AssistantMessageContent message={message} />
         </div>
         {time ? (
           <p className={cn("mt-1 text-xs text-slate-400", isUser ? "text-right" : "text-left")}>

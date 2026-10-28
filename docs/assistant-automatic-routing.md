@@ -105,6 +105,12 @@ O histórico carrega ao abrir o chat e é atualizado após um envio confirmado.
 Conforme correção direta do usuário, não há botão permanente de atualizar ou
 recarregar junto da ação de nova conversa.
 
+O handoff posterior de 28/10/2026 acrescenta negrito e listas simples somente
+às respostas normais do Assistente, com texto original preservado e conteúdo
+externo inerte. Critérios específicos de segurança e apresentação estão em
+[assistant-message-formatting.md](assistant-message-formatting.md); essa camada
+não altera roteamento, cotas, sessão ou confirmações financeiras.
+
 ## Matriz de aceitação Web
 
 Os cenários abaixo usam dados sintéticos e transporte controlado, sem gravações

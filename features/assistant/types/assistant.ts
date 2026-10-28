@@ -14,6 +14,7 @@ export type AssistantConversation = {
 };
 
 export type AssistantMessage = {
+  code?: string;
   content: string;
   conversation_id?: number;
   created_at?: string;
