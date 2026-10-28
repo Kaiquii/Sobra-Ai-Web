@@ -23,6 +23,8 @@ export type AssistantMessage = {
   role: AssistantRole;
   tool_call?: string | null;
   tool_result?: unknown;
+  error_code?: string;
+  retry_after_seconds?: number;
 };
 
 export type AssistantChatRequest = {
@@ -31,9 +33,12 @@ export type AssistantChatRequest = {
 };
 
 export type AssistantChatResponse = {
-  conversation_id: number;
+  conversation_id?: number | null;
   error_code?: string;
-  reply: string;
+  code?: string;
+  message?: string;
+  error?: string;
+  reply?: string;
   retry_after_seconds?: number;
   tool_call?: string | null;
   tool_result?: unknown;

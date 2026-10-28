@@ -1,6 +1,12 @@
 import axios from "axios";
 
-import { getBrowserAuthToken } from "@/lib/auth-cookie";
+import { getBrowserAuthSessionEpoch, getBrowserAuthToken } from "@/lib/auth-cookie";
+
+const requestSessionEpochs = new WeakMap<object, number>();
+
+export function getApiRequestSessionEpoch(config: object | undefined) {
+  return config ? requestSessionEpochs.get(config) : undefined;
+}
 
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -42,6 +48,7 @@ export function buildApiAssetUrl(
 }
 
 apiClient.interceptors.request.use((config) => {
+  requestSessionEpochs.set(config, getBrowserAuthSessionEpoch());
   const token = getBrowserAuthToken();
 
   if (token) {

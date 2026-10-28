@@ -43,6 +43,13 @@ Os critérios anteriores de VA/VR continuam aplicáveis.
 
 ## Origem e alcance
 
+O handoff do Assistente em 28/10/2026 acrescenta a adaptação para roteamento
+automático de IA. A decisão final remove a seleção manual e mantém histórico,
+rascunho, sessão, confirmações e continuidade da conversa. Não acrescentar logos,
+SDK de provedor ou redefinição de preferências. O backend confirmou publicação,
+mas isso não certifica a experiência Web. A matriz específica e as evidências
+ainda a registrar estão em [assistant-automatic-routing.md](assistant-automatic-routing.md).
+
 Referência recebida em 25/10/2026: Android **1.4.5**, versionCode **145**, commit
 **78a86c6** na main de [Sobra-Ai-Android](https://github.com/Kaiquii/Sobra-Ai-Android.git).
 Fonte completa local: `C:/Users/kaiqu/StudioProjects/App-Financeiro/docs/web-parity-harness.md`.

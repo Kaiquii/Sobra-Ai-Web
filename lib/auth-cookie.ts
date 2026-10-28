@@ -2,6 +2,13 @@ export const AUTH_TOKEN_COOKIE = "app-financeiro-token";
 
 const AUTH_TOKEN_MAX_AGE = 60 * 60 * 24 * 30;
 
+let sessionEpoch = 0;
+
+// In-memory identity for one login; never persisted or sent to the server.
+export function getBrowserAuthSessionEpoch() {
+  return sessionEpoch;
+}
+
 export function getBrowserAuthToken() {
   if (typeof document === "undefined") {
     return null;
@@ -19,6 +26,8 @@ export function setBrowserAuthToken(token: string) {
     return;
   }
 
+  sessionEpoch++;
+
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
 
   document.cookie = `${AUTH_TOKEN_COOKIE}=${encodeURIComponent(
@@ -30,6 +39,8 @@ export function clearBrowserAuthToken() {
   if (typeof document === "undefined") {
     return;
   }
+
+  sessionEpoch++;
 
   document.cookie = `${AUTH_TOKEN_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
 }

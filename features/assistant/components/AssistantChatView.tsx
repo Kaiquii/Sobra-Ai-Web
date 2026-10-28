@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  Bot,
-  ChevronDown,
-  Loader2,
-  MessageCircle,
-  Plus,
-  Send,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Bot, ChevronDown, Loader2, MessageCircle, Plus, Send, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 import { Alert } from "@/components/ui/alert";
@@ -17,10 +8,8 @@ import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { useLockBodyScroll } from "@/components/ui/use-lock-body-scroll";
 import { useAssistantStore } from "@/features/assistant/store/useAssistantStore";
-import type {
-  AssistantConversation,
-  AssistantMessage,
-} from "@/features/assistant/types/assistant";
+import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import type { AssistantConversation, AssistantMessage } from "@/features/assistant/types/assistant";
 import { cn } from "@/lib/utils";
 
 type AssistantChatDialogProps = {
@@ -49,9 +38,7 @@ function getMessageTime(message: AssistantMessage) {
 
 function getConversationLabel(conversation: AssistantConversation) {
   return (
-    conversation.title?.trim() ||
-    conversation.last_message?.trim() ||
-    `Conversa ${conversation.id}`
+    conversation.title?.trim() || conversation.last_message?.trim() || `Conversa ${conversation.id}`
   );
 }
 
@@ -76,15 +63,10 @@ function getConversationDescription(conversation: AssistantConversation) {
 
   const date = new Date(conversation.updated_at);
 
-  return Number.isNaN(date.getTime())
-    ? "Nova conversa"
-    : date.toLocaleDateString("pt-BR");
+  return Number.isNaN(date.getTime()) ? "Nova conversa" : date.toLocaleDateString("pt-BR");
 }
 
-function getConversationKey(
-  conversation: AssistantConversation,
-  index: number,
-) {
+function getConversationKey(conversation: AssistantConversation, index: number) {
   return `${conversation.id ?? "conversation"}-${index}`;
 }
 
@@ -109,6 +91,7 @@ function renderText(value: unknown): string {
 }
 
 type ConversationButtonProps = {
+  disabled: boolean;
   conversation: AssistantConversation;
   isActive: boolean;
   onDelete: (conversation: AssistantConversation) => void;
@@ -116,6 +99,7 @@ type ConversationButtonProps = {
 };
 
 function ConversationButton({
+  disabled,
   conversation,
   isActive,
   onDelete,
@@ -125,13 +109,16 @@ function ConversationButton({
     <div
       className={cn(
         "group flex min-w-0 items-center gap-2 rounded-lg px-2 py-2",
-        isActive
-          ? "bg-emerald-50 [--conversation-hover-bg:#d1fae5] hover:bg-(--conversation-hover-bg) dark:bg-emerald-950/35 dark:[--conversation-hover-bg:rgb(2_44_34/0.45)]"
-          : "[--conversation-hover-bg:#ecfdf5] hover:bg-(--conversation-hover-bg) dark:[--conversation-hover-bg:rgb(2_44_34/0.4)]",
+        disabled
+          ? "opacity-60"
+          : isActive
+            ? "bg-emerald-50 [--conversation-hover-bg:#d1fae5] hover:bg-(--conversation-hover-bg) dark:bg-emerald-950/35 dark:[--conversation-hover-bg:rgb(2_44_34/0.45)]"
+            : "[--conversation-hover-bg:#ecfdf5] hover:bg-(--conversation-hover-bg) dark:[--conversation-hover-bg:rgb(2_44_34/0.4)]",
       )}
     >
       <button
-        className="min-w-0 flex-1 cursor-pointer text-left"
+        className="min-w-0 flex-1 cursor-pointer text-left disabled:cursor-not-allowed"
+        disabled={disabled}
         onClick={() => onSelect(conversation.id)}
         type="button"
       >
@@ -144,7 +131,8 @@ function ConversationButton({
       </button>
       <button
         aria-label="Excluir conversa"
-        className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/35 dark:hover:text-red-300"
+        className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-slate-400 enabled:hover:bg-red-50 enabled:hover:text-red-600 disabled:cursor-not-allowed dark:enabled:hover:bg-red-950/35 dark:enabled:hover:text-red-300"
+        disabled={disabled}
         onClick={() => onDelete(conversation)}
         title="Excluir conversa"
         type="button"
@@ -173,12 +161,7 @@ function ChatMessage({ message }: { message: AssistantMessage }) {
           {renderText(message.content)}
         </div>
         {time ? (
-          <p
-            className={cn(
-              "mt-1 text-xs text-slate-400",
-              isUser ? "text-right" : "text-left",
-            )}
-          >
+          <p className={cn("mt-1 text-xs text-slate-400", isUser ? "text-right" : "text-left")}>
             {time}
           </p>
         ) : null}
@@ -195,7 +178,7 @@ function EmptyConversation() {
           <Bot aria-hidden="true" size={25} strokeWidth={2.25} />
         </div>
         <h2 className="mt-4 text-base font-semibold text-slate-950 dark:text-slate-50">
-          Assistente financeiro
+          Assistente SobraAi
         </h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Envie uma mensagem para começar.
@@ -205,57 +188,59 @@ function EmptyConversation() {
   );
 }
 
-export function AssistantChatDialog({
-  isOpen,
-  onClose,
-}: AssistantChatDialogProps) {
+function CooldownNotice({ until }: { until: number }) {
+  const [seconds, setSeconds] = useState(() => Math.max(0, Math.ceil((until - Date.now()) / 1000)));
+  useEffect(() => {
+    const timer = window.setInterval(
+      () => setSeconds(Math.max(0, Math.ceil((until - Date.now()) / 1000))),
+      1000,
+    );
+    return () => window.clearInterval(timer);
+  }, [until]);
+  return <Alert variant="info">Aguarde {seconds}s para enviar uma nova mensagem.</Alert>;
+}
+
+export function AssistantChatDialog(props: AssistantChatDialogProps) {
+  const revision = useAssistantStore((state) => state.sessionRevision);
+  return <AssistantChatContent key={revision} {...props} />;
+}
+
+function AssistantChatContent({ isOpen, onClose }: AssistantChatDialogProps) {
   useLockBodyScroll(isOpen);
 
-  const activeConversationId = useAssistantStore(
-    (state) => state.activeConversationId,
-  );
+  const activeConversationId = useAssistantStore((state) => state.activeConversationId);
   const clearError = useAssistantStore((state) => state.clearError);
   const clearRetry = useAssistantStore((state) => state.clearRetry);
   const conversations = useAssistantStore((state) => state.conversations);
-  const deleteConversation = useAssistantStore(
-    (state) => state.deleteConversation,
-  );
+  const deleteConversation = useAssistantStore((state) => state.deleteConversation);
   const error = useAssistantStore((state) => state.error);
-  const isLoadingConversations = useAssistantStore(
-    (state) => state.isLoadingConversations,
-  );
-  const isLoadingMessages = useAssistantStore(
-    (state) => state.isLoadingMessages,
-  );
+  const messagesError = useAssistantStore((state) => state.messagesError);
+  const historyError = useAssistantStore((state) => state.historyError);
+  const deletingConversationId = useAssistantStore((state) => state.deletingConversationId);
+  const draft = useAssistantStore((state) => state.draft);
+  const setDraft = useAssistantStore((state) => state.setDraft);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoadingConversations = useAssistantStore((state) => state.isLoadingConversations);
+  const isLoadingMessages = useAssistantStore((state) => state.isLoadingMessages);
   const isSending = useAssistantStore((state) => state.isSending);
-  const loadConversations = useAssistantStore(
-    (state) => state.loadConversations,
-  );
+  const loadConversations = useAssistantStore((state) => state.loadConversations);
   const messages = useAssistantStore((state) => state.messages);
-  const retryAfterSeconds = useAssistantStore(
-    (state) => state.retryAfterSeconds,
-  );
   const retryUntil = useAssistantStore((state) => state.retryUntil);
   const sendMessage = useAssistantStore((state) => state.sendMessage);
-  const setActiveConversation = useAssistantStore(
-    (state) => state.setActiveConversation,
-  );
-  const startNewConversation = useAssistantStore(
-    (state) => state.startNewConversation,
-  );
+  const setActiveConversation = useAssistantStore((state) => state.setActiveConversation);
+  const startNewConversation = useAssistantStore((state) => state.startNewConversation);
 
-  const [deleteTarget, setDeleteTarget] =
-    useState<AssistantConversation | null>(null);
-  const [draft, setDraft] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<AssistantConversation | null>(null);
   const [isMobileHistoryOpen, setIsMobileHistoryOpen] = useState(false);
   const draftInputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && hasHydrated && isAuthenticated) {
       void loadConversations();
     }
-  }, [isOpen, loadConversations]);
+  }, [isOpen, hasHydrated, isAuthenticated, loadConversations]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -273,10 +258,7 @@ export function AssistantChatDialog({
       return;
     }
 
-    const timeoutId = window.setTimeout(
-      clearRetry,
-      Math.max(retryUntil - Date.now(), 0),
-    );
+    const timeoutId = window.setTimeout(clearRetry, Math.max(retryUntil - Date.now(), 0));
 
     return () => window.clearTimeout(timeoutId);
   }, [clearRetry, retryUntil]);
@@ -292,8 +274,7 @@ export function AssistantChatDialog({
 
     const styles = window.getComputedStyle(input);
     const borderHeight =
-      Number.parseFloat(styles.borderTopWidth) +
-      Number.parseFloat(styles.borderBottomWidth);
+      Number.parseFloat(styles.borderTopWidth) + Number.parseFloat(styles.borderBottomWidth);
     const maxHeight = Number.parseFloat(styles.maxHeight);
     const nextHeight = input.scrollHeight + borderHeight;
 
@@ -305,7 +286,9 @@ export function AssistantChatDialog({
     return null;
   }
 
-  const isInputDisabled = isSending || isLoadingMessages || Boolean(retryUntil);
+  const isBusy = isSending || isLoadingMessages || deletingConversationId !== null;
+  const isInputDisabled =
+    isBusy || Boolean(retryUntil) || Boolean(messagesError) || !hasHydrated || !isAuthenticated;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -314,9 +297,7 @@ export function AssistantChatDialog({
       return;
     }
 
-    const nextMessage = draft;
-    setDraft("");
-    await sendMessage(nextMessage);
+    await sendMessage(draft);
   }
 
   async function handleDeleteConversation() {
@@ -324,20 +305,20 @@ export function AssistantChatDialog({
       return;
     }
 
-    try {
-      await deleteConversation(deleteTarget.id);
+    if (await deleteConversation(deleteTarget.id)) {
       setDeleteTarget(null);
-    } catch {}
+    }
   }
 
   function handleSelectConversation(conversationId: number) {
-    setActiveConversation(conversationId);
+    if (isBusy) return;
+    void setActiveConversation(conversationId);
     setIsMobileHistoryOpen(false);
   }
 
   function handleStartNewConversation() {
+    if (!startNewConversation()) return;
     clearError();
-    startNewConversation();
     setIsMobileHistoryOpen(false);
   }
 
@@ -345,6 +326,7 @@ export function AssistantChatDialog({
     <>
       <div
         aria-modal="true"
+        aria-label="Assistente SobraAi"
         className="fixed inset-0 z-50 flex items-stretch justify-stretch bg-slate-950/75 p-0 backdrop-blur-sm sm:items-center sm:justify-center sm:px-5 sm:py-4"
         role="dialog"
       >
@@ -359,15 +341,12 @@ export function AssistantChatDialog({
           >
             <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-2 dark:border-slate-800 sm:h-20 sm:px-3 sm:py-3">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-slate-950 dark:text-slate-50">
-                  Histórico
-                </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Outras conversas
-                </p>
+                <p className="text-sm font-semibold text-slate-950 dark:text-slate-50">Histórico</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Outras conversas</p>
               </div>
               <Button
                 aria-label="Nova conversa"
+                disabled={isBusy}
                 onClick={handleStartNewConversation}
                 size="iconSm"
                 title="Nova conversa"
@@ -378,13 +357,10 @@ export function AssistantChatDialog({
             </div>
 
             <div className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
+              {historyError ? <Alert variant="error">{historyError}</Alert> : null}
               {isLoadingConversations ? (
                 <div className="flex items-center gap-2 px-2 py-3 text-sm text-slate-500 dark:text-slate-400">
-                  <Loader2
-                    aria-hidden="true"
-                    className="animate-spin"
-                    size={16}
-                  />
+                  <Loader2 aria-hidden="true" className="animate-spin" size={16} />
                   Carregando conversas...
                 </div>
               ) : null}
@@ -398,6 +374,7 @@ export function AssistantChatDialog({
               {conversations.map((conversation, index) => (
                 <div key={getConversationKey(conversation, index)}>
                   <ConversationButton
+                    disabled={isBusy}
                     conversation={conversation}
                     isActive={conversation.id === activeConversationId}
                     onDelete={setDeleteTarget}
@@ -412,20 +389,14 @@ export function AssistantChatDialog({
             <div className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-2 dark:border-slate-800 dark:bg-slate-900 sm:h-20 sm:py-3">
               <div className="flex min-w-0 items-center gap-3">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/45 dark:text-emerald-300 sm:h-10 sm:w-10">
-                  <MessageCircle
-                    aria-hidden="true"
-                    size={21}
-                    strokeWidth={2.25}
-                  />
+                  <MessageCircle aria-hidden="true" size={21} strokeWidth={2.25} />
                 </span>
                 <div className="min-w-0">
                   <h1 className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50 sm:text-base">
-                    Chat com IA
+                    Assistente SobraAi
                   </h1>
                   <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                    {activeConversationId
-                      ? `Conversa ${activeConversationId}`
-                      : "Nova conversa"}
+                    {activeConversationId ? `Conversa ${activeConversationId}` : "Nova conversa"}
                   </p>
                 </div>
               </div>
@@ -470,29 +441,37 @@ export function AssistantChatDialog({
 
             {retryUntil ? (
               <div className="shrink-0 px-4 pt-4">
-                <Alert variant="info">
-                  {retryAfterSeconds
-                    ? `Aguarde ${retryAfterSeconds}s para enviar uma nova mensagem.`
-                    : "Aguarde alguns instantes para enviar uma nova mensagem."}
-                </Alert>
+                <CooldownNotice key={retryUntil} until={retryUntil} />
+              </div>
+            ) : null}
+
+            {messagesError ? (
+              <div className="shrink-0 px-4 pt-4">
+                <Alert variant="error">{messagesError}</Alert>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="mt-2"
+                  disabled={isBusy}
+                  onClick={() => {
+                    if (activeConversationId !== null)
+                      void setActiveConversation(activeConversationId);
+                  }}
+                >
+                  Tentar carregar novamente
+                </Button>
               </div>
             ) : null}
 
             <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-4 sm:py-5">
               {isLoadingMessages ? (
                 <div className="flex h-full items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                  <Loader2
-                    aria-hidden="true"
-                    className="animate-spin"
-                    size={17}
-                  />
+                  <Loader2 aria-hidden="true" className="animate-spin" size={17} />
                   Carregando mensagens...
                 </div>
               ) : null}
 
-              {!isLoadingMessages && !messages.length ? (
-                <EmptyConversation />
-              ) : null}
+              {!isLoadingMessages && !messages.length ? <EmptyConversation /> : null}
 
               {!isLoadingMessages && messages.length ? (
                 <div className="flex flex-col gap-3">
@@ -505,11 +484,7 @@ export function AssistantChatDialog({
                   {isSending ? (
                     <div className="flex justify-start">
                       <div className="inline-flex items-center gap-2 rounded-lg rounded-bl-sm bg-white px-3.5 py-2.5 text-sm text-slate-500 shadow-sm dark:bg-slate-800 dark:text-slate-400">
-                        <Loader2
-                          aria-hidden="true"
-                          className="animate-spin"
-                          size={16}
-                        />
+                        <Loader2 aria-hidden="true" className="animate-spin" size={16} />
                         Pensando...
                       </div>
                     </div>
@@ -525,12 +500,17 @@ export function AssistantChatDialog({
             >
               <div className="flex items-end gap-2">
                 <textarea
+                  aria-label="Mensagem"
                   ref={draftInputRef}
                   className="max-h-28 min-h-10 flex-1 resize-none overflow-y-hidden rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm leading-6 text-slate-950 outline-none placeholder:text-slate-500 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:placeholder:text-slate-500 dark:focus:border-emerald-400 dark:focus:bg-slate-950 dark:focus:ring-emerald-950 sm:max-h-32 sm:min-h-11 sm:px-4 sm:py-2.5"
                   disabled={isInputDisabled}
                   onChange={(event) => setDraft(event.target.value)}
                   onKeyDown={(event) => {
-                    if (event.key === "Enter" && !event.shiftKey) {
+                    if (
+                      event.key === "Enter" &&
+                      !event.shiftKey &&
+                      !event.nativeEvent.isComposing
+                    ) {
                       event.preventDefault();
                       event.currentTarget.form?.requestSubmit();
                     }
@@ -548,11 +528,7 @@ export function AssistantChatDialog({
                   type="submit"
                 >
                   {isSending ? (
-                    <Loader2
-                      aria-hidden="true"
-                      className="animate-spin"
-                      size={18}
-                    />
+                    <Loader2 aria-hidden="true" className="animate-spin" size={18} />
                   ) : (
                     <Send aria-hidden="true" size={18} strokeWidth={2.25} />
                   )}
@@ -567,6 +543,7 @@ export function AssistantChatDialog({
         confirmLabel="Excluir"
         description="Essa conversa será removida do seu histórico."
         isOpen={Boolean(deleteTarget)}
+        isSubmitting={deletingConversationId !== null}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConversation}
         title="Excluir conversa?"

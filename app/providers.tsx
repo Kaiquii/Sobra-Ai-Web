@@ -5,8 +5,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
-import { apiClient } from "@/lib/api";
+import { apiClient, getApiRequestSessionEpoch } from "@/lib/api";
 import { getApiErrorMessage } from "@/lib/api-errors";
+import { getBrowserAuthSessionEpoch, getBrowserAuthToken } from "@/lib/auth-cookie";
 import { useThemeStore } from "@/store/useThemeStore";
 import { applyBrowserTheme } from "@/lib/theme";
 
@@ -80,12 +81,17 @@ export function Providers({ children }: Readonly<{ children: React.ReactNode }>)
       (error) => {
         if (axios.isAxiosError(error)) {
           const status = error.response?.status;
+          const token = getBrowserAuthToken();
+          const headers = error.config?.headers;
+          const authorization = headers?.get?.("Authorization") ?? headers?.Authorization;
+          const belongsToCurrentSession =
+            token &&
+            useAuthStore.getState().isAuthenticated &&
+            authorization === `Bearer ${token}` &&
+            getApiRequestSessionEpoch(error.config) === getBrowserAuthSessionEpoch();
 
-          if (status === 401 || status === 403) {
-            const errorMessage =
-              status === 403 ? getApiErrorMessage(error) : undefined;
-
-            useAuthStore.getState().logout(errorMessage);
+          if ((status === 401 || status === 403) && belongsToCurrentSession) {
+            useAuthStore.getState().logout(getApiErrorMessage(error));
             router.replace("/login");
           }
         }

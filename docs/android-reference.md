@@ -15,6 +15,12 @@ não copiar Roboto. Critérios, referências, testes e pendências:
 - Referência aprovada atual: Android 1.4.5, versionCode 145, commit `78a86c6`, conforme guia recebido em 25/10/2026. Critérios completos, fontes atuais e diferenças web estão em [android-parity-harness.md](android-parity-harness.md).
 - Referências consultadas: `core/designsystem/theme/Color.kt`, `StandardBottomBar.kt` e as telas de início, despesas, relatórios, perfil e autenticação.
 
+Atualização do Assistente em 28/10/2026: o handoff Android/iOS adota um único
+Assistente SobraAi, sem escolha de modelos, logos ou configuração pelo usuário.
+O backend confirmou o roteamento automático publicado; a validação da Web é
+separada. Preservar fonte/paleta Web e a distinção desktop/mobile. Comportamento,
+estado de origem e critérios: [assistant-automatic-routing.md](assistant-automatic-routing.md).
+
 ## Direção visual
 
 ### Padrão próprio do desktop

@@ -52,6 +52,9 @@ Este documento registra regras de comportamento entre o front-end e o back-end s
 
 ## Assistente
 
-- O historico da conversa e mantido pelo back-end; o front conserva apenas o identificador da conversa ativa enquanto ela estiver em uso.
-- Quando a resposta indicar tempo de espera, a interface pode desabilitar temporariamente o campo de mensagem e mostrar a contagem restante.
-- Confirmacoes de acoes identificadas pelo assistente devem ser exibidas como parte da conversa, respeitando a resposta do back-end.
+- O usuário interage com o Assistente SobraAi. O backend escolhe e troca a IA; o cliente não consulta catálogo, exibe modelos ou redefine preferências antigas. Não adicionar SDK ou chave OpenRouter ao navegador/PWA.
+- O histórico e o contexto são mantidos pelo backend. O cliente conserva a conversa ativa e as mensagens de apresentação da sessão; trocar a IA internamente não cria uma nova conversa nem repete ações.
+- Preservar código, mensagem e atraso positivo dos erros do Assistente, inclusive em respostas controladas. Códigos atuais são neutros quanto ao provedor; manter a compatibilidade histórica. Cooldown exige erro reconhecido e atraso positivo informado, sem prazo inventado ou contorno por nova conversa.
+- O rascunho só é limpo quando o envio é aceito. Bloquear envios e mudanças de conversa concorrentes, preservar reentrada durante hidratação e descartar estado/respostas antigas ao encerrar ou trocar a sessão.
+- Rede, timeout ou resposta perdida não autorizam reenvio automático: a mensagem ou uma ação financeira pode já ter sido recebida. Exibir a falha e permitir conferir o histórico antes de nova tentativa manual.
+- Confirmações financeiras permanecem na conversa e respeitam a resposta do backend. Critérios, origem e estado de publicação reportado pelo servidor: [assistant-automatic-routing.md](assistant-automatic-routing.md).
