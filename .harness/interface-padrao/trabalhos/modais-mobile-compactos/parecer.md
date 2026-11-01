@@ -27,3 +27,7 @@ O mesmo revisor examinou o diff dos componentes reais, seus consumidores e teste
 Revisor confirmou a correção: Salvar textual somente no mobile e nos dois temas; Excluir continua preenchido, desktop e estados de envio/desabilitado preservados. Sem novos bloqueantes estáticos no trecho corrigido; mantida a análise anterior das partes inalteradas.
 
 Evidência autenticada indisponível: navegador de teste abriu no login. Não houve contorno de autenticação, alteração de dados reais ou abertura de servidor pela IA. A revisão não certificou geometria, teclado, cortes ou comparação visual desktop. Os 94 testes e lint passaram; build padrão apresentou falha interna de processo do Turbopack. Após a última correção, a sessão principal confirmou TypeScript e build com webpack aprovados, além do check rápido. Esses resultados não substituem a revisão visual pendente.
+
+## Incremento: informativo de adiantamento
+
+Mesmo revisor, fase final incremental em 31/10/2026: conformidade estática aprovada, sem achados. Confirmada equivalência ao `AdvanceDetailsBlock` Android atual: somente data/texto em negrito, linha única com rolagem horizontal, fundo azul a 10%, raio 16 e espaçamento 12 × 10. Desktop, fonte e paleta preservados, sem ações novas. Parecer visual permanece pendente. A sessão principal confirmou 95 testes, lint, doctor, TypeScript e build com webpack aprovados; o build padrão continua falhando internamente no processo CSS do Turbopack.

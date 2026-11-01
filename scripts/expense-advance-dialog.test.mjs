@@ -101,3 +101,19 @@ test("compact dialog geometry and actions are confined to the mobile media query
   assert.match(mobile, /\.mobile-compact-dialog-actions > button\s*\{\s*min-height:\s*48px/);
   assert.doesNotMatch(css.replace(mobile, ""), /\.mobile-compact-dialog/);
 });
+
+test("mobile advance information matches the Android single-line notice without payment copy or actions", () => {
+  for (const [advancedAt, expected] of [["2026-10-05", "Adiantada em 05/10/2026"], [null, "Despesa adiantada"]]) {
+    const tree = detailsDialog({ expense: { ...expense, advanced_at: advancedAt }, categoryName: "Comida", onClose() {} });
+    const mobile = descendants(tree).find((node) => "data-mobile-expense-details" in node.props);
+    const info = descendants(mobile).find((node) => "data-advance-info" in node.props);
+    assert.match(info.props.className, /px-3 py-2\.5/);
+    assert.equal(info.props.children.type, "p");
+    assert.equal(info.props.children.props.children, expected);
+    assert.match(info.props.children.props.className, /overflow-x-auto/);
+    assert.match(info.props.children.props.className, /whitespace-nowrap/);
+    assert.equal(descendants(info).filter((node) => node.type === "button").length, 0);
+  }
+  const regular = detailsDialog({ expense: { ...expense, is_advanced: false }, categoryName: "Comida", onClose() {} });
+  assert.equal(descendants(regular).some((node) => "data-advance-info" in node.props), false);
+});

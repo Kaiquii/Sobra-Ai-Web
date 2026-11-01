@@ -39,6 +39,8 @@ Verificações: 94 testes passaram, lint e doctor aprovados, TypeScript e build 
 
 ## Aceitação
 
+Ajuste localizado pedido em 31/10/2026 após a entrega: alinhar o informativo de adiantamento ao Android atual. `AdvanceDetailsBlock` nativo contém somente a data em negrito, uma linha e rolagem horizontal quando necessária, com espaçamento horizontal 12 e vertical 10. Removido o parágrafo sobre status Paga somente da composição mobile. Não é novo fluxo ou redesenho do desktop; ações continuam fora dos detalhes.
+
 - Aprovação explícita do mock antes de editar produção.
 - Somente estilos mobile; comparar desktop antes/depois sem diferenças.
 - Não cortar textos, campos ou ações em 320, 390 e 430 px, paisagem, teclado e texto ampliado.
