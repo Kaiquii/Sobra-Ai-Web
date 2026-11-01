@@ -54,13 +54,13 @@ export function ConfirmationDialog({
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm"
       role="dialog"
     >
-      <div className="max-h-[calc(100dvh-3rem)] w-full max-w-md overflow-y-auto rounded-lg border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-800 dark:bg-slate-950 sm:p-6">
-        <div className="flex gap-4">
+      <div className="mobile-compact-dialog max-h-[calc(100dvh-3rem)] w-full max-w-md overflow-y-auto rounded-lg border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-800 dark:bg-slate-950 sm:p-6">
+        <div className="flex gap-4 max-sm:flex-col max-sm:gap-3">
           <div
             className={
               isDanger
-                ? "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300"
-                : "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                ? "hidden h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 sm:flex"
+                : "hidden h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 sm:flex"
             }
           >
             <AlertTriangle className="h-5 w-5" />
@@ -76,7 +76,7 @@ export function ConfirmationDialog({
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <div className="mobile-compact-dialog-actions mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <Button disabled={isSubmitting} onClick={onClose} type="button" variant="secondary">
             {cancelLabel}
           </Button>

@@ -163,7 +163,9 @@ consequência deste guia.
   direito: pagar, adiantar, visualizar, editar, excluir; não criar rodapé de ações.
   Conferir variantes e ícones no Android atual, inclusive a variante do Início.
 - Adiantar: calendário azul com seta; já adiantada: calendário com confirmação
-  para alterar data. Remover adiantamento permanece nos detalhes.
+  para alterar data. Conforme atualização Android consultada em 31/10/2026,
+  remover adiantamento fica no modal de alteração da data, não nos detalhes.
+  A remoção exige confirmação; cancelar retorna à edição e concluir fecha ambos.
 - Marcador de tipo: Única azul, Parcelada roxo, Fixa verde-água. Não colorir o card
   inteiro pela fonte, categoria ou pagamento.
 - Avisos transitórios compactos acima da navegação/teclado, com tema e ícone por
@@ -171,6 +173,17 @@ consequência deste guia.
   com nova tentativa. Agrupar falhas de transporte equivalentes por contexto,
   preservar erros HTTP distintos e timeout; não afirmar que a internet caiu.
 - Revisar todos os consumidores da mesma causa, não apenas a tela relatada.
+
+### Densidade dos diálogos mobile
+
+Em 31/10/2026, o usuário aprovou diálogos mais compactos de renda, adiantamento,
+detalhes e confirmações, preservando inteiramente o desktop. O padrão compartilhado
+`mobile-compact-dialog` limita largura e altura pelo conteúdo e pela viewport
+somente abaixo de 640 px, com margens laterais e ações de toque preservadas.
+Detalhes não exibem Alterar data nem Remover adiantamento: essas ações pertencem
+ao editor de adiantamento. Formulários de despesa continuam em tela cheia no
+celular, como no Android. Exportação, seletores e Patrimônio mantêm seus formatos
+próprios. Aceite e limitações: `.harness/interface-padrao/trabalhos/modais-mobile-compactos/spec.md`.
 
 ## Mapa de fontes
 
@@ -243,8 +256,9 @@ Consultar o registro de implementação abaixo e não presumir aprovação visua
   opções identificadas por valor, altura estável, limpeza sem deslocar o campo,
   lista com rolagem só quando necessária e foco isolado pelo diálogo nativo.
 - O + verde fica dentro de Categoria. Alterar a categoria não recarrega o
-  formulário de edição apagando outros campos. Remoção de adiantamento fica nos
-  detalhes; calendário no card permite criar ou alterar sua data.
+  formulário de edição apagando outros campos. Remoção de adiantamento foi movida
+  dos detalhes para o modal de alteração da data em 31/10/2026; calendário no card
+  permite criar ou alterar sua data. A data prevista e o pagamento são preservados.
 - Avisos de sucesso usam `AppNotification`, mantendo falhas de carregamento
   persistentes. Timeout tem mensagem distinta de falha genérica de conexão.
 - `scripts/benefits-parity.test.mjs` cobre fontes/aliases, rateios, totais,

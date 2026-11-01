@@ -62,12 +62,12 @@ export function ExpenseDeleteDialog({
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 px-4 py-6 backdrop-blur-sm"
       role="dialog"
     >
-      <div className="max-h-[calc(100dvh-3rem)] w-full max-w-md overflow-y-auto rounded-lg border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+      <div className="mobile-compact-dialog max-h-[calc(100dvh-3rem)] w-full max-w-md overflow-y-auto rounded-lg border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-800 dark:bg-slate-900 sm:p-6">
         <h2 className="text-xl font-semibold tracking-normal text-slate-950 dark:text-white">
           Excluir despesa
         </h2>
 
-        <div className="mt-6 space-y-5">
+        <div className="mt-6 space-y-5 max-sm:mt-4 max-sm:space-y-3">
           {error ? <Alert variant="error">{error}</Alert> : null}
 
           <p className="text-base leading-7 text-slate-700 dark:text-slate-200">
@@ -95,7 +95,7 @@ export function ExpenseDeleteDialog({
           ) : null}
         </div>
 
-        <div className="mt-8 flex justify-end gap-3">
+        <div className="mobile-compact-dialog-actions mt-8 flex justify-end gap-3">
           <button
             className="inline-flex h-10 cursor-pointer items-center justify-center rounded-lg px-4 text-sm font-semibold text-blue-600 hover:bg-blue-50 hover:text-blue-500 disabled:cursor-not-allowed disabled:opacity-60 dark:text-blue-400 dark:hover:bg-blue-950/35"
             disabled={isSubmitting}

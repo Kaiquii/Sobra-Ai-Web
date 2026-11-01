@@ -44,6 +44,29 @@ body {
   [role="dialog"] {
     overscroll-behavior: contain;
   }
+
+  .mobile-compact-dialog {
+    width: 100%;
+    max-width: min(360px, calc(100vw - 48px));
+    max-height: calc(100dvh - 48px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow-y: auto;
+    border-radius: 28px;
+    padding: 24px;
+  }
+
+  .mobile-compact-dialog-actions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  .mobile-compact-dialog-actions > button {
+    min-height: 48px;
+    max-width: 100%;
+  }
 }
 
 @layer base {

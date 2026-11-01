@@ -713,13 +713,14 @@ export function ExpensesView() {
   }
 
   function confirmUndoAdvance() {
-    if (!undoAdvanceTarget) {
+    if (!undoAdvanceTarget || isAdvanceStatusSubmitting) {
       return;
     }
 
     void updateAdvanceStatus(undoAdvanceTarget.id, false)
       .then(() => {
         setUndoAdvanceTarget(null);
+        setAdvanceTarget(null);
         refreshExpenseList();
       })
       .catch(() => {});
@@ -982,11 +983,16 @@ export function ExpensesView() {
       />
 
       <ExpenseAdvanceDialog
-        expense={advanceTarget}
+        expense={undoAdvanceTarget ? null : advanceTarget}
         isSubmitting={isAdvanceStatusSubmitting}
         key={advanceTarget?.id ?? "empty-advance-dialog"}
         onClose={() => setAdvanceTarget(null)}
         onConfirm={confirmAdvance}
+        onRemoveAdvance={() => {
+          if (advanceTarget?.is_advanced && !isAdvanceStatusSubmitting) {
+            setUndoAdvanceTarget(advanceTarget);
+          }
+        }}
       />
 
       <ExpenseFormDialog
@@ -1012,7 +1018,6 @@ export function ExpensesView() {
         expense={detailsTarget}
         key={detailsTarget?.id ?? "empty-details-dialog"}
         onClose={() => setDetailsTarget(null)}
-        onRemoveAdvance={(expense) => { setDetailsTarget(null); setUndoAdvanceTarget(expense); }}
       />
     </>
   );

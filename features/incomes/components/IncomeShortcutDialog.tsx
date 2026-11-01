@@ -189,15 +189,15 @@ function IncomeShortcutDialogContent({
       role="dialog"
     >
       <form
-        className="max-h-[calc(100dvh-3rem)] w-full max-w-md overflow-y-auto rounded-lg border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-800 dark:bg-slate-900 sm:p-6"
+        className="mobile-compact-dialog max-h-[calc(100dvh-3rem)] w-full max-w-md overflow-y-auto rounded-lg border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-800 dark:bg-slate-900 sm:p-6"
         onSubmit={handleSubmit}
       >
-        <h2 className="text-xl font-semibold tracking-normal text-slate-950 dark:text-white">
+        <h2 className="text-xl font-semibold tracking-normal text-slate-950 dark:text-white max-sm:text-[22px] max-sm:leading-7">
           {getTitle(shortcut)}
         </h2>
         {(shortcut.source === "VA" || shortcut.source === "VR") ? <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{paymentSourceLabel(shortcut.source)}</p> : null}
 
-        <div className="mt-7 space-y-5">
+        <div className="mt-7 space-y-5 max-sm:mt-5 max-sm:space-y-3">
           {error || localError ? (
             <Alert variant="error">{localError ?? error}</Alert>
           ) : null}
@@ -232,14 +232,14 @@ function IncomeShortcutDialogContent({
 
           <label
             className={cn(
-              "flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-300",
+              "flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-300 max-sm:min-h-12 max-sm:gap-3 max-sm:border-0 max-sm:bg-transparent max-sm:p-0 max-sm:text-[13px] dark:max-sm:bg-transparent",
               isSubmitting && "opacity-70",
             )}
           >
             <input
               checked={applyFuture}
               className={cn(
-                "h-6 w-6 rounded border-slate-400 bg-transparent accent-blue-600",
+                "h-6 w-6 rounded border-slate-400 bg-transparent accent-blue-600 max-sm:h-5 max-sm:w-5 max-sm:shrink-0",
                 isDelete && "accent-red-500",
               )}
               disabled={isSubmitting}
@@ -254,7 +254,7 @@ function IncomeShortcutDialogContent({
           </label>
         </div>
 
-        <div className="mt-8 flex justify-end gap-3">
+        <div className="mobile-compact-dialog-actions mt-8 flex justify-end gap-3">
           <button
             className="inline-flex h-10 cursor-pointer items-center justify-center rounded-lg px-4 text-sm font-semibold text-blue-600 hover:bg-blue-50 hover:text-blue-500 disabled:cursor-not-allowed disabled:opacity-60 dark:text-blue-400 dark:hover:bg-blue-950/35"
             disabled={isSubmitting}
@@ -266,6 +266,7 @@ function IncomeShortcutDialogContent({
           <button
             className={cn(
               "inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400",
+              !isDelete && "max-sm:bg-transparent max-sm:px-3 max-sm:text-blue-600 max-sm:hover:bg-blue-50 dark:max-sm:bg-transparent dark:max-sm:text-blue-400 dark:max-sm:hover:bg-blue-950/35",
               isDelete &&
                 "bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:text-white dark:hover:bg-red-400",
             )}

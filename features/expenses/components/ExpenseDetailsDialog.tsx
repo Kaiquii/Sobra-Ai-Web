@@ -24,7 +24,6 @@ type ExpenseDetailsDialogProps = {
   categoryName: string;
   expense: Expense | null;
   onClose: () => void;
-  onRemoveAdvance?: (expense: Expense) => void;
 };
 
 function normalizeText(value: string) {
@@ -154,7 +153,6 @@ export function ExpenseDetailsDialog({
   categoryName,
   expense,
   onClose,
-  onRemoveAdvance,
 }: ExpenseDetailsDialogProps) {
   useLockBodyScroll(Boolean(expense));
 
@@ -168,12 +166,77 @@ export function ExpenseDetailsDialog({
 
   return (
     <div
-      aria-labelledby="expense-details-title"
+      aria-label="Detalhes da despesa"
       aria-modal="true"
       className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-slate-950/75 px-3 py-3 backdrop-blur-sm sm:px-4 sm:py-6"
       role="dialog"
     >
-      <div className="my-auto flex max-h-[calc(100dvh-1.5rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-slate-200 border-t-4 border-t-blue-600 bg-white shadow-2xl shadow-slate-950/20 dark:border-slate-800 dark:border-t-blue-500 dark:bg-slate-900 sm:max-h-[calc(100dvh-3rem)]">
+      <div data-mobile-expense-details className="mobile-compact-dialog my-auto flex min-h-0 flex-col border border-slate-200 bg-white text-slate-950 shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 sm:hidden">
+        <h2 className="shrink-0 text-[22px] font-bold leading-7">Detalhes da despesa</h2>
+        <div className="mt-4 min-h-0 overflow-y-auto overscroll-contain">
+          <div className="rounded-[18px] bg-brand/10 p-4">
+            <p className="wrap-anywhere text-base font-semibold">{expense.description}</p>
+            <strong className="mt-2 block wrap-anywhere text-[28px] font-bold leading-9 tabular-nums"><FinancialValue value={expense.amount} /></strong>
+            <div className="mt-2.5 flex flex-wrap gap-2 text-xs font-semibold text-blue-600 dark:text-blue-400">
+              <span className="max-w-full rounded-full bg-brand/15 px-2.5 py-1.5 wrap-anywhere">{categoryName}</span>
+              <span className="max-w-full rounded-full bg-brand/15 px-2.5 py-1.5 wrap-anywhere">{expense.type}{installmentDetails ? ` (${installmentDetails.current}/${installmentDetails.total})` : ""}</span>
+            </div>
+            {installmentDetails ? (
+              <div aria-label={`Progresso do parcelamento: ${installmentDetails.current} de ${installmentDetails.total}`} aria-valuemax={installmentDetails.total} aria-valuemin={0} aria-valuenow={Math.min(installmentDetails.current, installmentDetails.total)} className="mt-3 h-1.5 overflow-hidden rounded-full bg-blue-100 dark:bg-blue-950" role="progressbar">
+                <div className="h-full rounded-full bg-blue-600 dark:bg-blue-400" style={{ width: `${installmentDetails.progress}%` }} />
+              </div>
+            ) : null}
+          </div>
+
+          <dl className="mt-3.5 divide-y divide-slate-200 rounded-2xl bg-slate-50 px-3.5 py-1 text-sm dark:divide-slate-800 dark:bg-slate-950/60">
+            {paymentSplits.length > 1 ? (
+              <div className="py-2.5">
+                <dt className="text-xs text-slate-500 dark:text-slate-400">Pagamento dividido</dt>
+                <dd className="mt-2 space-y-2.5">
+                  {paymentSplits.map((split) => (
+                    <div className="grid grid-cols-[minmax(0,.7fr)_minmax(0,1.3fr)] gap-3" key={split.payment_source}>
+                      <span className="text-xs text-slate-500 wrap-anywhere dark:text-slate-400">{getPaymentSourceLabel(split.payment_source)}</span>
+                      <strong className="font-semibold tabular-nums wrap-anywhere"><FinancialValue value={split.amount} /></strong>
+                    </div>
+                  ))}
+                </dd>
+              </div>
+            ) : (
+              <div className="grid grid-cols-[minmax(0,.7fr)_minmax(0,1.3fr)] gap-3 py-2.5">
+                <dt className="text-xs text-slate-500 dark:text-slate-400">Origem</dt>
+                <dd className="font-semibold wrap-anywhere">{getPaymentSourceLabel(paymentSplits[0]?.payment_source ?? "")}</dd>
+              </div>
+            )}
+            <div className="grid grid-cols-[minmax(0,.7fr)_minmax(0,1.3fr)] gap-3 py-2.5">
+              <dt className="text-xs text-slate-500 dark:text-slate-400">Data</dt>
+              <dd className="font-semibold wrap-anywhere">{formatExpenseFullDate(expense.date)}</dd>
+            </div>
+            {expense.is_paid ? (
+              <div className="grid grid-cols-[minmax(0,.7fr)_minmax(0,1.3fr)] gap-3 py-2.5">
+                <dt className="text-xs text-slate-500 dark:text-slate-400">Pago em</dt>
+                <dd className="font-semibold wrap-anywhere">{formatPaidAt(expense.paid_at)}</dd>
+              </div>
+            ) : null}
+          </dl>
+
+          {expense.is_advanced ? (
+            <div className="mt-3.5 space-y-2 rounded-2xl bg-brand/10 p-3">
+              <p className="text-sm font-semibold">{expense.advanced_at ? `Adiantada em ${formatExpenseFullDate(expense.advanced_at)}` : "Despesa adiantada"}</p>
+              <p className="text-xs leading-4.5 text-slate-500 dark:text-slate-400">O status Paga é independente deste adiantamento.</p>
+            </div>
+          ) : null}
+
+          <div className="mt-3.5">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Observações</p>
+            <p className="mt-1.5 max-h-37.5 overflow-y-auto overscroll-contain rounded-2xl bg-slate-50 p-3 text-sm leading-5.25 whitespace-pre-wrap text-slate-600 wrap-anywhere dark:bg-slate-950/60 dark:text-slate-300">{notes || "Sem observações"}</p>
+          </div>
+        </div>
+        <div className="mobile-compact-dialog-actions shrink-0">
+          <Button className="px-3 text-blue-600 dark:text-blue-400" onClick={onClose} variant="ghost">Fechar</Button>
+        </div>
+      </div>
+
+      <div data-desktop-expense-details className="my-auto hidden max-h-[calc(100dvh-1.5rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-slate-200 border-t-4 border-t-blue-600 bg-white shadow-2xl shadow-slate-950/20 dark:border-slate-800 dark:border-t-blue-500 dark:bg-slate-900 sm:flex sm:max-h-[calc(100dvh-3rem)]">
         <div className="shrink-0 border-b border-dashed border-slate-200 px-5 py-3 dark:border-slate-700 sm:px-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
@@ -264,8 +327,6 @@ export function ExpenseDetailsDialog({
             {paymentSplits.length > 1 ? (
               <PaymentSplitsDetailItem splits={paymentSplits} />
             ) : null}
-
-            {expense.is_advanced && onRemoveAdvance ? <div className="border-t border-slate-200 p-3 dark:border-slate-800 sm:col-span-2"><Button variant="ghost" onClick={() => onRemoveAdvance(expense)} className="text-blue-600 dark:text-blue-400">Remover adiantamento</Button></div> : null}
 
             {expense.is_paid ? (
               <DetailItem
