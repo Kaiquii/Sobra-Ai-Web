@@ -305,27 +305,33 @@ function ExpenseCard({
         <p className="truncate text-[13px] text-slate-500 dark:text-slate-400 sm:text-sm sm:font-medium">
           {categoryName}
         </p>
-        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 sm:mt-1.5 sm:text-sm">
-          <span className={`${expenseTypeAccent(expense.type)} rounded bg-(--expense-accent)/10 px-1.5 py-0.5 text-[10px] text-(--expense-accent) sm:text-xs sm:font-medium`}>
-            <span className="sm:hidden">{installmentLabel ? `Parc. ${installmentLabel}` : expense.type}</span>
-            <span className="hidden sm:inline">{expense.type}</span>
-          </span>
-          {installmentLabel ? (
-            <span className={`${expenseTypeAccent(expense.type)} hidden rounded bg-(--expense-accent)/10 px-1.5 py-0.5 text-xs font-medium text-(--expense-accent) sm:inline`}>
-              {installmentLabel}
+        <div className="mt-2 flex min-w-0 items-center gap-1.5 sm:contents">
+          <div className="scrollbar-none flex min-w-0 flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 max-sm:flex-nowrap max-sm:overflow-x-auto sm:mt-1.5 sm:text-sm">
+            <span className={`${expenseTypeAccent(expense.type)} rounded bg-(--expense-accent)/10 px-1.5 py-0.5 text-[10px] text-(--expense-accent) max-sm:shrink-0 max-sm:whitespace-nowrap sm:text-xs sm:font-medium`}>
+              <span className="sm:hidden">{installmentLabel ? `Parc. ${installmentLabel}` : expense.type}</span>
+              <span className="hidden sm:inline">{expense.type}</span>
             </span>
-          ) : null}
-          <span className={expense.is_advanced ? "hidden sm:inline" : ""}>• {formatExpenseDate(expense.date)}</span>
-          {expense.is_advanced && expense.advanced_at ? (
-            <span className="rounded bg-brand/14 px-1.5 py-0.5 text-[10px] font-semibold text-brand sm:bg-amber-50 sm:text-xs sm:text-amber-800 sm:dark:bg-amber-950/50 sm:dark:text-amber-200">
-              <span className="sm:hidden">Adiantada</span><span className="hidden sm:inline">Adiantada para {formatExpenseFullDate(expense.advanced_at)}</span>
+            {installmentLabel ? (
+              <span className={`${expenseTypeAccent(expense.type)} hidden rounded bg-(--expense-accent)/10 px-1.5 py-0.5 text-xs font-medium text-(--expense-accent) sm:inline`}>
+                {installmentLabel}
+              </span>
+            ) : null}
+            <span className={expense.is_advanced ? "hidden sm:inline" : "max-sm:shrink-0 max-sm:whitespace-nowrap"}>• {formatExpenseDate(expense.date)}</span>
+            {expense.is_advanced && expense.advanced_at ? (
+              <span className="rounded bg-brand/14 px-1.5 py-0.5 text-[10px] font-semibold text-brand max-sm:shrink-0 max-sm:whitespace-nowrap sm:bg-amber-50 sm:text-xs sm:text-amber-800 sm:dark:bg-amber-950/50 sm:dark:text-amber-200">
+                <span className="sm:hidden">Adiantada</span><span className="hidden sm:inline">Adiantada para {formatExpenseFullDate(expense.advanced_at)}</span>
+              </span>
+            ) : null}
+          </div>
+          {notes ? (
+            <span aria-label="Tem observações" className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-brand/10 p-1 text-brand sm:hidden" role="img">
+              <FileText aria-hidden="true" size={12} />
             </span>
           ) : null}
         </div>
         {notes ? (
           <p
             className="mt-2 hidden max-w-full items-center gap-1.5 truncate rounded-md bg-slate-50 px-2 py-1 text-xs text-slate-500 dark:bg-slate-950/60 dark:text-slate-400 sm:flex"
-            title={notes}
           >
             <FileText
               aria-hidden="true"

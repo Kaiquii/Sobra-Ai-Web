@@ -61,4 +61,12 @@ O bloco “Impactam o planejamento deste mês” mantém sua organização, cont
 
 ## Validação
 
+Handoff de 01/11/2026: restaurar nos cards mobile do Início e de Despesas o
+indicador informativo “Tem observações” quando `notes` tiver texto não vazio.
+Referência: `ExpenseNoteIndicatorIcon` em `ExpenseCard.kt` Android. Documento
+de 12, padding de 4, caixa de 20, fundo brand a 10% e distância de 6 dos
+metadados; reservar o indicador fora da área rolável de tipo/data/Adiantada.
+Sem clique ou conteúdo da nota em tooltip/rótulo. Desktop mantém a prévia
+existente sem tooltip com a nota; o conteúdo integral permanece nos detalhes.
+
 Comparar celular e desktop, temas claro e escuro, estados vazios e com dados. Nenhuma mudança visual deve alterar contratos de integração ou regras de cálculo.

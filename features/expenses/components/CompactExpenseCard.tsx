@@ -5,6 +5,7 @@ import { paymentSourceLabel } from "@/lib/payment-sources";
 import {
   CalendarCheck,
   Eye,
+  FileText,
   WalletCards,
 } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
@@ -80,26 +81,33 @@ export function CompactExpenseCard({
         <p className="truncate text-xs leading-5 text-slate-500 dark:text-slate-400">
           {categoryName}
         </p>
-        <div className="scrollbar-none mt-2 flex min-w-0 items-center gap-1.5 overflow-x-auto">
-          <span className={`${expenseTypeAccent(expense.type)} inline-flex shrink-0 whitespace-nowrap rounded bg-(--expense-accent)/18 px-1.5 py-0.5 text-[10px] leading-4 text-(--expense-accent)`}>{type}</span>
-          {expense.is_paid ? <Chip color="#4CAF50">Paga</Chip> : null}
-          {expense.is_advanced ? (
-            <Chip color="#1877F2">
-              <CalendarCheck
-                aria-label={
-                  expense.advanced_at
-                    ? `Adiantada em ${expense.advanced_at.split("T")[0].split("-").reverse().join("/")}`
-                    : "Despesa adiantada"
-                }
-                size={11}
-              />
-              <span>Adiantada</span>
-            </Chip>
-          ) : (
-            <span className="shrink-0 whitespace-nowrap text-[10px] text-slate-500 dark:text-slate-400">
-              {day}/{month}
+        <div className="mt-2 flex min-w-0 items-center gap-1.5">
+          <div className="scrollbar-none flex min-w-0 items-center gap-1.5 overflow-x-auto">
+            <span className={`${expenseTypeAccent(expense.type)} inline-flex shrink-0 whitespace-nowrap rounded bg-(--expense-accent)/18 px-1.5 py-0.5 text-[10px] leading-4 text-(--expense-accent)`}>{type}</span>
+            {expense.is_paid ? <Chip color="#4CAF50">Paga</Chip> : null}
+            {expense.is_advanced ? (
+              <Chip color="#1877F2">
+                <CalendarCheck
+                  aria-label={
+                    expense.advanced_at
+                      ? `Adiantada em ${expense.advanced_at.split("T")[0].split("-").reverse().join("/")}`
+                      : "Despesa adiantada"
+                  }
+                  size={11}
+                />
+                <span>Adiantada</span>
+              </Chip>
+            ) : (
+              <span className="shrink-0 whitespace-nowrap text-[10px] text-slate-500 dark:text-slate-400">
+                {day}/{month}
+              </span>
+            )}
+          </div>
+          {expense.notes?.trim() ? (
+            <span aria-label="Tem observações" className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-brand/10 p-1 text-brand" role="img">
+              <FileText aria-hidden="true" size={12} />
             </span>
-          )}
+          ) : null}
         </div>
       </div>
       <div className="flex max-w-[55%] shrink-0 flex-col items-end gap-2">
