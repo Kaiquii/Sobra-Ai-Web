@@ -33,6 +33,8 @@ import {
 } from "@/features/incomes/components/IncomeShortcutDialog";
 import type { IncomeSource } from "@/features/incomes/types/income";
 import { useIncomeStore } from "@/features/incomes/store/useIncomeStore";
+import { useBalancePreferencesStore } from "@/features/incomes/store/useBalancePreferencesStore";
+import { getBrowserAuthSessionEpoch, getBrowserAuthToken } from "@/lib/auth-cookie";
 import { summaryApi } from "@/features/summary/api/summaryApi";
 import type { MonthlySummary } from "@/features/summary/types/summary";
 import { FinancialValue } from "@/components/ui/financial-value";
@@ -46,6 +48,7 @@ import {
   getMonthlyLoadFeedback,
   type MonthlyLoadState,
 } from "@/features/summary/utils/monthlyLoadState";
+import { getAvailableBalanceHint, getBalanceExclusionLabel } from "@/features/summary/utils/availableBalancePresentation";
 
 const monthFormatter = new Intl.DateTimeFormat("pt-BR", {
   month: "long",
@@ -157,7 +160,7 @@ function SummaryCard({
         </div>
 
         <div className="flex items-end justify-between gap-3">
-          <div className="min-w-0">
+          <div className={cn("min-w-0", isFeatured && "max-sm:pr-10")}>
             <strong
               className={cn(
                 "max-sm:text-lg max-sm:font-bold max-sm:leading-tight block wrap-break-word text-2xl font-semibold leading-none tracking-normal text-slate-950 dark:text-white sm:text-[1.875rem]",
@@ -191,7 +194,7 @@ function SummaryCard({
                   "max-sm:mt-1 max-sm:text-[11px] max-sm:text-slate-500! dark:max-sm:text-slate-400!",
                 )}
               >
-                {hidden ? "Saldo do mês" : <><span className="sm:hidden">{isFeatured && value < 0 ? "Atenção: saldo negativo no mês" : hint}</span><span className="hidden sm:inline">{hint}</span></>}
+                {hidden ? "Saldo do mês" : hint}
               </p>
             ) : null}
           </div>
@@ -326,7 +329,9 @@ export function MonthlySummaryView() {
   const [refreshKey, setRefreshKey] = useState(0);
   const incomeRevision = useIncomeStore((state) => state.revision);
   const expenseRevision = useExpenseStore((state) => state.revision);
-  const requestKey = `${year}-${month}-${refreshKey}-${incomeRevision}-${expenseRevision}`;
+  const balanceRevision = useBalancePreferencesStore((state) => state.revision);
+  const sessionRevision = useBalancePreferencesStore((state) => state.sessionRevision);
+  const requestKey = `${year}-${month}-${refreshKey}-${incomeRevision}-${expenseRevision}-${balanceRevision}-${sessionRevision}`;
   const [loadState, setLoadState] = useState<MonthlyLoadState>({
     requestKey: "",
     status: "loading",
@@ -336,17 +341,20 @@ export function MonthlySummaryView() {
   const [overview, setOverview] = useState<{
     month: number;
     year: number;
+    sessionRevision: number;
     summary: MonthlySummary;
     expensesData: MonthlyExpensesData | null;
   } | null>(null);
   const summary =
-    overview?.month === month && overview?.year === year
+    overview?.month === month && overview?.year === year && overview.sessionRevision === sessionRevision
       ? overview.summary
       : null;
   const loadCategories = useExpenseStore((state) => state.loadCategories);
 
   useEffect(() => {
     let isMounted = true;
+    const sessionEpoch = getBrowserAuthSessionEpoch();
+    const sessionToken = getBrowserAuthToken();
 
     async function loadSummary() {
       try {
@@ -365,12 +373,12 @@ export function MonthlySummaryView() {
             : Promise.resolve(null),
         ]);
 
-        if (isMounted) {
-          setOverview({ month, year, summary: response, expensesData });
+        if (isMounted && sessionEpoch === getBrowserAuthSessionEpoch() && sessionToken === getBrowserAuthToken()) {
+          setOverview({ month, year, sessionRevision, summary: response, expensesData });
           setLoadState({ requestKey, status: "success", error: null });
         }
       } catch {
-        if (isMounted) {
+        if (isMounted && sessionEpoch === getBrowserAuthSessionEpoch() && sessionToken === getBrowserAuthToken()) {
           setLoadState({
             requestKey,
             status: "error",
@@ -386,13 +394,15 @@ export function MonthlySummaryView() {
     return () => {
       isMounted = false;
     };
-  }, [month, requestKey, year]);
+  }, [month, requestKey, sessionRevision, year]);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 639px)");
     const reloadLayout = () => setRefreshKey((value) => value + 1);
     media.addEventListener("change", reloadLayout);
-    return () => media.removeEventListener("change", reloadLayout);
+    return () => {
+      media.removeEventListener("change", reloadLayout);
+    };
   }, []);
 
   const monthLabel = useMemo(() => {
@@ -525,7 +535,7 @@ export function MonthlySummaryView() {
 
         {summary ? <div className="hidden space-y-3 lg:block">
           <div className="grid grid-cols-3 gap-3">
-            <SummaryCard label="Total Geral Disponível" tone="balance" value={summary.total_geral_disponivel} icon={<PiggyBank aria-hidden="true" size={30} />} />
+            <SummaryCard label="Total Geral Disponível" tone="balance" value={summary.total_geral_disponivel} hint={getBalanceExclusionLabel(summary) ? getAvailableBalanceHint(summary) : undefined} icon={<PiggyBank aria-hidden="true" size={30} />} />
             <SummaryCard label="Total Recebido" tone="income" value={summary.total_income} icon={<TrendingUp aria-hidden="true" size={26} />} />
             <SummaryCard label="Total Gasto" tone="expense" value={summary.total_expense} icon={<Wallet aria-hidden="true" size={26} />} />
           </div>
@@ -545,7 +555,7 @@ export function MonthlySummaryView() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-1 md:grid-cols-2 lg:hidden">
             <SummaryCard
               className="col-span-2 sm:col-span-1 md:col-span-2 lg:col-span-4"
-              hint="Saldo livre no mês."
+              hint={getAvailableBalanceHint(summary)}
               icon={
                 <PiggyBank
                   aria-hidden="true"

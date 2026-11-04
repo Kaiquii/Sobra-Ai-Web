@@ -2,6 +2,17 @@
 
 O web é a versão para navegador do SobraAí Android. A identidade e os fluxos devem ser reconhecíveis nas duas plataformas, com adaptação de espaço para desktop.
 
+Em 04/11/2026, o usuário definiu no Android as preferências independentes de VA
+e VR em Configurações de Renda e autorizou a mesma tela na Web. A primeira
+implementação colocou o bloco mobile depois de VR e antes de Renda Extra.
+Na orientação posterior feita no Web, **Saldo disponível passa a ser a última
+seção, depois de Renda Extra, em todas as larguras**, com texto resumido e botão
+de ajuda que abre explicação completa, exemplo e instruções em modal. Essa
+orientação posterior prevalece para a Web; não certifica mudança já aplicada
+ao Android. Desktop preserva seus formulários e padrões de modal; fonte,
+cores e totais do servidor continuam preservados. Critérios e cronologia:
+[balance-preferences.md](balance-preferences.md).
+
 Atualização em 04/11/2026: a tela principal de Perfil e o visualizador de foto
 no celular/PWA seguem a referência Android enviada pelo usuário, preservando
 desktop, paleta e fonte Web. A comparação das demais telas é somente informativa,

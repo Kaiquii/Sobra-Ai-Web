@@ -1,5 +1,22 @@
 # Harness de paridade com Android
 
+## Preferências de saldo VA e VR em 04/11/2026
+
+Localização inicialmente decidida no Android e autorizada para Web:
+Configurações de Renda, com o bloco mobile abaixo de VR e antes de Renda Extra.
+Orientação posterior do usuário no Web: **Saldo disponível é a última seção,
+após Renda Extra, em mobile e desktop**. Manter texto resumido na página e botão
+de ajuda acessível que abre modal com explicação, exemplo e como ativar e
+desativar. O modal usa `ModalPanel`, centralizado e responsivo, respeitando os
+padrões próprios de cada largura. A nova posição é a regra atual da Web; não
+afirmar que ela já foi incorporada ao Android. Preservar as demais rendas,
+seus rascunhos e os formulários desktop.
+Somente o restante pode ficar fora do disponível, incluindo negativos, por
+cálculo do servidor. Não subtrair novamente nem alterar os cartões, os totais
+brutos ou os relatórios integrais. Estado, evidências e limites de validação:
+[balance-preferences.md](balance-preferences.md). Conferências anteriores não
+certificam o ajuste posterior de posição e de ajuda em modal.
+
 ## Perfil mobile em 04/11/2026
 
 A autorização atual cobre somente a tela principal do Perfil e o visualizador

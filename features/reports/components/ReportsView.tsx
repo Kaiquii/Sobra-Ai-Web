@@ -1,6 +1,8 @@
 "use client";
 
 import { useIncomeStore } from "@/features/incomes/store/useIncomeStore";
+import { useBalancePreferencesStore } from "@/features/incomes/store/useBalancePreferencesStore";
+import { getBrowserAuthSessionEpoch } from "@/lib/auth-cookie";
 import { useExpenseStore } from "@/features/expenses/store/useExpenseStore";
 
 import { ResponsivePie } from "@nivo/pie";
@@ -39,6 +41,7 @@ import type {
 } from "@/features/reports/types/report";
 import { formatMoney, formatPercentage } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
+import { getBalanceExclusionLabel } from "@/features/summary/utils/availableBalancePresentation";
 
 const categoryColors = [
   "#1877F2",
@@ -461,7 +464,11 @@ export function ReportsView() {
   const loadReports = useReportsStore((state) => state.loadReports);
   const incomeRevision = useIncomeStore((state) => state.revision);
   const expenseRevision = useExpenseStore((state) => state.revision);
-  const summary = useReportsStore((state) => state.summary);
+  const balanceRevision = useBalancePreferencesStore((state) => state.revision);
+  const sessionRevision = useBalancePreferencesStore((state) => state.sessionRevision);
+  const loadedSummary = useReportsStore((state) => state.summary);
+  const summarySessionEpoch = useReportsStore((state) => state.sessionEpoch);
+  const summary = loadedSummary?.month === month && loadedSummary.year === year && summarySessionEpoch === getBrowserAuthSessionEpoch() ? loadedSummary : null;
   const yearlySummary = useReportsStore((state) => state.yearlySummary);
 
   const comparisonData = useMonthComparisonStore((state) => state.data);
@@ -495,7 +502,7 @@ export function ReportsView() {
 
   useEffect(() => {
     void loadReports(month, year);
-  }, [loadReports, month, refreshKey, incomeRevision, expenseRevision, year]);
+  }, [loadReports, month, refreshKey, incomeRevision, expenseRevision, balanceRevision, sessionRevision, year]);
 
   useEffect(() => {
     void loadComparison({
@@ -545,9 +552,9 @@ export function ReportsView() {
         </div>
       </div>
 
-      {isLoading ? <ReportsSkeleton /> : null}
+      {isLoading && !summary ? <ReportsSkeleton /> : null}
 
-      {!isLoading && error ? (
+      {error ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <Alert variant="error">{error}</Alert>
 
@@ -562,7 +569,7 @@ export function ReportsView() {
         </div>
       ) : null}
 
-      {!isLoading && summary ? (
+      {summary ? (
         <>
           <div className="grid items-stretch gap-4 lg:grid-cols-2">
             <CategoryPieCard
@@ -643,7 +650,7 @@ export function ReportsView() {
             />
 
             <MetricCard
-              description="Saldo disponível no mês."
+              description={getBalanceExclusionLabel(summary) ? `Saldo disponível no mês · ${getBalanceExclusionLabel(summary)}.` : "Saldo disponível no mês."}
               icon={<Wallet aria-hidden="true" size={24} />}
               label="Saldo"
               tone={

@@ -5,6 +5,7 @@ type SwitchProps = {
   checked: boolean;
   className?: string;
   disabled?: boolean;
+  id?: string;
   onCheckedChange: (checked: boolean) => void;
 };
 
@@ -13,6 +14,7 @@ export function Switch({
   checked,
   className,
   disabled,
+  id,
   onCheckedChange,
 }: SwitchProps) {
   return (
@@ -24,6 +26,7 @@ export function Switch({
         className,
       )}
       disabled={disabled}
+      id={id}
       onClick={() => onCheckedChange(!checked)}
       role="switch"
       type="button"

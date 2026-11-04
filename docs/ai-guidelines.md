@@ -12,6 +12,14 @@ Este arquivo define regras permanentes para qualquer IA ou pessoa que trabalhar 
 - Entenda a estrutura atual antes de criar arquivos, pastas, componentes ou stores.
 - Para alterações visuais ou financeiras, consulte `docs/android-reference.md`, `docs/android-parity-harness.md` e as fontes Android indicadas. O harness registra requisitos e diferenças, não uma aprovação de paridade já implementada.
 
+## Git e preservação do trabalho
+
+- Conferir a branch antes de iniciar o trabalho e antes de cada commit ou push. O projeto deve permanecer na `main`.
+- Não criar branches, inclusive temporárias ou com prefixo `codex/`, nem worktrees. Fazer commits e pushes somente na `main` e apenas quando autorizados pelo usuário.
+- Se houver outra branch, HEAD destacado ou falha ao consultar o Git, preservar os arquivos e o estado Git, informar o usuário e não avançar com alterações ou commits nessa condição.
+- Não executar checkout, switch, reset, stash ou exclusão de branches/worktrees automaticamente. A correção de divergência depende da orientação do usuário; não descartar alterações para passar o harness.
+- A regra não autoriza commit ou push. `ai:context` e `ai:doctor` validam `requiredBranch`; `ai:check:quick` e `ai:check` passam pela mesma proteção antes das verificações. O harness apenas consulta a branch, sem realizar operações de escrita no Git.
+
 ## Execução local do projeto
 
 - Somente o usuário inicia o projeto e controla seu servidor local.

@@ -1,5 +1,14 @@
 # Regras do projeto
 
+## Git somente na main
+
+Orientação permanente do usuário em 04/11/2026:
+
+- Trabalhar na `main`; conferir a branch antes de iniciar o trabalho e antes de cada commit ou push.
+- Não criar novas branches, nem temporárias ou `codex/`, e não criar worktrees. Commits e pushes autorizados pelo usuário são feitos somente na `main`.
+- Branch diferente, HEAD destacado ou Git indisponível exigem preservar o estado e informar o usuário. Não usar checkout, switch, reset, stash ou exclusão automática de branches/worktrees para resolver a divergência.
+- A política não concede autorização para commit ou push. O guardrail `requiredBranch` verifica a branch em `ai:context`, `ai:doctor`, `ai:check:quick` e `ai:check`, sem trocar ou criar branches.
+
 ## Desktop e celular têm apresentações diferentes
 
 Orientação permanente do usuário, reforçada em 26/10/2026:

@@ -17,6 +17,13 @@ Antes de alterar codigo neste projeto, leia e siga:
 
 As regras desses arquivos fazem parte do contrato do projeto. Nao fuja da arquitetura existente sem motivo forte e sem registrar a decisao.
 
+## Git: trabalhar somente na main
+
+- Confira a branch atual antes de iniciar o trabalho e novamente antes de cada commit ou push: deve ser `main`.
+- Não criar branches, inclusive temporárias ou com prefixo `codex/`, nem criar worktrees. Commits e pushes, quando autorizados pelo usuário, devem ocorrer somente na `main`.
+- Se a branch divergir, o HEAD estiver destacado ou não for possível conferir o Git, preserve o estado e informe o usuário. Não executar checkout, switch, reset, stash ou exclusão de branches/worktrees automaticamente para corrigir a situação.
+- Esta regra não autoriza commit ou push. `ai:context`, `ai:doctor` e as verificações do harness conferem a branch sem alterar o repositório.
+
 ## Harness de IA
 
 - Respeite a separação visual registrada em `rules.md` e `docs/android-parity-harness.md`: desktop tem modais Web próprios e dropdowns em lista junto ao campo; celular/PWA usa modais e seletores semelhantes ao Android. Não transportar o padrão mobile ao desktop.

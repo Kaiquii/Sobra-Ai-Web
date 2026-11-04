@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import process from "node:process";
+import { getGitBranchPolicyError } from "./git-guardrails.mjs";
 import { hasCustomFontLoading, hasThemeColorTransition } from "./ui-guardrails.mjs";
 
 const projectRoot = process.cwd();
@@ -69,6 +70,14 @@ function loadHarness() {
 function doctor(config) {
   const errors = [];
   const packagePath = resolve(projectRoot, "package.json");
+  const branchError = getGitBranchPolicyError(
+    runGit(["branch", "--show-current"]),
+    config.guardrails.requiredBranch,
+  );
+
+  if (branchError) {
+    errors.push(branchError);
+  }
 
   for (const file of config.context.requiredFiles) {
     if (!existsSync(resolve(projectRoot, file))) {
@@ -169,6 +178,13 @@ function doctor(config) {
 }
 
 function context(config) {
+  const branch = runGit(["branch", "--show-current"]);
+  const branchError = getGitBranchPolicyError(branch, config.guardrails.requiredBranch);
+
+  if (branchError) {
+    fail(branchError);
+  }
+
   const ignoredDirectories = new Set(config.context.ignoredDirectories);
   const sourceFiles = config.context.sourceRoots
     .flatMap((root) => listFiles(resolve(projectRoot, root), ignoredDirectories))
@@ -183,7 +199,7 @@ function context(config) {
     },
     project: config.project,
     repository: {
-      branch: runGit(["branch", "--show-current"]),
+      branch,
       changedFiles: runGit(["status", "--short"]),
     },
     runtime: {

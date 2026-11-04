@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  Banknote,
-  CircleDollarSign,
-  Gift,
-  Loader2,
-  Trash2,
-} from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { Banknote, CircleDollarSign, Gift, Loader2, Trash2 } from "lucide-react";
+import { FormEvent, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Alert } from "@/components/ui/alert";
@@ -22,14 +16,21 @@ import {
   MonthSwitcher,
 } from "@/components/ui/month-switcher";
 import { useIncomeStore } from "@/features/incomes/store/useIncomeStore";
+import { BalancePreferencesControls } from "@/features/incomes/components/BalancePreferencesControls";
 import type { Income, IncomeSource } from "@/features/incomes/types/income";
-import { buildIncomeCreateRequest, findIncomeByReference } from "@/features/incomes/utils/incomeUtils";
 import {
-  formatAmountInput,
-  formatMoney,
-  parseAmountInput,
-} from "@/lib/formatters";
+  buildIncomeCreateRequest,
+  findIncomeByReference,
+} from "@/features/incomes/utils/incomeUtils";
+import { formatAmountInput, formatMoney, parseAmountInput } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
+
+function subscribeToLayout(onChange: () => void) {
+  const media = window.matchMedia("(max-width: 639px)");
+  media.addEventListener("change", onChange);
+  return () => media.removeEventListener("change", onChange);
+}
+const mobileLayout = () => window.matchMedia("(max-width: 639px)").matches;
 
 type IncomeCardProps = {
   existingIncome: Income | undefined;
@@ -77,9 +78,7 @@ function IncomeCard({
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
-            {title}
-          </p>
+          <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">{title}</p>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {hasExistingIncome
               ? `Atual: ${formatMoney(existingIncome?.amount)}`
@@ -148,9 +147,7 @@ function IncomeCard({
           </Button>
         ) : null}
         <Button disabled={isSubmitting} type="submit">
-          {isSubmitting ? (
-            <Loader2 aria-hidden="true" className="animate-spin" size={16} />
-          ) : null}
+          {isSubmitting ? <Loader2 aria-hidden="true" className="animate-spin" size={16} /> : null}
           {hasExistingIncome ? "Atualizar" : "Cadastrar"}
         </Button>
       </div>
@@ -164,9 +161,8 @@ type DeleteTarget = {
 } | null;
 
 export function IncomeSettingsView() {
-  const [{ month, year }, setSelectedDate] = useState<MonthReference>(
-    getCurrentMonthReference,
-  );
+  const isMobile = useSyncExternalStore(subscribeToLayout, mobileLayout, () => false);
+  const [{ month, year }, setSelectedDate] = useState<MonthReference>(getCurrentMonthReference);
   const clearFeedback = useIncomeStore((state) => state.clearFeedback);
   const createIncome = useIncomeStore((state) => state.createIncome);
   const deleteIncome = useIncomeStore((state) => state.deleteIncome);
@@ -216,7 +212,15 @@ export function IncomeSettingsView() {
         return;
       }
 
-      await createIncome(buildIncomeCreateRequest(source, amount, month, year, source === "Renda Extra" ? repeatFuture : true));
+      await createIncome(
+        buildIncomeCreateRequest(
+          source,
+          amount,
+          month,
+          year,
+          source === "Renda Extra" ? repeatFuture : true,
+        ),
+      );
     } catch {}
   }
 
@@ -233,6 +237,65 @@ export function IncomeSettingsView() {
       setDeleteFuture(false);
     } catch {}
   }
+
+  const sourceCards = {
+    Salario: {
+      title: "Salário",
+      key: "salario",
+      income: currentIncomes.salario,
+      icon: <Banknote aria-hidden="true" size={22} strokeWidth={2.25} />,
+    },
+    Adiantamento: {
+      title: "Adiantamento",
+      key: "adiantamento",
+      income: currentIncomes.adiantamento,
+      icon: <CircleDollarSign aria-hidden="true" size={22} strokeWidth={2.25} />,
+    },
+    VA: {
+      title: "Vale-alimentação (VA)",
+      key: "VA",
+      income: currentIncomes.VA,
+      icon: <Banknote aria-hidden="true" size={22} />,
+    },
+    VR: {
+      title: "Vale-refeição (VR)",
+      key: "VR",
+      income: currentIncomes.VR,
+      icon: <Banknote aria-hidden="true" size={22} />,
+    },
+    "Renda Extra": {
+      title: "Renda Extra",
+      key: "renda-extra",
+      income: currentIncomes.rendaExtra,
+      icon: <Gift aria-hidden="true" size={22} strokeWidth={2.25} />,
+    },
+  };
+  const sources: IncomeSource[] = isMobile
+    ? ["Salario", "Adiantamento", "VA", "VR", "Renda Extra"]
+    : ["VA", "VR", "Salario", "Adiantamento", "Renda Extra"];
+  const incomeCards = sources.map((source) => {
+    const card = sourceCards[source];
+    return (
+      <IncomeCard
+        key={`${card.key}-${month}-${year}-${card.income?.id ?? "new"}-${card.income?.amount ?? 0}`}
+        existingIncome={card.income}
+        icon={card.icon}
+        isSubmitting={isSubmitting || isLoading}
+        title={card.title}
+        showRepeatFutureOption={source === "Renda Extra" && !card.income}
+        onDelete={() => {
+          if (card.income)
+            setDeleteTarget({
+              income: card.income,
+              title:
+                source === "VA" || source === "VR" ? source : card.title.toLocaleLowerCase("pt-BR"),
+            });
+        }}
+        onSave={(amount, future, repeat) => handleSave(source, card.income, amount, future, repeat)}
+      />
+    );
+  });
+  incomeCards.push(<BalancePreferencesControls key="balance-preferences" />);
 
   return (
     <>
@@ -252,95 +315,23 @@ export function IncomeSettingsView() {
           title="Suas fontes de renda"
         />
 
-        {error ? <div className="space-y-3"><Alert variant="error">{error}</Alert><Button variant="secondary" disabled={isLoading || isSubmitting} onClick={() => void loadIncomes(month, year)}>Tentar novamente</Button></div> : null}
+        {error ? (
+          <div className="space-y-3">
+            <Alert variant="error">{error}</Alert>
+            <Button
+              variant="secondary"
+              disabled={isLoading || isSubmitting}
+              onClick={() => void loadIncomes(month, year)}
+            >
+              Tentar novamente
+            </Button>
+          </div>
+        ) : null}
         <AppNotification key={message} message={message} />
         {isLoading ? <Alert>Carregando rendas...</Alert> : null}
 
         <div className={cn("grid gap-4 lg:grid-cols-3", isLoading && "opacity-70")}>
-          {(["VA", "VR"] as const).map((source) => <IncomeCard
-            key={`${source}-${month}-${year}-${currentIncomes[source]?.id ?? "new"}-${currentIncomes[source]?.amount ?? 0}`}
-            existingIncome={currentIncomes[source]}
-            icon={<Banknote aria-hidden="true" size={22} />}
-            isSubmitting={isSubmitting || isLoading}
-            title={source === "VA" ? "Vale-alimentação (VA)" : "Vale-refeição (VR)"}
-            onDelete={() => { const income = currentIncomes[source]; if (income) setDeleteTarget({ income, title: source }); }}
-            onSave={(amount, future, repeat) => handleSave(source, currentIncomes[source], amount, future, repeat)}
-          />)}
-          <IncomeCard
-            existingIncome={currentIncomes.salario}
-            icon={<Banknote aria-hidden="true" size={22} strokeWidth={2.25} />}
-            isSubmitting={isSubmitting || isLoading}
-            key={`salario-${month}-${year}-${currentIncomes.salario?.id ?? "new"}-${currentIncomes.salario?.amount ?? 0}`}
-            onDelete={() =>
-              currentIncomes.salario
-                ? setDeleteTarget({
-                    income: currentIncomes.salario,
-                    title: "salário",
-                  })
-                : undefined
-            }
-            onSave={(amount, updateFuture, repeatFuture) =>
-              handleSave(
-                "Salario",
-                currentIncomes.salario,
-                amount,
-                updateFuture,
-                repeatFuture,
-              )
-            }
-            title="Salário"
-          />
-
-          <IncomeCard
-            existingIncome={currentIncomes.adiantamento}
-            icon={<CircleDollarSign aria-hidden="true" size={22} strokeWidth={2.25} />}
-            isSubmitting={isSubmitting || isLoading}
-            key={`adiantamento-${month}-${year}-${currentIncomes.adiantamento?.id ?? "new"}-${currentIncomes.adiantamento?.amount ?? 0}`}
-            onDelete={() =>
-              currentIncomes.adiantamento
-                ? setDeleteTarget({
-                    income: currentIncomes.adiantamento,
-                    title: "adiantamento",
-                  })
-                : undefined
-            }
-            onSave={(amount, updateFuture, repeatFuture) =>
-              handleSave(
-                "Adiantamento",
-                currentIncomes.adiantamento,
-                amount,
-                updateFuture,
-                repeatFuture,
-              )
-            }
-            title="Adiantamento"
-          />
-
-          <IncomeCard
-            existingIncome={currentIncomes.rendaExtra}
-            icon={<Gift aria-hidden="true" size={22} strokeWidth={2.25} />}
-            isSubmitting={isSubmitting || isLoading}
-            key={`renda-extra-${month}-${year}-${currentIncomes.rendaExtra?.id ?? "new"}-${currentIncomes.rendaExtra?.amount ?? 0}`}
-            onDelete={() =>
-              currentIncomes.rendaExtra
-                ? setDeleteTarget({
-                    income: currentIncomes.rendaExtra,
-                    title: "renda extra",
-                  })
-                : undefined
-            }
-            onSave={(amount, updateFuture, repeatFuture) =>
-              handleSave(
-                "Renda Extra",
-                currentIncomes.rendaExtra,
-                amount,
-                updateFuture,
-                repeatFuture,
-              )
-            }
-            showRepeatFutureOption={!currentIncomes.rendaExtra}
-            title="Renda Extra"
-          />
+          {incomeCards}
         </div>
       </section>
 

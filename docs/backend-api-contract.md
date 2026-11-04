@@ -26,6 +26,13 @@ Este documento registra regras de comportamento entre o front-end e o back-end s
 
 ## Rendas e despesas
 
+- As preferências de VA e VR no disponível são independentes, pertencem à conta
+  e valem para todos os meses e dispositivos. Não deduzir escolhas dos valores
+  de renda nem gravar padrões após erro de leitura. Alterar somente a opção
+  escolhida; usar o total disponível e as preferências do mesmo resumo recebido
+  do servidor, sem subtrair benefícios no cliente. Critérios de confirmação,
+  reconciliação e sessão: [balance-preferences.md](balance-preferences.md).
+
 - A referência Android 1.4.5 para VA/VR e os critérios de aceitação estão em `docs/android-parity-harness.md`. As diferenças ainda não implementadas no web estão inventariadas nesse guia; sua presença não confirma suporte já entregue. Preservar os contratos de transporte no código e na documentação privada.
 
 - Rendas e despesas sao carregadas e filtradas pelo periodo selecionado na interface.
