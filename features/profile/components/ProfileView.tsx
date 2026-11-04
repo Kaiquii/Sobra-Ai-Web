@@ -6,6 +6,7 @@ import {
   CircleDollarSign,
   Diamond,
   HelpCircle,
+  Landmark,
   LogOut,
   Pencil,
   Shapes,
@@ -34,8 +35,7 @@ function getInitial(name: string | undefined) {
 function getRoleInfo(role: string | undefined) {
   if (role === "admin") {
     return {
-      className:
-        "bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300",
+      className: "bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300",
       icon: <Star aria-hidden="true" size={15} strokeWidth={2.25} />,
       label: "Administrador",
     };
@@ -43,8 +43,7 @@ function getRoleInfo(role: string | undefined) {
 
   if (role === "premium") {
     return {
-      className:
-        "bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300",
+      className: "bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300",
       icon: <Diamond aria-hidden="true" size={15} strokeWidth={2.25} />,
       label: "Premium",
     };
@@ -62,25 +61,46 @@ type ProfileShortcutProps = {
   href: string;
   icon: React.ReactNode;
   title: string;
+  mobile?: boolean;
 };
 
-function ProfileShortcut({ description, href, icon, title }: ProfileShortcutProps) {
+function ProfileShortcut({ description, href, icon, title, mobile = false }: ProfileShortcutProps) {
   return (
     <Link
-      className="flex min-w-0 items-center justify-between gap-3 overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-900"
+      className={cn(
+        "flex min-w-0 items-center justify-between gap-3 overflow-hidden border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900",
+        mobile
+          ? "rounded-xl p-3 active:bg-slate-50 dark:active:bg-slate-800"
+          : "rounded-lg p-4 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md dark:hover:border-emerald-900",
+      )}
       href={href}
     >
       <span className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+        <span
+          className={cn(
+            "flex shrink-0 items-center justify-center bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",
+            mobile ? "h-11 w-11 rounded-xl" : "h-10 w-10 rounded-lg",
+          )}
+        >
           {icon}
         </span>
 
         <span className="min-w-0 flex-1 overflow-hidden">
-          <span className="block truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
+          <span
+            className={cn(
+              "block font-semibold text-slate-950 dark:text-slate-50",
+              mobile ? "wrap-anywhere text-base" : "truncate text-sm",
+            )}
+          >
             {title}
           </span>
 
-          <span className="mt-1 block truncate text-sm text-slate-500 dark:text-slate-400">
+          <span
+            className={cn(
+              "block text-slate-500 dark:text-slate-400",
+              mobile ? "wrap-anywhere text-xs" : "mt-1 truncate text-sm",
+            )}
+          >
             {description}
           </span>
         </span>
@@ -89,13 +109,12 @@ function ProfileShortcut({ description, href, icon, title }: ProfileShortcutProp
       <ChevronRight
         aria-hidden="true"
         className="shrink-0 text-slate-400"
-        size={18}
+        size={mobile ? 24 : 18}
         strokeWidth={2.25}
       />
     </Link>
   );
 }
-
 
 export function ProfileView() {
   const [isDeletePhotoDialogOpen, setIsDeletePhotoDialogOpen] = useState(false);
@@ -166,47 +185,76 @@ export function ProfileView() {
 
   return (
     <>
-      <section className="mx-auto flex w-full min-w-0 max-w-4xl flex-col gap-5">
-        <article className="min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-          <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-center gap-4 overflow-hidden">
-              {avatarUrl ? (
-                <button
-                  aria-label="Visualizar foto de perfil"
-                  className="flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-emerald-100 text-2xl font-semibold text-emerald-700 hover:border-emerald-300 hover:ring-2 hover:ring-emerald-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 dark:border-slate-800 dark:bg-emerald-950/50 dark:text-emerald-300"
-                  onClick={() => setIsPhotoPreviewOpen(true)}
-                  title="Visualizar foto"
-                  type="button"
-                >
-                  <Image
-                    alt="Foto de perfil"
-                    className="h-full w-full object-cover"
-                    height={64}
-                    loading="eager"
-                    src={avatarUrl}
-                    width={64}
-                  />
-                </button>
-              ) : (
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-emerald-100 text-2xl font-semibold text-emerald-700 dark:border-slate-800 dark:bg-emerald-950/50 dark:text-emerald-300">
-                  {getInitial(user?.name) || (
-                    <UserRound aria-hidden="true" size={30} strokeWidth={2.25} />
-                  )}
+      <section className="mx-auto flex w-full min-w-0 max-w-4xl flex-col gap-6 sm:gap-5">
+        <article className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:rounded-lg sm:p-6">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
+            <div className="flex min-w-0 items-center gap-3.5 sm:gap-4 sm:overflow-hidden">
+              <div className="relative flex h-24 w-23 shrink-0 justify-center sm:contents">
+                {avatarUrl ? (
+                  <button
+                    aria-label="Visualizar foto de perfil"
+                    className="flex h-19 w-19 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-emerald-100 text-2xl font-semibold text-emerald-700 hover:border-emerald-300 hover:ring-2 hover:ring-emerald-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 dark:border-slate-800 dark:bg-emerald-950/50 dark:text-emerald-300 sm:h-16 sm:w-16"
+                    onClick={() => setIsPhotoPreviewOpen(true)}
+                    title="Visualizar foto"
+                    type="button"
+                  >
+                    <Image
+                      alt="Foto de perfil"
+                      className="h-full w-full object-cover"
+                      height={76}
+                      loading="eager"
+                      src={avatarUrl}
+                      width={76}
+                    />
+                  </button>
+                ) : (
+                  <div className="flex h-19 w-19 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-emerald-100 text-2xl font-semibold text-emerald-700 dark:border-slate-800 dark:bg-emerald-950/50 dark:text-emerald-300 sm:h-16 sm:w-16">
+                    {getInitial(user?.name) || (
+                      <UserRound aria-hidden="true" size={30} strokeWidth={2.25} />
+                    )}
+                  </div>
+                )}
+                <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1 sm:hidden">
+                  <Button
+                    aria-label="Alterar foto"
+                    className="bg-brand text-white ring-[3px] ring-white enabled:hover:bg-brand-hover max-sm:rounded-full dark:text-white dark:ring-slate-900 dark:enabled:hover:bg-brand-hover"
+                    disabled={isPhotoBusy}
+                    onClick={() => fileInputRef.current?.click()}
+                    size="iconSm"
+                    variant="ghost"
+                  >
+                    <Pencil aria-hidden="true" size={16} />
+                  </Button>
+                  {avatarUrl ? (
+                    <Button
+                      aria-label="Remover foto"
+                      className="bg-red-600 text-white ring-[3px] ring-white enabled:hover:bg-red-700 max-sm:rounded-full dark:bg-red-500 dark:text-white dark:ring-slate-900 dark:enabled:hover:bg-red-400"
+                      disabled={isPhotoBusy}
+                      onClick={() => setIsDeletePhotoDialogOpen(true)}
+                      size="iconSm"
+                      variant="ghost"
+                    >
+                      <Trash2 aria-hidden="true" size={16} />
+                    </Button>
+                  ) : null}
                 </div>
-              )}
+              </div>
 
               <div className="min-w-0 flex-1 overflow-hidden">
-                <h2 className="wrap-anywhere text-xl font-semibold text-slate-950 dark:text-slate-50 sm:text-2xl">
+                <h2 className="wrap-anywhere text-xl font-bold text-slate-950 dark:text-slate-50 sm:text-2xl sm:font-semibold">
                   {user?.name || "Usuário"}
                 </h2>
 
-                <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">
+                <p
+                  className="mt-0.5 truncate text-[13px] text-slate-500 dark:text-slate-400 sm:mt-1 sm:text-sm"
+                  title={user?.email}
+                >
                   {user?.email || "E-mail não informado."}
                 </p>
 
                 <span
                   className={cn(
-                    "mt-3 inline-flex max-w-full items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold",
+                    "mt-2.5 inline-flex max-w-full items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-semibold sm:mt-3 sm:px-3 sm:py-1",
                     roleInfo.className,
                   )}
                 >
@@ -222,7 +270,7 @@ export function ProfileView() {
                   type="file"
                 />
 
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-3 hidden flex-wrap gap-2 sm:flex">
                   <Button
                     className="h-8 px-2.5 text-xs"
                     disabled={isPhotoBusy}
@@ -252,13 +300,15 @@ export function ProfileView() {
 
             <Link
               className={buttonClassName({
-                className: "w-full min-w-0 sm:w-auto",
+                className:
+                  "w-full min-w-0 max-sm:rounded-xl max-sm:border-transparent max-sm:bg-brand max-sm:text-white max-sm:hover:bg-brand-hover max-sm:dark:border-transparent max-sm:dark:bg-brand max-sm:dark:text-white max-sm:dark:hover:bg-brand-hover sm:w-auto",
                 variant: "secondary",
               })}
               href="/perfil/editar"
             >
               <Pencil aria-hidden="true" size={16} strokeWidth={2.25} />
-              Editar Perfil
+              <span className="sm:hidden">Editar perfil</span>
+              <span className="hidden sm:inline">Editar Perfil</span>
             </Link>
           </div>
         </article>
@@ -266,12 +316,47 @@ export function ProfileView() {
         {error ? <Alert variant="error">{error}</Alert> : null}
         {message ? <Alert variant="success">{message}</Alert> : null}
 
-        <div className="min-w-0"><h2 className="text-lg font-semibold">Finanças</h2><div className="mt-3"><ProfileShortcut title="Patrimônio" description="FGTS e investimentos" href="/patrimonio?origem=perfil" icon={<Wallet aria-hidden="true" size={24} />} /></div></div>
+        <div className="min-w-0 sm:hidden">
+          <h2 className="mb-2 pl-0.5 text-[17px] font-bold">Finanças</h2>
+          <div className="grid min-w-0 gap-2">
+            <ProfileShortcut
+              mobile
+              title="Rendas"
+              description="Salário, adiantamento, renda extra, VA e VR"
+              href="/salario"
+              icon={<Landmark aria-hidden="true" size={24} />}
+            />
+            <ProfileShortcut
+              mobile
+              title="Patrimônio"
+              description="FGTS e investimentos"
+              href="/patrimonio?origem=perfil"
+              icon={<Wallet aria-hidden="true" size={24} />}
+            />
+            <ProfileShortcut
+              mobile
+              title="Categorias"
+              description="Organize os tipos de despesa"
+              href="/perfil/categorias"
+              icon={<Shapes aria-hidden="true" size={24} />}
+            />
+          </div>
+        </div>
 
-        <div className="min-w-0">
-          <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-50">
-            Configurações
-          </h2>
+        <div className="hidden min-w-0 sm:block">
+          <h2 className="text-lg font-semibold">Finanças</h2>
+          <div className="mt-3">
+            <ProfileShortcut
+              title="Patrimônio"
+              description="FGTS e investimentos"
+              href="/patrimonio?origem=perfil"
+              icon={<Wallet aria-hidden="true" size={24} />}
+            />
+          </div>
+        </div>
+
+        <div className="hidden min-w-0 sm:block">
+          <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-50">Configurações</h2>
 
           <div className="mt-3 grid min-w-0 gap-3">
             <ProfileShortcut
@@ -290,10 +375,19 @@ export function ProfileView() {
           </div>
         </div>
 
-        <div className="min-w-0">
-          <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-50">
-            Ajuda
-          </h2>
+        <div className="min-w-0 sm:hidden">
+          <h2 className="mb-2 pl-0.5 text-[17px] font-bold">Suporte</h2>
+          <ProfileShortcut
+            mobile
+            title="Ajuda e suporte"
+            description="Dúvidas frequentes e contato"
+            href="/perfil/ajuda"
+            icon={<HelpCircle aria-hidden="true" size={24} />}
+          />
+        </div>
+
+        <div className="hidden min-w-0 sm:block">
+          <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-50">Ajuda</h2>
 
           <div className="mt-3 min-w-0">
             <ProfileShortcut
@@ -302,12 +396,11 @@ export function ProfileView() {
               icon={<HelpCircle aria-hidden="true" size={20} strokeWidth={2.25} />}
               title="Central de Ajuda"
             />
-
           </div>
         </div>
 
         <Button
-          className="min-w-0 border-red-200 bg-red-50 text-red-700 shadow-sm hover:bg-red-100 focus-visible:ring-red-200 dark:border-red-900/70 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/50"
+          className="min-w-0 border-red-200 bg-red-50 text-red-700 shadow-sm hover:bg-red-100 focus-visible:ring-red-200 max-sm:hidden dark:border-red-900/70 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/50"
           onClick={() => setIsLogoutDialogOpen(true)}
           type="button"
           variant="secondary"
@@ -343,6 +436,7 @@ export function ProfileView() {
         avatarUrl={avatarUrl}
         isOpen={isPhotoPreviewOpen}
         onClose={() => setIsPhotoPreviewOpen(false)}
+        userName={user?.name}
       />
     </>
   );

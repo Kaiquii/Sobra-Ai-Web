@@ -1,5 +1,13 @@
 # Harness de paridade com Android
 
+## Perfil mobile em 04/11/2026
+
+A autorização atual cobre somente a tela principal do Perfil e o visualizador
+de foto abaixo de 640 px, conforme Android, preservando fonte, paleta e desktop
+Web. As outras diferenças foram apenas inventariadas, sem editar suas telas.
+Referências, proporções, exceção da biometria e evidências reais ficam em
+[profile-mobile-parity.md](profile-mobile-parity.md).
+
 ## Contrato obrigatório de desktop e celular
 
 Reforçado diretamente pelo usuário em 26/10/2026. Este contrato prevalece sobre

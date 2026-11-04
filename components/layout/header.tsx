@@ -141,10 +141,28 @@ export function Header({ onOpenSidebar }: HeaderProps) {
     </div>
   </header> : null;
 
+  const profileMobileHeader = pathname === "/perfil" ? (
+    <header className="sticky top-0 z-30 bg-slate-100 pl-4 pr-2 pt-[env(safe-area-inset-top)] text-slate-950 dark:bg-slate-950 dark:text-slate-50 sm:hidden">
+      <div className="flex min-h-16 items-center justify-between gap-3">
+        <h1 className="min-w-0 text-2xl font-bold">Meu perfil</h1>
+        <Button
+          aria-label="Sair da conta"
+          className="shrink-0 enabled:text-red-600 max-sm:rounded-full dark:enabled:text-red-300"
+          onClick={() => setIsLogoutDialogOpen(true)}
+          size="iconLg"
+          variant="ghost"
+        >
+          <LogOut aria-hidden="true" size={24} />
+        </Button>
+      </div>
+    </header>
+  ) : null;
+
   return (
     <>
       {patrimonyMobileHeader}
-      <header className={`sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-3 py-2 text-slate-950 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:text-slate-50 sm:px-6 lg:px-8 ${pathname === "/patrimonio" ? "max-sm:hidden" : ""}`}>
+      {profileMobileHeader}
+      <header className={`sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-3 py-2 text-slate-950 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:text-slate-50 sm:px-6 lg:px-8 ${pathname === "/patrimonio" || pathname === "/perfil" ? "max-sm:hidden" : ""}`}>
         <div className="flex w-full items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <Button

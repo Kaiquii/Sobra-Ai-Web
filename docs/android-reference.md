@@ -2,6 +2,11 @@
 
 O web é a versão para navegador do SobraAí Android. A identidade e os fluxos devem ser reconhecíveis nas duas plataformas, com adaptação de espaço para desktop.
 
+Atualização em 04/11/2026: a tela principal de Perfil e o visualizador de foto
+no celular/PWA seguem a referência Android enviada pelo usuário, preservando
+desktop, paleta e fonte Web. A comparação das demais telas é somente informativa,
+sem autorização para editá-las. Escopo e diferenças: [profile-mobile-parity.md](profile-mobile-parity.md).
+
 Atualização em 26/10/2026: Patrimônio segue Android 1.4.8 (`136a9a5`) no
 celular/PWA, com exceção da paleta oficial Web. Essa autorização acrescenta a
 feature ao escopo anterior de Dropdowns/VA/VR; não autoriza redesenhar outras
